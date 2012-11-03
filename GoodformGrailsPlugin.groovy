@@ -1,4 +1,4 @@
-class GoodformsGrailsPlugin {
+class GoodformGrailsPlugin {
     // the plugin version
     def version = "0.1"
     // the version or versions of Grails the plugin is designed for
@@ -11,15 +11,16 @@ class GoodformsGrailsPlugin {
     ]
 
     // TODO Fill in these fields
-    def title = "Goodforms Plugin" // Headline display name of the plugin
-    def author = "Your name"
-    def authorEmail = ""
+    def title = "Goodform Plugin" // Headline display name of the plugin
+    def author = "Peter McNeil, Ross Rowe"
+    def authorEmail = "peter@nerderg.com"
     def description = '''\
-Brief summary/description of the plugin.
+Create extremely usable complex forms with rules based flow that work well in browsers.
+Good form features a form definition DSL that allows rapid human readable form creation.
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/goodforms"
+    def documentation = "http://grails.org/plugin/goodform"
 
     // Extra (optional) plugin metadata
 
