@@ -1,0 +1,26 @@
+<plugin name='goodforms' version='0.1' grailsVersion='2.1 &gt; *'>
+  <author>Your name</author>
+  <title>Goodforms Plugin</title>
+  <description>Brief summary/description of the plugin.
+</description>
+  <documentation>http://grails.org/plugin/goodforms</documentation>
+  <type>GoodformsGrailsPlugin</type>
+  <resources>
+    <resource>com.nerderg.goodForm.FormApplication</resource>
+    <resource>com.nerderg.goodForm.FormDefinition</resource>
+    <resource>com.nerderg.goodForm.FormDataService</resource>
+    <resource>com.nerderg.goodForm.GoodFormService</resource>
+    <resource>com.nerderg.goodForm.RulesEngineService</resource>
+    <resource>com.nerderg.goodForm.FormTagLib</resource>
+    <resource>com.nerderg.goodForm.HelpTagLib</resource>
+  </resources>
+  <repositories>
+    <repository name='grailsCentral' url='http://grails.org/plugins' />
+    <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
+    <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+  </repositories>
+  <dependencies />
+  <plugins />
+  <runtimePluginRequirements />
+  <behavior />
+</plugin>
