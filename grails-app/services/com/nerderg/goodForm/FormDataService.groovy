@@ -49,8 +49,8 @@ class FormDataService {
         return null
     }
 
-    FormApplication checkApplication(Long id) {
-        FormApplication application = FormApplication.get(id)
+    FormInstance checkApplication(Long id) {
+        FormInstance application = FormInstance.get(id)
         //TODO include security check?
         return application
     }
@@ -85,7 +85,7 @@ class FormDataService {
      * @param application the GrantApplication object
      * @return true on error
      */
-    boolean validateAndProcessFields(FormElement formElement, Map formData, FormApplication application) {
+    boolean validateAndProcessFields(FormElement formElement, Map formData, FormInstance application) {
         //note makeElement name uses the attr.name of it's parent so it must be set. (side effect)
         boolean error = false
         if (formElement.attr.heading) {
@@ -257,7 +257,7 @@ class FormDataService {
      * @param questions
      * @return answered questions
      */
-    def getAnsweredQuestions(FormApplication application, Form form) {
+    def getAnsweredQuestions(FormInstance application, Form form) {
 
         List answered = []
         List state = application.storedState()
@@ -273,8 +273,8 @@ class FormDataService {
         return answered
     }
 
-    FormApplication createApplication(Map formData) {
-        FormApplication application = new FormApplication(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last())
+    FormInstance createApplication(Map formData) {
+        FormInstance application = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last())
         application.storeFormData(formData)
         application.storeState([formData.next])
         application.storeCurrentQuestion(formData.next)
@@ -316,7 +316,7 @@ class FormDataService {
      * @param mergedFormData
      * @return processedFormData up to the next un-asked question
      */
-    def Map processNext(FormApplication application, Map mergedFormData) {
+    def Map processNext(FormInstance application, Map mergedFormData) {
         String lastQuestion = application.storedCurrrentQuestion().last()
         String ruleName = "Application${lastQuestion}"
         mergedFormData.remove('next')  //prevent possible pass through by rules engine

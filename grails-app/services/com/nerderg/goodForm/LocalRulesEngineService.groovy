@@ -8,9 +8,9 @@ package com.nerderg.goodForm
  */
 class LocalRulesEngineService {
 
-    def com.nerderg.rules.RulesEngineService rulesEngineService
-
-    def ask(String ruleSet, Map facts) {
-        return rulesEngineService.fireRules(ruleSet, facts)
-    }
+//    def com.nerderg.rules.RulesEngineService rulesEngineService
+//
+//    def ask(String ruleSet, Map facts) {
+//        return rulesEngineService.fireRules(ruleSet, facts)
+//    }
 }

@@ -6,7 +6,7 @@
   <documentation>http://grails.org/plugin/goodforms</documentation>
   <type>GoodformsGrailsPlugin</type>
   <resources>
-    <resource>com.nerderg.goodForm.FormApplication</resource>
+    <resource>com.nerderg.goodForm.FormInstance</resource>
     <resource>com.nerderg.goodForm.FormDefinition</resource>
     <resource>com.nerderg.goodForm.FormDataService</resource>
     <resource>com.nerderg.goodForm.GoodFormService</resource>

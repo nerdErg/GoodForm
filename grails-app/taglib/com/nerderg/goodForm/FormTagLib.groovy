@@ -317,7 +317,7 @@ class FormTagLib {
      * TODO i18n
      */
     def answered = { attrs ->
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(application.formVersion)
 
@@ -341,7 +341,7 @@ class FormTagLib {
 
     def display = { attrs ->
         log.debug "in display tag $attrs"
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(application.formVersion)
 
@@ -363,7 +363,7 @@ class FormTagLib {
      */
     def displayText = { attrs ->
         log.debug "in display tag $attrs"
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(application.formVersion)
         Boolean compress = false //attrs.compress || attrs.readOnly
@@ -437,7 +437,7 @@ class FormTagLib {
      */
     def displayFilteredText = { attrs ->
         log.debug "in display tag $attrs"
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(application.formVersion)
         Boolean compress = attrs.compress || attrs.readOnly
@@ -486,7 +486,7 @@ class FormTagLib {
     //todo delete if we're not using this
     def displayFormData = { attrs ->
         log.debug "in display tag $attrs"
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         Map formData = attrs.store
 
         List state = application.storedState()
@@ -513,7 +513,7 @@ class FormTagLib {
      */
     def linkToQset = { attrs, body ->
         log.debug "in linkToQset tag $attrs"
-        FormApplication application = attrs.application
+        FormInstance application = attrs.application
         String questionRef = attrs.questionRef
         List<List> state = application.storedState()
         def i = 0

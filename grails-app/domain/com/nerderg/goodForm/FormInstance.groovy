@@ -7,7 +7,7 @@ import grails.converters.JSON
  *
  * Copied from GrantApplication
  */
-class FormApplication {
+class FormInstance {
 
     Date started
     String givenNames
