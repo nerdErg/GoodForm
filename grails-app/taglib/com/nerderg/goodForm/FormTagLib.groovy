@@ -509,7 +509,7 @@ class FormTagLib {
     }
 
     /**
-     * TODO how to handle goback
+     * TODO how to handle back
      */
     def linkToQset = { attrs, body ->
         log.debug "in linkToQset tag $attrs"
@@ -522,7 +522,7 @@ class FormTagLib {
             log.debug "$i -> ${state[i]}"
         }
         i = state.size() - i - 1
-        String href = g.createLink(controller: "grant", action: "goback") + "/${application.id}/${i}"
+        String href = g.createLink(controller: "grant", action: "back") + "/${application.id}/${i}"
         out << "<a href='$href'>"
         out << body()
         out << '</a>'

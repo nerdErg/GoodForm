@@ -161,7 +161,7 @@ class GoodFormServiceTests extends GrailsUnitTestCase {
     "Breifly_explain_your_legal_problem": "I want the kids all to myself"
   },
   "firmNumber": "30043",
-  "action": "applyNext",
+  "action": "next",
   "M18": {"order": "1"},
   "M19": {
     "order": "2",
@@ -362,7 +362,7 @@ class GoodFormServiceTests extends GrailsUnitTestCase {
     "Has_any_person_or_group_offered_to_pay_or_are_they_able_to_pay_any_of_your_legal_fees_for_this_case": {"Please_give_details": ""}
   },
   "M30": {"order": "5"},
-  "applyNext": "Continue",
+  "next": "Continue",
   "C4": {
     "Where_is_the_court_or_tribunal": {"courtOrTribunal": {
       "State": "ACT",

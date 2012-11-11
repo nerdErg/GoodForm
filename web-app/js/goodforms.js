@@ -334,7 +334,7 @@ $(function () {
     });
 
 //    $('div.qset').click(function (event) {
-//        var url = "${g.createLink(controller: "grant", action: "goback")}/" + $(this).attr('id');
+//        var url = "${g.createLink(controller: "grant", action: "back")}/" + $(this).attr('id');
 //        window.location = url;
 //    });
 

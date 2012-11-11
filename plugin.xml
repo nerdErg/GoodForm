@@ -1,15 +1,19 @@
-<plugin name='goodforms' version='0.1' grailsVersion='2.1 &gt; *'>
-  <author>Your name</author>
-  <title>Goodforms Plugin</title>
-  <description>Brief summary/description of the plugin.
+<plugin name='goodform' version='0.1' grailsVersion='2.1 &gt; *'>
+  <author>Peter McNeil, Ross Rowe</author>
+  <authorEmail>peter@nerderg.com</authorEmail>
+  <title>Goodform Plugin</title>
+  <description>Create extremely usable complex forms with rules based flow that work well in browsers.
+Good form features a form definition DSL that allows rapid human readable form creation.
 </description>
-  <documentation>http://grails.org/plugin/goodforms</documentation>
-  <type>GoodformsGrailsPlugin</type>
+  <documentation>http://grails.org/plugin/goodform</documentation>
+  <type>GoodformGrailsPlugin</type>
   <resources>
-    <resource>com.nerderg.goodForm.FormInstance</resource>
+    <resource>com.nerderg.goodForm.FormController</resource>
     <resource>com.nerderg.goodForm.FormDefinition</resource>
+    <resource>com.nerderg.goodForm.FormInstance</resource>
     <resource>com.nerderg.goodForm.FormDataService</resource>
     <resource>com.nerderg.goodForm.GoodFormService</resource>
+    <resource>com.nerderg.goodForm.LocalRulesEngineService</resource>
     <resource>com.nerderg.goodForm.RulesEngineService</resource>
     <resource>com.nerderg.goodForm.FormTagLib</resource>
     <resource>com.nerderg.goodForm.HelpTagLib</resource>

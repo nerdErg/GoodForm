@@ -7,6 +7,8 @@ import net.sf.json.JSONObject
 import grails.converters.JSON
 
 /**
+ * Controller which manages the display of goodform forms.
+ *
  *
  */
 class FormController {
@@ -21,31 +23,36 @@ class FormController {
 
     def applicationService
 
+    def index = {}
+
     /**
      * Creates a new form instance.
      *
      * Pre conditions:
      * <ul>
      * <li>FormDefinition must be defined in the database (typically in Bootstrap).</li>
+     * <li>Form name must be supplied as an input parameter (eg. http://localhost:8080/your-app/form/createForm?form=jobForm Instance)</li>
      * </ul>
      * TODO retrieve form name from input parameters and redirect to error page if not supplied
-     * TODO: redirect to error page when FormDefinition not supplied
+     * TODO redirect to error page when FormDefinition not supplied
      *
      */
-    def newForm = {
+    def createForm = {
         log.debug "apply: $params"
         try {
             String formName = params.formName
-            //TODO handle no form name
-            Form form = formDataService.getForm()
+            if (!formName) {
+                flash.message = "Form name needs to be supplied"
+                return redirect(action: 'index')
+            }
+            Form form = formDataService.getForm(formName)
             Map formData = rulesEngineService.ask(formName, [loginType: whoIs()])
-            FormInstance application = formDataService.createApplication(formData)
+            FormInstance instance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
-            render(view: 'jobApplication', model: [form: form, asked: [], questions: ask, formData: formData, app: application])
+            render(view: 'formDetails', model: [form: form, asked: [], questions: ask, formData: formData, instance: instance])
         } catch (RulesEngineException e) {
             flash.message = "An error occured during rules processing: '$e.message'."
-            //            //TODO redirect somewhere relevant
-            return redirect(controller: 'jobApplication', action: 'index')
+            return redirect(action: 'index')
         }
     }
 
@@ -63,23 +70,23 @@ class FormController {
      * TODO this method needs a refactor, can we move some/most of the logic into the service?
      *
      */
-    def applyNext = {
-        log.debug "applyNext: $params"
-        FormInstance application = formDataService.checkApplication(params.applicationId as Long)
-        if (!application) {
-            flash.message = "Something has gone wrong, I can't find that Application (${params.id})"
+    def next = {
+        log.debug "next: $params"
+        FormInstance instance = formDataService.checkInstance(params.instanceId as Long)
+        if (!instance) {
+            flash.message = "Something has gone wrong, I can't find that instance (${params.instanceId})"
             return redirect(action: 'apply')
         }
 
         Map currentFormData = formDataService.cleanUpStateParams(params)
-        Form form = formDataService.getFormQuestions(application.formVersion)
-        List asked = formDataService.getSubset(application.storedCurrrentQuestion(), form)
+        Form form = formDataService.getFormQuestions(instance.formVersion)
+        List asked = formDataService.getSubset(instance.storedCurrrentQuestion(), form)
 
         //todo re look at this merged Data as we should merge after validate? Also multiple calls to storedFormData
-        Map mergedFormData = rulesEngineService.cleanUpJSONNullMap(application.storedFormData()) << currentFormData
-        mergedFormData.formVersion = application.formVersion
+        Map mergedFormData = rulesEngineService.cleanUpJSONNullMap(instance.storedFormData()) << currentFormData
+        mergedFormData.formVersion = instance.formVersion
 
-        application.storedCurrrentQuestion().each { ref ->
+        instance.storedCurrrentQuestion().each { ref ->
             if (mergedFormData[ref]?.recheck) {
                 (mergedFormData[ref] as Map).remove('recheck')
             }
@@ -88,21 +95,21 @@ class FormController {
         boolean error = false
         asked.each { Question question ->
             //note the or error here makes sure error isn't reset whilst checking all form elements (so don't move it in front :-)
-            error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, application) || error
+            error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, instance) || error
         }
-        application.storeFormData(mergedFormData)
+        instance.storeFormData(mergedFormData)
 
         if (!error) {
             try {
-                Map processedFormData = formDataService.processNext(application, mergedFormData)
-                log.debug "applyNext processedFormData: ${processedFormData.toString(2)}"
+                Map processedFormData = formDataService.processNext(instance, mergedFormData)
+                log.debug "next processedFormData: ${processedFormData.toString(2)}"
                 //rules engine returns "End" as the next question at the end
                 if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
-                    return redirect(action: 'endForm', id: application.id)
+                    return redirect(action: 'end', id: instance.id)
                 }
                 List<Question> current = formDataService.getSubset(processedFormData.next, form)
-                List answered = formDataService.getAnsweredQuestions(application, form)
-                render(view: 'jobApplication', model: [form: form, asked: answered, questions: current, formData: processedFormData, app: application])
+                List answered = formDataService.getAnsweredQuestions(instance, form)
+                render(view: 'formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, instance: instance])
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
                 flash.message = "Rule error $e.message."
@@ -110,113 +117,116 @@ class FormController {
             }
         } else {
             //error detected, redisplay form
-            List answered = formDataService.getAnsweredQuestions(application, form)
-            render(view: 'jobApplication', model: [form: form, asked: answered, questions: asked, formData: mergedFormData, app: application])
+            List answered = formDataService.getAnsweredQuestions(instance, form)
+            render(view: 'formDetails', model: [form: form, asked: answered, questions: asked, formData: mergedFormData, instance: instance])
         }
     }
 
     /**
      *
      */
-    def goback = {
-        log.debug "goback: $params"
-        FormInstance application = formDataService.checkApplication(params.id as Long)
-        if (!application) {
-            flash.message = "Something has gone wrong, I can't find that Application (${params.id})"
+    def back = {
+        log.debug "back: $params"
+        FormInstance instance = formDataService.checkInstance(params.id as Long)
+        if (!instance) {
+            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
             return redirect(action: 'apply')
         }
 
-        List state = application.storedState()
+        List state = instance.storedState()
         List currentQ = state.reverse()[params.qset as int]
-        application.storeCurrentQuestion(currentQ)
-        application.storeState(formDataService.truncateState(state, currentQ))
-        application.save(flush: true)
-        redirect(action: 'continueApp', id: application.id)
+        instance.storeCurrentQuestion(currentQ)
+        instance.storeState(formDataService.truncateState(state, currentQ))
+        instance.save(flush: true)
+        redirect(action: 'continueApp', id: instance.id)
     }
 
     /**
-     * TODO I think this might be only needed for legal aid, might be able to remove this from example
+     * Handles the final submission of a form.
      */
-    def endForm = {
-        log.debug "endForm: $params"
-        FormInstance application = formDataService.checkApplication(params.id as Long)
-        if (!application) {
-            flash.message = "Something has gone wrong, I can't find that Application (${params.id})"
+    def end = {
+        log.debug "end: $params"
+        FormInstance instance = formDataService.checkInstance(params.id as Long)
+        if (!instance) {
+            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
             return redirect(action: 'apply')
         }
-        Map formData = application.storedFormData()
+        Map formData = instance.storedFormData()
         JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData)
         formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
-        updateStoredApplication(application, formData)
+        updateStoredFormInstance(instance, formData)
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
-        [app: application, formData: formData]
+        [instance: instance, formData: formData]
     }
 
     /**
      *
-     * @param application
+     * @param instance
      * @param processedFormData
      * @return
      */
-    private updateStoredApplication(FormInstance application, Map processedFormData) {
-        List state = application.storedState()
+    private updateStoredFormInstance(FormInstance instance, Map processedFormData) {
+        List state = instance.storedState()
         def nextInState = state.find { s ->
             s == processedFormData.next
         }
         if (!nextInState) {
             state.add(processedFormData.next)
-            application.storeState(state)
+            instance.storeState(state)
         }
-        application.storeCurrentQuestion(processedFormData.next)
-        application.storeFormData(processedFormData)
+        instance.storeCurrentQuestion(processedFormData.next)
+        instance.storeFormData(processedFormData)
+    }
+
+    /**
+     * Displays a read-only view of a form.
+     */
+    def view = {
+        log.debug "view: $params"
+        FormInstance instance = formDataService.checkInstance(params.id as Long)
+        if (!instance) {
+            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
+            return redirect(action: 'apply')
+        }
+
+        Map formData = instance.storedFormData()
+        log.debug "view FormData: ${(formData as JSON).toString(true)}"
+        if (params.name) {
+            return renderPdf([template: 'applicationView', model: [instance: instance, formData: formData]])
+        } else {
+            return [instance: instance, formData: formData]
+        }
     }
 
     /**
      *
      */
-    def view = {
-        log.debug "view: $params"
-        FormInstance application = formDataService.checkApplication(params.id as Long)
-        if (!application) {
-            flash.message = "Something has gone wrong, I can't find that Application (${params.id})"
-            return redirect(action: 'apply')
-        }
-
-        Map formData = application.storedFormData()
-        log.debug "view FormData: ${(formData as JSON).toString(true)}"
-        if (params.name) {
-            return renderPdf([template: 'applicationView', model: [app: application, formData: formData]])
-        } else {
-            return [app: application, formData: formData]
-        }
-    }
-
     def submit = {
         log.debug "submitForm: $params"
-        FormInstance application = formDataService.checkApplication(params.id as Long)
-        if (!application) {
-            flash.message = "Something has gone wrong, I can't find that Application (${params.id})"
+        FormInstance instance = formDataService.checkInstance(params.id as Long)
+        if (!instance) {
+            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
             return redirect(action: 'apply')
         }
 
-        //TODO should this go into applicationService.submitApplication?
-        //write pdf of application form to the applications attachments directory for attachment to the file history
-        Map formData = application.storedFormData()
+        //TODO should this go into applicationService.submitForm Instance?
+        //write pdf of instance form to the applications attachments directory for attachment to the file history
+        Map formData = instance.storedFormData()
         //TODO create example-app-specific grails config entries to store pdfs
-        File location = new File(grailsApplication.config.uploaded.file.location.toString() + 'applications/' + application.id)
+        File location = new File(grailsApplication.config.uploaded.file.location.toString() + 'applications/' + instance.id)
         location.mkdirs()
-        File upload = new File(location, "jobApplication.pdf")
+        File upload = new File(location, "formDetails.pdf")
         upload.withOutputStream {outputStream ->
-            pdfRenderingService.render([controller: 'grant', template: 'applicationView', model: [app: application, formData: formData]], outputStream)
+            pdfRenderingService.render([controller: 'grant', template: 'applicationView', model: [app: instance, formData: formData]], outputStream)
         }
 
-        Map result = applicationService.submitApplication(application)
+        Map result = applicationService.submitFormInstance(instance)
         if (result.errors.isEmpty()) {
 
-            flash.message = "Application submitted: File number $application.fileNumber"
+            flash.message = "Form Instance submitted: File number $instance.fileNumber"
             return redirect(action: 'apply')
         } else {
-            flash.message = "Application had errors $result.errors"
+            flash.message = "Form Instance had errors $result.errors"
             return redirect(action: 'apply')
         }
     }
