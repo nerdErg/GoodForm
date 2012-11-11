@@ -317,17 +317,17 @@ class FormTagLib {
      * TODO i18n
      */
     def answered = { attrs ->
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(application.formVersion)
+        Form questions = formDataService.getFormQuestions(instance.formVersion)
 
-        List state = application.storedState().reverse()
-        List currentQuestions = application.storedCurrrentQuestion()
+        List state = instance.storedState().reverse()
+        List currentQuestions = instance.storedCurrrentQuestion()
         boolean found = false
         def i = 0
         state.each() { List qSet ->
             if (found) {
-                out << "<div class='qset' title='click to edit' id='${application.id}/${i}'>"
+                out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
                 out << qSet.toString()
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
                     out << element([element: q.formElement, store: formData, disabled: true])
@@ -341,14 +341,14 @@ class FormTagLib {
 
     def display = { attrs ->
         log.debug "in display tag $attrs"
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(application.formVersion)
+        Form questions = formDataService.getFormQuestions(instance.formVersion)
 
-        List state = application.storedState()
+        List state = instance.storedState()
         def i = state.size() - 1
         state.each() { List qSet ->
-            out << "<div class='qset' title='click to edit' id='${application.id}/${i}'>"
+            out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
             goodFormService.withQuestions(qSet, questions) { q, qRef ->
                 out << element([element: q.formElement, store: formData, disabled: true])
             }
@@ -363,12 +363,12 @@ class FormTagLib {
      */
     def displayText = { attrs ->
         log.debug "in display tag $attrs"
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(application.formVersion)
+        Form questions = formDataService.getFormQuestions(instance.formVersion)
         Boolean compress = false //attrs.compress || attrs.readOnly
 
-        List state = application.storedState()
+        List state = instance.storedState()
         def i = state.size() - 1
         state.each() { List qSet ->
 
@@ -421,7 +421,7 @@ class FormTagLib {
                 if (attrs.readOnly) {
                     out << "<div class='qsetReadOnly' style='page-break-inside: avoid;'>"
                 } else {
-                    out << "<div class='qset' title='click to edit' id='${application.id}/${i}'>"
+                    out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
                 }
                 output.each { out << it }
                 out << "</div>"
@@ -437,9 +437,9 @@ class FormTagLib {
      */
     def displayFilteredText = { attrs ->
         log.debug "in display tag $attrs"
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(application.formVersion)
+        Form questions = formDataService.getFormQuestions(instance.formVersion)
         Boolean compress = attrs.compress || attrs.readOnly
 
         List refs = attrs.refs as List
@@ -486,10 +486,10 @@ class FormTagLib {
     //todo delete if we're not using this
     def displayFormData = { attrs ->
         log.debug "in display tag $attrs"
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         Map formData = attrs.store
 
-        List state = application.storedState()
+        List state = instance.storedState()
         state.each() { List qSet ->
             out << "<div class='qsetReadOnly'>"
             goodFormService.withQuestions(qSet, formData as Map) { qData, qRef ->
@@ -513,16 +513,16 @@ class FormTagLib {
      */
     def linkToQset = { attrs, body ->
         log.debug "in linkToQset tag $attrs"
-        FormInstance application = attrs.application
+        FormInstance instance = attrs.instance
         String questionRef = attrs.questionRef
-        List<List> state = application.storedState()
+        List<List> state = instance.storedState()
         def i = 0
         while (i < state.size() && !(state[i].contains(questionRef))) {
             i++
             log.debug "$i -> ${state[i]}"
         }
         i = state.size() - i - 1
-        String href = g.createLink(controller: "grant", action: "back") + "/${application.id}/${i}"
+        String href = g.createLink(controller: "grant", action: "back") + "/${instance.id}/${i}"
         out << "<a href='$href'>"
         out << body()
         out << '</a>'

@@ -27,7 +27,7 @@ Form version ${form.version}
 %{--</g:form>--}%
 </div>
 
-<form:answered application="${app}" store="${formData}"/>
+<form:answered application="${instance}" store="${formData}"/>
 
 </body>
 </html>
