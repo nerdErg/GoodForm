@@ -1,6 +1,6 @@
 class GoodformGrailsPlugin {
     // the plugin version
-    def version = "0.1"
+    def version = "1.0.0-SNAPSHOT"
     // the version or versions of Grails the plugin is designed for
     def grailsVersion = "2.1 > *"
     // the other plugins this plugin depends on
@@ -10,7 +10,6 @@ class GoodformGrailsPlugin {
         "grails-app/views/error.gsp"
     ]
 
-    // TODO Fill in these fields
     def title = "Goodform Plugin" // Headline display name of the plugin
     def author = "Peter McNeil, Ross Rowe"
     def authorEmail = "peter@nerderg.com"
