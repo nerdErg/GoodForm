@@ -10,6 +10,12 @@ import grails.util.GrailsUtil
 class FormDefinition {
 
     String formDefinition
+    /**
+     * The name of the form.  Must be unique.
+     *
+     * TODO include uniqueness check
+     */
+    String name
 
     static mapping = {
         if (GrailsUtil.getEnvironment() != 'test') {
@@ -18,5 +24,6 @@ class FormDefinition {
     }
 
     static constraints = {
+
     }
 }

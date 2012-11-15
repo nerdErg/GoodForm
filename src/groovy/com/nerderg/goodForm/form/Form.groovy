@@ -11,6 +11,7 @@ class Form {
 
     def goodFormService
     Long version
+    String name
     def parent = null
     List<Question>  questions = []
     Map<String, Closure> updates = [:]
