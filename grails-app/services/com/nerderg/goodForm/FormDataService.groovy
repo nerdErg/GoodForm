@@ -8,27 +8,28 @@ import com.nerderg.goodForm.form.Question
 import net.sf.json.JSONObject
 
 /**
+ * Service which handles retrieval and validation of Form data.
  *
  * Copied from GrantFormService
  */
 class FormDataService {
 
     def goodFormService
-    
+
     def rulesEngineService
 
     Map<Long, Form> forms = [:]
 
-    Form getForm() {
-        return getFormQuestions(latestVersion())
+    Form getForm(String formName) {
+        return getFormQuestions(latestVersionOfFormForName(formName))
     }
 
     /**
      *
      * @return
      */
-    Long latestVersion() {
-        FormDefinition.executeQuery("select max(id) from FormDefinition").first() as Long
+    Long latestVersionOfFormForName(String formName) {
+        FormDefinition.executeQuery("select max(id) from FormDefinition where name = ?", [formName]).first() as Long
     }
 
     Form getFormQuestions(Long version) {
@@ -44,12 +45,13 @@ class FormDataService {
         if (formDefinition) {
             Form form = GoodFormService.compileForm(formDefinition.formDefinition)
             form.version = version
+            form.name = formDefinition.name
             return form
         }
         return null
     }
 
-    FormInstance checkApplication(Long id) {
+    FormInstance checkInstance(Long id) {
         FormInstance application = FormInstance.get(id)
         //TODO include security check?
         return application
@@ -163,7 +165,7 @@ class FormDataService {
     }
 
     /**
-     * TODO i18n
+     *
      * @param formElement
      * @param fieldValue
      * @param error
@@ -172,14 +174,14 @@ class FormDataService {
     boolean validateField(FormElement formElement, fieldValue, boolean error) {
         if (formElement.attr.containsKey('required')) {
             if (fieldValue == null || fieldValue == '') {
-                formElement.attr.error += 'Required field. Please fill in this field. '
+                formElement.attr.error += message(code: "goodform.validate.required.field")
                 error = true
             }
         }
 
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
-            String message = "This doesn't look right."
+            String message = message(code: "goodform.validate.invalid.pattern")
             if (formElement.attr.pattern instanceof List) {
                 pattern = formElement.attr.pattern[0]
                 if (formElement.attr.pattern.size() > 1) {
@@ -200,13 +202,13 @@ class FormDataService {
                 if (formElement.attr.max) {
                     if (formElement.attr.max == 'today') {
                         if (d.time > System.currentTimeMillis()) {
-                            formElement.attr.error += "Date can't be in the future."
+                            formElement.attr.error += message(code: "goodform.validate.date.future")
                             error = true
                         }
                     } else {
                         Date max = Date.parse(formElement.attr.date, formElement.attr.max)
                         if (d.time > max.time) {
-                            formElement.attr.error += "Date can't be greater than ${formElement.attr.max}."
+                            formElement.attr.error += message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
                             error = true
                         }
                     }
@@ -214,12 +216,12 @@ class FormDataService {
                 if (formElement.attr.min) {
                     Date min = Date.parse(formElement.attr.date, formElement.attr.min)
                     if (d.time < min.time) {
-                        formElement.attr.error += "Date can't be less than ${formElement.attr.min}."
+                        formElement.attr.error += message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
                         error = true
                     }
                 }
             } catch (ParseException e) {
-                formElement.attr.error += "This date looks wrong, please format dd/mm/yyyy, eg. 23/3/2001"
+                formElement.attr.error += message(code: "goodform.validate.date.invalid")
                 error = true
 
             }
@@ -228,13 +230,14 @@ class FormDataService {
         if (fieldValue && formElement.attr.containsKey('phone')) {
             String numbers = fieldValue.replaceAll(/[^0-9\+]/, '')
             if (numbers.size() < 8) {
-                formElement.attr.error += "Phone numbers must have at least 8 numbers."
+                formElement.attr.error += message(code: "goodform.validate.phone.minLength")
                 error = true
             }
-            if (!(numbers =~ /^(\+|02|03|04|07|08|[2-9])/)) {
-                formElement.attr.error += "The prefix for this phone number looks wrong (e.g. can't be 00xx, 01xx, 05xx, 06xx, 09xx, or 1xxx)"
-                error = true
-            }
+            //TODO this is Australia-specific, can this be factored in as a service?
+//            if (!(numbers =~ /^(\+|02|03|04|07|08|[2-9])/)) {
+//                formElement.attr.error += "The prefix for this phone number looks wrong (e.g. can't be 00xx, 01xx, 05xx, 06xx, 09xx, or 1xxx)"
+//                error = true
+//            }
         }
 
         //TODO incoporate formValidationService into GoodForms?
@@ -261,7 +264,7 @@ class FormDataService {
 
         List answered = []
         List state = application.storedState()
-        List currentQuestions = application.storedCurrrentQuestion()
+        List currentQuestions = application.storedCurrentQuestion()
 
         def i = 0
         List qSet
@@ -273,12 +276,12 @@ class FormDataService {
         return answered
     }
 
-    FormInstance createApplication(Map formData) {
-        FormInstance application = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last())
+    FormInstance createFormInstance(Form form, Map formData) {
+        FormInstance application = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), form: form)
         application.storeFormData(formData)
         application.storeState([formData.next])
         application.storeCurrentQuestion(formData.next)
-        application.formVersion = latestVersion()
+        application.formVersion = latestVersionOfFormForName(form.name)
         application.save()
         return application
     }
@@ -317,7 +320,7 @@ class FormDataService {
      * @return processedFormData up to the next un-asked question
      */
     def Map processNext(FormInstance application, Map mergedFormData) {
-        String lastQuestion = application.storedCurrrentQuestion().last()
+        String lastQuestion = application.storedCurrentQuestion().last()
         String ruleName = "Application${lastQuestion}"
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {

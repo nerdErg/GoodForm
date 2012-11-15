@@ -9,15 +9,14 @@ import grails.converters.JSON
 /**
  * Controller which manages the display of goodform forms.
  *
+ * This controller can be subclassed by implementing applications if custom behaviour is required (eg.
+ * email the submitted form details in the {@link FormController#end} method).
+ *
  *
  */
 class FormController {
 
-    def pdfRenderingService
-
     def formDataService
-
-    def goodFormService
 
     def rulesEngineService
 
@@ -42,16 +41,16 @@ class FormController {
         try {
             String formName = params.formName
             if (!formName) {
-                flash.message = "Form name needs to be supplied"
+                flash.message = message(code: "goodform.formName.supplied")
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
             Map formData = rulesEngineService.ask(formName, [loginType: whoIs()])
             FormInstance instance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
-            render(view: 'formDetails', model: [form: form, asked: [], questions: ask, formData: formData, instance: instance])
+            render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, instance: instance])
         } catch (RulesEngineException e) {
-            flash.message = "An error occured during rules processing: '$e.message'."
+            flash.message = message(code:  "goodform.rules.error", args: [e.message])
             return redirect(action: 'index')
         }
     }
@@ -74,19 +73,19 @@ class FormController {
         log.debug "next: $params"
         FormInstance instance = formDataService.checkInstance(params.instanceId as Long)
         if (!instance) {
-            flash.message = "Something has gone wrong, I can't find that instance (${params.instanceId})"
+            flash.message = message(code:"goodform.form.invalid", args: [params.instanceId])
             return redirect(action: 'apply')
         }
 
         Map currentFormData = formDataService.cleanUpStateParams(params)
         Form form = formDataService.getFormQuestions(instance.formVersion)
-        List asked = formDataService.getSubset(instance.storedCurrrentQuestion(), form)
+        List asked = formDataService.getSubset(instance.storedCurrentQuestion(), form)
 
         //todo re look at this merged Data as we should merge after validate? Also multiple calls to storedFormData
         Map mergedFormData = rulesEngineService.cleanUpJSONNullMap(instance.storedFormData()) << currentFormData
         mergedFormData.formVersion = instance.formVersion
 
-        instance.storedCurrrentQuestion().each { ref ->
+        instance.storedCurrentQuestion().each { ref ->
             if (mergedFormData[ref]?.recheck) {
                 (mergedFormData[ref] as Map).remove('recheck')
             }
@@ -109,16 +108,16 @@ class FormController {
                 }
                 List<Question> current = formDataService.getSubset(processedFormData.next, form)
                 List answered = formDataService.getAnsweredQuestions(instance, form)
-                render(view: 'formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, instance: instance])
+                render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, instance: instance])
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
-                flash.message = "Rule error $e.message."
+                flash.message = message(code:"goodform.rules.error", args: [e.message])
                 return redirect(action: 'apply')
             }
         } else {
             //error detected, redisplay form
             List answered = formDataService.getAnsweredQuestions(instance, form)
-            render(view: 'formDetails', model: [form: form, asked: answered, questions: asked, formData: mergedFormData, instance: instance])
+            render(view: '/form/formDetails', model: [form: form, asked: answered, questions: asked, formData: mergedFormData, instance: instance])
         }
     }
 
@@ -129,7 +128,7 @@ class FormController {
         log.debug "back: $params"
         FormInstance instance = formDataService.checkInstance(params.id as Long)
         if (!instance) {
-            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
+            flash.message = message(code:"goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
 
@@ -148,7 +147,7 @@ class FormController {
         log.debug "end: $params"
         FormInstance instance = formDataService.checkInstance(params.id as Long)
         if (!instance) {
-            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
+            flash.message = message(code:"goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
         Map formData = instance.storedFormData()
@@ -185,17 +184,14 @@ class FormController {
         log.debug "view: $params"
         FormInstance instance = formDataService.checkInstance(params.id as Long)
         if (!instance) {
-            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
+            flash.message = message(code:"goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
 
         Map formData = instance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
-        if (params.name) {
-            return renderPdf([template: 'applicationView', model: [instance: instance, formData: formData]])
-        } else {
-            return [instance: instance, formData: formData]
-        }
+        return [instance: instance, formData: formData]
+
     }
 
     /**
@@ -205,19 +201,8 @@ class FormController {
         log.debug "submitForm: $params"
         FormInstance instance = formDataService.checkInstance(params.id as Long)
         if (!instance) {
-            flash.message = "Something has gone wrong, I can't find that Form Instance (${params.id})"
+            flash.message = message(code:"goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
-        }
-
-        //TODO should this go into applicationService.submitForm Instance?
-        //write pdf of instance form to the applications attachments directory for attachment to the file history
-        Map formData = instance.storedFormData()
-        //TODO create example-app-specific grails config entries to store pdfs
-        File location = new File(grailsApplication.config.uploaded.file.location.toString() + 'applications/' + instance.id)
-        location.mkdirs()
-        File upload = new File(location, "formDetails.pdf")
-        upload.withOutputStream {outputStream ->
-            pdfRenderingService.render([controller: 'grant', template: 'applicationView', model: [app: instance, formData: formData]], outputStream)
         }
 
         Map result = applicationService.submitFormInstance(instance)

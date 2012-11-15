@@ -3,6 +3,9 @@ package com.nerderg.goodForm
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 
+/**
+ *
+ */
 class FormTagLib {
 
     def formDataService
@@ -147,7 +150,7 @@ class FormTagLib {
     }
 
     /**
-     * TODO i18n
+     *
      */
     def listOf = { FormElement e, Map store, Integer index, boolean disabled ->
         e.attr.name = makeElementName(e)
@@ -164,14 +167,18 @@ class FormTagLib {
             }
             out << "<div class='removeForm'><img src='"
             out << g.resource(dir: 'images/icons', file: 'delete.png')
-            out << "' title='Remove this' alt='+'/><span class='hint'>Remove</span></div>"
+            out << """' title='Remove this' alt='+'/><span class='hint'>"""
+            out << g.message(code: "goodform.item.remove")
+            out << "</span></div>"
             out << "</div>"
         }
         out << "</div>"
 
         out << "<div class='addAnotherForm'><img src='"
         out << g.resource(dir: 'images/icons', file: 'add.png')
-        out << "' title='add another' alt='+'/><span class='hint'>Add another</span></div>"
+        out << " title='add another' alt='+'/><span class='hint'>"
+        out << g.message(code: "goodform.item.addAnother")
+        out << "</span></div>"
 
     }
 
@@ -226,7 +233,7 @@ class FormTagLib {
                     """
             }
         }
-        out << "</div>"
+        out << "</ div > "
     }
 
     private radioButtonElement(value, FormElement e, disabledAttr) {
@@ -314,7 +321,7 @@ class FormTagLib {
     }
 
     /**
-     * TODO i18n
+     *
      */
     def answered = { attrs ->
         FormInstance instance = attrs.instance
@@ -322,12 +329,14 @@ class FormTagLib {
         Form questions = formDataService.getFormQuestions(instance.formVersion)
 
         List state = instance.storedState().reverse()
-        List currentQuestions = instance.storedCurrrentQuestion()
+        List currentQuestions = instance.storedCurrentQuestion()
         boolean found = false
         def i = 0
         state.each() { List qSet ->
             if (found) {
-                out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
+                out << "<div class='qset' title='"
+                out << g.message(code: "goodform.click.edit")
+                out << "' id='${instance.id}/${i}'>"
                 out << qSet.toString()
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
                     out << element([element: q.formElement, store: formData, disabled: true])
@@ -348,7 +357,9 @@ class FormTagLib {
         List state = instance.storedState()
         def i = state.size() - 1
         state.each() { List qSet ->
-            out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
+            out << "<div class='qset' title='"
+            out << g.message(code: "goodform.click.edit")
+            out << "' id='${instance.id}/${i}'>"
             goodFormService.withQuestions(qSet, questions) { q, qRef ->
                 out << element([element: q.formElement, store: formData, disabled: true])
             }
@@ -359,7 +370,7 @@ class FormTagLib {
     }
 
     /**
-     * TODO i18n
+     *
      */
     def displayText = { attrs ->
         log.debug "in display tag $attrs"
@@ -397,7 +408,7 @@ class FormTagLib {
                         if (compress && !answerPresent) {
                             return ''
                         }
-                        String res = "<div title='$qRef' class='caseDetail'>"
+                        String res = "<div title='$qRef'>"
                         res += "${indent.replaceAll(' ', '&nbsp;')}"
                         res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
                         if (value) {
@@ -421,7 +432,9 @@ class FormTagLib {
                 if (attrs.readOnly) {
                     out << "<div class='qsetReadOnly' style='page-break-inside: avoid;'>"
                 } else {
-                    out << "<div class='qset' title='click to edit' id='${instance.id}/${i}'>"
+                    out << "<div class='qset' title='"
+                    out << g.message(code: "goodform.click.edit")
+                    out << "' id='${instance.id}/${i}'>"
                 }
                 output.each { out << it }
                 out << "</div>"
@@ -432,7 +445,7 @@ class FormTagLib {
     }
 
     /**
-     * TODO i18n
+     *
      * TODO caseDetail class?
      */
     def displayFilteredText = { attrs ->
@@ -449,7 +462,7 @@ class FormTagLib {
         goodFormService.withQuestions(refs, questions) { q, qRef ->
             String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
                 if (value && value != 'No') {
-                    String res = "<div class='caseDetail' title='$qRef'>"
+                    String res = "<div title='$qRef'>"
                     res += "${indent.replaceAll(' ', '&nbsp;')}"
                     res += "<span class='label'>${label ? label.encodeAsHTML() + ':' : ''}</span> "
                     if (value) {
@@ -476,7 +489,7 @@ class FormTagLib {
             if (contentPresent) {
                 output.each { out << it }
             } else {
-                out << "no answers (all negative)"
+                out << g.message(code: "goodform.no.answers")
             }
             out << "</div>"
         }
@@ -522,7 +535,7 @@ class FormTagLib {
             log.debug "$i -> ${state[i]}"
         }
         i = state.size() - i - 1
-        String href = g.createLink(controller: "grant", action: "back") + "/${instance.id}/${i}"
+        String href = g.createLink(controller: "form", action: "back") + "/${instance.id}/${i}"
         out << "<a href='$href'>"
         out << body()
         out << '</a>'

@@ -35,7 +35,7 @@ class FormInstance {
         this.formData = (formData as JSON) as String
     }
 
-    def storedCurrrentQuestion() {
+    def storedCurrentQuestion() {
         JSON.parse(currentQuestion) as List
     }
 
