@@ -1,4 +1,4 @@
-<plugin name='goodform' version='0.1' grailsVersion='2.1 &gt; *'>
+<plugin name='goodform' version='1.0.0-SNAPSHOT' grailsVersion='2.1 &gt; *'>
   <author>Peter McNeil, Ross Rowe</author>
   <authorEmail>peter@nerderg.com</authorEmail>
   <title>Goodform Plugin</title>
