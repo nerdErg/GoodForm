@@ -9,9 +9,6 @@ import grails.converters.JSON
 /**
  * Controller which manages the display of goodform forms.
  *
- * This controller can be subclassed by implementing applications if custom behaviour is required (eg.
- * email the submitted form details in the {@link FormController#end} method).
- *
  *
  */
 class FormController {
@@ -104,7 +101,7 @@ class FormController {
                 log.debug "next processedFormData: ${processedFormData.toString(2)}"
                 //rules engine returns "End" as the next question at the end
                 if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
-                    return redirect(action: 'end', id: instance.id)
+                    return redirect(action: 'endForm', id: instance.id)
                 }
                 List<Question> current = formDataService.getSubset(processedFormData.next, form)
                 List answered = formDataService.getAnsweredQuestions(instance, form)
@@ -143,7 +140,7 @@ class FormController {
     /**
      * Handles the final submission of a form.
      */
-    def end = {
+    def endForm = {
         log.debug "end: $params"
         FormInstance instance = formDataService.checkInstance(params.id as Long)
         if (!instance) {
@@ -155,7 +152,8 @@ class FormController {
         formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
         updateStoredFormInstance(instance, formData)
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
-        [instance: instance, formData: formData]
+        //[instance: instance, formData: formData]
+        render(view: '/form/endForm', model: [instance: instance, formData: formData])
     }
 
     /**
