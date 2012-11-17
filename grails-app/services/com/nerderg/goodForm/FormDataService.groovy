@@ -54,9 +54,9 @@ class FormDataService {
     }
 
     FormInstance checkInstance(Long id) {
-        FormInstance application = FormInstance.get(id)
+        FormInstance instance = FormInstance.get(id)
         //TODO include security check?
-        return application
+        return instance
     }
 
     /**
@@ -86,10 +86,10 @@ class FormDataService {
      *
      * @param formElement
      * @param formData the current data Map
-     * @param application the GrantApplication object
+     * @param instance the FormInstance object
      * @return true on error
      */
-    boolean validateAndProcessFields(FormElement formElement, Map formData, FormInstance application) {
+    boolean validateAndProcessFields(FormElement formElement, Map formData, FormInstance instance) {
         //note makeElement name uses the attr.name of it's parent so it must be set. (side effect)
         boolean error = false
         if (formElement.attr.heading) {
@@ -112,7 +112,7 @@ class FormDataService {
             //get the uploaded file and store somewhere
             def f = request.getFile(formElement.attr.name)
             if (f && !f.empty) {
-                String basedir = ConfigurationHolder.config.uploaded.file.location.toString() + 'applications/' + application.id
+                String basedir = ConfigurationHolder.config.uploaded.file.location.toString() + 'applications/' + instance.id
                 File location = new File(basedir)
                 location.mkdirs()
                 def fieldSplit = formElement.attr.name.split(/\./)
@@ -122,7 +122,7 @@ class FormDataService {
                 goodFormService.setField(formData, formElement.attr.name, upload.name)
             } else {
                 //todo refactor so we don't continually get the stored FormData also dangerous for overwrite
-                def existingFile = goodFormService.findField(application.storedFormData(), formElement.attr.name)
+                def existingFile = goodFormService.findField(instance.storedFormData(), formElement.attr.name)
                 if (existingFile) {
                     goodFormService.setField(formData, formElement.attr.name, existingFile)
                 } else {
@@ -135,11 +135,11 @@ class FormDataService {
         if (formElement.attr.containsKey('each')) {
             //handle each which dynamically adds elements
             goodFormService.processEachFormElement(formElement, formData) {Map subMap ->
-                error = validateAndProcessFields(subMap.element, formData, application) || error
+                error = validateAndProcessFields(subMap.element, formData, instance) || error
             }
         } else {
             formElement.subElements.each { FormElement sub ->
-                error = validateAndProcessFields(sub, formData, application) || error
+                error = validateAndProcessFields(sub, formData, instance) || error
             }
         }
 
@@ -258,15 +258,15 @@ class FormDataService {
     /**
      *
      * Get the questions that have been answered so far up to the current question set
-     * @param application
+     * @param instance
      * @param questions
      * @return answered questions
      */
-    def getAnsweredQuestions(FormInstance application, Form form) {
+    def getAnsweredQuestions(FormInstance instance, Form form) {
 
         List answered = []
-        List state = application.storedState()
-        List currentQuestions = application.storedCurrentQuestion()
+        List state = instance.storedState()
+        List currentQuestions = instance.storedCurrentQuestion()
 
         def i = 0
         List qSet
@@ -279,13 +279,13 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        FormInstance application = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), form: form)
-        application.storeFormData(formData)
-        application.storeState([formData.next])
-        application.storeCurrentQuestion(formData.next)
-        application.formVersion = latestVersionOfFormForName(form.name)
-        application.save()
-        return application
+        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), form: form)
+        instance.storeFormData(formData)
+        instance.storeState([formData.next])
+        instance.storeCurrentQuestion(formData.next)
+        instance.formVersion = latestVersionOfFormForName(form.name)
+        instance.save()
+        return instance
     }
 
     /**
@@ -317,13 +317,14 @@ class FormDataService {
      * This way we skip forward through the questions that have been answered to only ask relevant questions
      *
      * One side effect is that we set the flash.message on the way through,perhaps we shouldn't
-     * @param application
+     * @param instance
      * @param mergedFormData
      * @return processedFormData up to the next un-asked question
      */
-    def Map processNext(FormInstance application, Map mergedFormData) {
-        String lastQuestion = application.storedCurrentQuestion().last()
-        String ruleName = "Application${lastQuestion}"
+    def Map processNext(FormInstance instance, Map mergedFormData) {
+        String lastQuestion = instance.storedCurrentQuestion().last()
+        FormDefinition definition = FormDefinition.findById(instance.formVersion)
+        String ruleName = definition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
             JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData)
@@ -349,9 +350,9 @@ class FormDataService {
                 }
             }
             //otherwise we check the next lot
-            return processNext(application, processedFormData)
+            return processNext(instance, processedFormData)
         } catch (RulesEngineException e) {
-            log.error "Calling rule $ruleName, application $application.id: $e"
+            log.error "Calling rule $ruleName, instance $instance.id: $e"
             throw e
         }
     }
