@@ -7,7 +7,9 @@ import net.sf.json.JSONObject
 import grails.converters.JSON
 
 /**
- * Controller which manages the display of goodform forms.
+ * Controller which manages the display of goodform forms.  This controller can either be referenced directly
+ * or sublassed in order to provide specific functionality (eg. subclassing the {@link FormController#endForm}
+ * allows applications to provide custom handling of the form once submitted).
  *
  *
  */
@@ -119,7 +121,7 @@ class FormController {
     }
 
     /**
-     *
+     * Invoked when the 'Back' button is selected.
      */
     def back = {
         log.debug "back: $params"
@@ -193,7 +195,7 @@ class FormController {
     }
 
     /**
-     *
+     * TODO is this method required?
      */
     def submit = {
         log.debug "submitForm: $params"

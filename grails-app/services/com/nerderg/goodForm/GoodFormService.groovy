@@ -5,6 +5,10 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 import com.nerderg.goodForm.form.Question
 import com.nerderg.goodForm.form.Form
 
+/**
+ * Handles the rendering of form elements.
+ *
+ */
 class GoodFormService {
 
     static transactional = true

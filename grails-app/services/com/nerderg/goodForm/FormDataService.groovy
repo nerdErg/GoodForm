@@ -9,6 +9,7 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
+ * Handles retrieving and validating form submissions.
  *
  * Copied from GrantFormService
  */

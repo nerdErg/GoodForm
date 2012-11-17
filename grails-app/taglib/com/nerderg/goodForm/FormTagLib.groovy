@@ -4,6 +4,7 @@ import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 
 /**
+ * Provides goodform-specific tags for use in GSP pages.
  *
  */
 class FormTagLib {
