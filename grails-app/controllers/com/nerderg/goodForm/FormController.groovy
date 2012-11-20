@@ -7,9 +7,7 @@ import net.sf.json.JSONObject
 import grails.converters.JSON
 
 /**
- * Controller which manages the display of goodform forms.  This controller can either be referenced directly
- * or sublassed in order to provide specific functionality (eg. subclassing the {@link FormController#endForm}
- * allows applications to provide custom handling of the form once submitted).
+ * Controller which manages the display of goodform forms.
  *
  *
  */
@@ -99,6 +97,7 @@ class FormController {
 
         if (!error) {
             try {
+                
                 Map processedFormData = formDataService.processNext(instance, mergedFormData)
                 log.debug "next processedFormData: ${processedFormData.toString(2)}"
                 //rules engine returns "End" as the next question at the end
@@ -121,7 +120,7 @@ class FormController {
     }
 
     /**
-     * Invoked when the 'Back' button is selected.
+     *
      */
     def back = {
         log.debug "back: $params"
@@ -152,30 +151,13 @@ class FormController {
         Map formData = instance.storedFormData()
         JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData)
         formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
-        updateStoredFormInstance(instance, formData)
+        formDataService.updateStoredFormInstance(instance, formData)
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
         //[instance: instance, formData: formData]
         render(view: '/form/endForm', model: [instance: instance, formData: formData])
     }
 
-    /**
-     *
-     * @param instance
-     * @param processedFormData
-     * @return
-     */
-    private updateStoredFormInstance(FormInstance instance, Map processedFormData) {
-        List state = instance.storedState()
-        def nextInState = state.find { s ->
-            s == processedFormData.next
-        }
-        if (!nextInState) {
-            state.add(processedFormData.next)
-            instance.storeState(state)
-        }
-        instance.storeCurrentQuestion(processedFormData.next)
-        instance.storeFormData(processedFormData)
-    }
+    
 
     /**
      * Displays a read-only view of a form.
@@ -195,7 +177,7 @@ class FormController {
     }
 
     /**
-     * TODO is this method required?
+     *
      */
     def submit = {
         log.debug "submitForm: $params"

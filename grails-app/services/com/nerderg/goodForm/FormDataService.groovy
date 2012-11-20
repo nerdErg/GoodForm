@@ -9,7 +9,6 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
- * Handles retrieving and validating form submissions.
  *
  * Copied from GrantFormService
  */
@@ -168,7 +167,7 @@ class FormDataService {
     }
 
     /**
-     * 
+     *
      * @param formElement
      * @param fieldValue
      * @param error
@@ -336,6 +335,8 @@ class FormDataService {
                 //flash.message = processedFormData[lastQuestion].message
             }
 
+            updateStoredFormInstance(instance, processedFormData)
+
             if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
                 return processedFormData
             }
@@ -357,6 +358,41 @@ class FormDataService {
             throw e
         }
     }
+
+    def updateStoredFormInstance(FormInstance instance, Map processedFormData) {
+
+        List state = instance.storedState()
+        def nextInState = state.find { s ->
+            s == processedFormData.next
+        }
+        if (!nextInState) {
+            state.add(processedFormData.next)
+            instance.storeState(state)
+        }
+        instance.storeCurrentQuestion(processedFormData.next)
+        instance.storeFormData(processedFormData)
+    }
+
+    /**
+     * Remove all the state after the currentQuestion list of questions.
+     * If the current question doesn't exist don't truncate anything
+     * @param state
+     * @param currentQuestion
+     * @return A new truncated list
+     */
+    def List truncateState(List<List> state, List currentQuestion) {
+        List trunkState = []
+        def i = 0
+        List s = state[i]
+        boolean found = false
+        while (i < state.size() && !found) {
+            trunkState.add(s)
+            found = (s == currentQuestion)
+            s = state[++i]
+        }
+        return trunkState
+    }
+
 }
 class FormDataException extends Exception {
     def FormDataException() {
