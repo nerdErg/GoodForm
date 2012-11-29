@@ -13,6 +13,8 @@ import grails.converters.JSON
  */
 class FormController {
 
+    def pdfRenderingService
+
     def formDataService
 
     def rulesEngineService
@@ -42,7 +44,7 @@ class FormController {
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
-            Map formData = rulesEngineService.ask(formName, [loginType: whoIs()])
+            Map formData = rulesEngineService.ask(formName + "_firstQuestion", [loginType: whoIs()])
             FormInstance instance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, instance: instance])
@@ -172,7 +174,11 @@ class FormController {
 
         Map formData = instance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
+        if (params.name) {
+
+        } else {
         return [instance: instance, formData: formData]
+        }
 
     }
 

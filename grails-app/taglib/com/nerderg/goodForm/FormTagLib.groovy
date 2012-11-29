@@ -234,7 +234,7 @@ class FormTagLib {
                     """
             }
         }
-        out << "</ div > "
+        out << "</div>"
     }
 
     private radioButtonElement(value, FormElement e, disabledAttr) {

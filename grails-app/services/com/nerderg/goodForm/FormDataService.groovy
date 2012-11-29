@@ -22,6 +22,20 @@ class FormDataService {
 
     Map<Long, Form> forms = [:]
 
+    Map<String, List<Closure>> validators = createDefaultValidators()
+
+    /**
+     *
+     * @return
+     */
+    Map<String, List<Closure>> createDefaultValidators() {
+        validators = [:]
+        addValidator("*", {formElement, fieldValue -> validateMandatoryField(formElement, fieldValue)})
+        addValidator("*", {formElement, fieldValue -> validateDate(formElement, fieldValue)})
+        addValidator("*", {formElement, fieldValue -> validatePattern(formElement, fieldValue)})
+        return validators
+    }
+
     Form getForm(String formName) {
         return getFormQuestions(latestVersionOfFormForName(formName))
     }
@@ -174,30 +188,22 @@ class FormDataService {
      * @return
      */
     boolean validateField(FormElement formElement, fieldValue, boolean error) {
-        if (formElement.attr.containsKey('required')) {
-            if (fieldValue == null || fieldValue == '') {
-                formElement.attr.error += g.message(code: "goodform.validate.required.field")
-                error = true
-            }
-        }
 
-        if (fieldValue && formElement.attr.containsKey('pattern')) {
-            String pattern
-            String message = g.message(code: "goodform.validate.invalid.pattern")
-            if (formElement.attr.pattern instanceof List) {
-                pattern = formElement.attr.pattern[0]
-                if (formElement.attr.pattern.size() > 1) {
-                    message = formElement.attr.pattern[1]
-                }
-            } else {
-                pattern = formElement.attr.pattern
-            }
-            if (fieldValue && !(fieldValue ==~ pattern)) {
-                formElement.attr.error += message
-                error = true
-            }
+        //iterate over validators
+        List<Closure> validators = getValidatorsForElement(formElement)
+        validators.each {
+            //invoke closure
+            error = error || it(formElement, fieldValue)
         }
+        return error
+    }
 
+    List<Closure> getValidatorsForElement(FormElement formElement) {
+        return validators.findAll{ it.key == formElement.attr || it.key == "*"}.values() as List<Closure>
+    }
+
+    private boolean validateDate(fieldValue, FormElement formElement) {
+        def error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
                 Date d = Date.parse(formElement.attr.date, fieldValue)
@@ -228,30 +234,38 @@ class FormDataService {
 
             }
         }
+        return error
+    }
 
-        if (fieldValue && formElement.attr.containsKey('phone')) {
-            String numbers = fieldValue.replaceAll(/[^0-9\+]/, '')
-            if (numbers.size() < 8) {
-                formElement.attr.error += g.message(code: "goodform.validate.phone.minLength")
+    private boolean validatePattern(fieldValue, FormElement formElement) {
+        def error = false
+        if (fieldValue && formElement.attr.containsKey('pattern')) {
+            String pattern
+            String message = g.message(code: "goodform.validate.invalid.pattern")
+            if (formElement.attr.pattern instanceof List) {
+                pattern = formElement.attr.pattern[0]
+                if (formElement.attr.pattern.size() > 1) {
+                    message = formElement.attr.pattern[1]
+                }
+            } else {
+                pattern = formElement.attr.pattern
+            }
+            if (fieldValue && !(fieldValue ==~ pattern)) {
+                formElement.attr.error += message
                 error = true
             }
-            //TODO this is Australia-specific, can this be factored in as a service?
-//            if (!(numbers =~ /^(\+|02|03|04|07|08|[2-9])/)) {
-//                formElement.attr.error += "The prefix for this phone number looks wrong (e.g. can't be 00xx, 01xx, 05xx, 06xx, 09xx, or 1xxx)"
-//                error = true
-//            }
         }
+        return error
+    }
 
-        //TODO incoporate formValidationService into GoodForms?
-
-        //        if (fieldValue && formElement.attr.containsKey('validate')) {
-        //            if (!formValidationService.validate(formElement.attr.validate, fieldValue)) {
-        //                formElement.attr.error += "The postcode is not valid. Please check it."
-        //                error = true
-        //            }
-        //        }
-
-
+    private boolean validateMandatoryField(FormElement formElement, fieldValue) {
+        def error = false
+        if (formElement.attr.containsKey('required')) {
+            if (fieldValue == null || fieldValue == '') {
+                formElement.attr.error += g.message(code: "goodform.validate.required.field")
+                error = true
+            }
+        }
         return error
     }
 
@@ -391,6 +405,14 @@ class FormDataService {
             s = state[++i]
         }
         return trunkState
+    }
+
+    def addValidator(String fieldName, Closure cli) {
+        if (!validators.get(fieldName)) {
+            validators.put(fieldName, new ArrayList<Closure>())
+        }
+        validators.get(fieldName).add(cli)
+
     }
 
 }

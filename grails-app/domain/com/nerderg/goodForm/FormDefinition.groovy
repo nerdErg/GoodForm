@@ -12,8 +12,6 @@ class FormDefinition {
     String formDefinition
     /**
      * The name of the form.  Must be unique.
-     *
-     * TODO include uniqueness check
      */
     String name
 
@@ -24,6 +22,6 @@ class FormDefinition {
     }
 
     static constraints = {
-
+       name unique: true
     }
 }
