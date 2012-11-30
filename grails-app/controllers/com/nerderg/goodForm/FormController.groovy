@@ -104,7 +104,7 @@ class FormController {
                 }
                 List<Question> current = formDataService.getSubset(processedFormData.next, form)
                 List answered = formDataService.getAnsweredQuestions(formInstance, form)
-                render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, instance: formInstance])
+                render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, formInstance: formInstance])
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
                 flash.message = message(code: "goodform.rules.error", args: [e.message])

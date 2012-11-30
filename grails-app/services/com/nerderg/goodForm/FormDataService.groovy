@@ -208,7 +208,9 @@ class FormDataService {
     }
 
     List<Closure> getValidatorsForElement(FormElement formElement) {
-        return validators.findAll { it.key == formElement.attr || it.key == "*"}.values() as List<Closure>
+        List<Closure> matchingValidators = new ArrayList<Closure>()
+        (validators.findAll { it.key == formElement.attr || it.key == "*"}.values() as List<Closure>).each {matchingValidators.addAll(it)}
+        return matchingValidators
     }
 
     /**
@@ -218,7 +220,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    private boolean validateDate(fieldValue, FormElement formElement) {
+    private boolean validateDate(FormElement formElement, fieldValue) {
         def error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
@@ -260,7 +262,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    private boolean validatePattern(fieldValue, FormElement formElement) {
+    private boolean validatePattern(FormElement formElement, fieldValue) {
         def error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
