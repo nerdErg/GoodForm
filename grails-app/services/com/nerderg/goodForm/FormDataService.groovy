@@ -25,7 +25,7 @@ class FormDataService {
     Map<String, List<Closure>> validators = createDefaultValidators()
 
     /**
-     *
+     * Adds the default validators to the validator list.
      * @return
      */
     Map<String, List<Closure>> createDefaultValidators() {
@@ -173,6 +173,7 @@ class FormDataService {
             }
         } catch (NumberFormatException e) {
             log.error "${e.message} converting $fieldValue to number"
+            //TODO i18n
             formElement.attr.error += "$fieldValue isn't a number."
             error = true
         }
@@ -181,11 +182,12 @@ class FormDataService {
     }
 
     /**
+     * Retrieves and invokes the validators that have been added for the formElement.
      *
      * @param formElement
      * @param fieldValue
      * @param error
-     * @return
+     * @return true if the field contains errors, false if not
      */
     boolean validateField(FormElement formElement, fieldValue, boolean error) {
 
@@ -199,9 +201,16 @@ class FormDataService {
     }
 
     List<Closure> getValidatorsForElement(FormElement formElement) {
-        return validators.findAll{ it.key == formElement.attr || it.key == "*"}.values() as List<Closure>
+        return validators.findAll { it.key == formElement.attr || it.key == "*"}.values() as List<Closure>
     }
 
+    /**
+     * Performs validation of date form elements.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @return
+     */
     private boolean validateDate(fieldValue, FormElement formElement) {
         def error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
@@ -237,6 +246,13 @@ class FormDataService {
         return error
     }
 
+    /**
+     * Validates that a field value matches a defined regex pattern.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @return
+     */
     private boolean validatePattern(fieldValue, FormElement formElement) {
         def error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
@@ -258,13 +274,18 @@ class FormDataService {
         return error
     }
 
+    /**
+     * Validates that a required field is present.
+     *
+     * @param formElement
+     * @param fieldValue
+     * @return
+     */
     private boolean validateMandatoryField(FormElement formElement, fieldValue) {
         def error = false
-        if (formElement.attr.containsKey('required')) {
-            if (fieldValue == null || fieldValue == '') {
-                formElement.attr.error += g.message(code: "goodform.validate.required.field")
-                error = true
-            }
+        if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
+            formElement.attr.error += g.message(code: "goodform.validate.required.field")
+            error = true
         }
         return error
     }
@@ -407,6 +428,13 @@ class FormDataService {
         return trunkState
     }
 
+    /**
+     * Adds the closure to the validator map.
+     *
+     * @param fieldName
+     * @param cli
+     * @return
+     */
     def addValidator(String fieldName, Closure cli) {
         if (!validators.get(fieldName)) {
             validators.put(fieldName, new ArrayList<Closure>())

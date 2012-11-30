@@ -1,13 +1,23 @@
 package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.FormElement
+import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
+ * Contains custom validators for form elements.
  *
+ * Projects using Goodforms can add a custom validation service by executing the following as part of the Bootstrap:
+ *
+ * <pre>
+ * def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
+ * ctx.formDataService.addValidator("someField", {formElement, fieldValue -> ctx.customValidationService.validateSomeField(formElement, fieldValue)})
+ * </pre>
  */
 class FormValidationService {
 
     def addressWranglingService
+
+    def g = new ValidationTagLib()
 
     static transactional = true
 
@@ -23,8 +33,7 @@ class FormValidationService {
         def error = false
         if (fieldValue && formElement.attr.containsKey('validate')) {
             if (!validate(formElement.attr.validate, fieldValue)) {
-                //TODO i18n
-                formElement.attr.error += "The postcode is not valid. Please check it."
+                formElement.attr.error += g.message(code: "goodform.validate.postcode.invalid")
                 error = true
             }
         }
@@ -45,9 +54,9 @@ class FormValidationService {
                 formElement.attr.error += g.message(code: "goodform.validate.phone.minLength")
                 error = true
             }
+            //TODO store phone prefix in properties somewhere?
             if (!(numbers =~ /^(\+|02|03|04|07|08|[2-9])/)) {
-                //TODO i18n
-                formElement.attr.error += "The prefix for this phone number looks wrong (e.g. can't be 00xx, 01xx, 05xx, 06xx, 09xx, or 1xxx)"
+                formElement.attr.error += g.message(code: "goodform.validate.phone.invalid")
                 error = true
             }
         }

@@ -4,6 +4,8 @@ import javax.naming.Context
 import javax.naming.InitialContext
 
 /**
+ * Validates the postcode, language and country field against a pre-defined CSV file.
+ *
  * needs the pc-full csv file from here http://auspost.com.au/products-and-services/download-postcode-data.html
  * modified to remove all columns after the state and to make it tab separated
  */
@@ -24,7 +26,7 @@ class AddressWranglingService {
             String dataDirectory = envContext.lookup("dataDirectory")
             if (dataDirectory) {
                 println "Overriding data directory from context env (e.g. tomcat context.xml): $dataDirectory"
-                grailsApplication.config.egrants.data.directory = dataDirectory
+                grailsApplication.config.goodform.data.directory = dataDirectory
             }
         } catch (e) {
             //expected if context not set
@@ -45,7 +47,7 @@ class AddressWranglingService {
         }
         Map<Integer, Set<String>> subpc = [:]
         Map<String, Set<Integer>> statepc = [:]
-        String dataDir = grailsApplication.config.egrants.data.directory
+        String dataDir = grailsApplication.config.goodform.data.directory
         File postcodeFile = new File(dataDir, 'postcodes.csv')
         postcodeFile.eachLine { line ->
             String[] fields = line.split('\t')
@@ -71,7 +73,7 @@ class AddressWranglingService {
             return countries
         }
         Set<String> country = []
-        String dataDir = grailsApplication.config.egrants.data.directory
+        String dataDir = grailsApplication.config.goodform.data.directory
         File countryFile = new File(dataDir, 'countries.csv')
         countryFile.eachLine { line ->
             String[] fields = line.split('\t')
@@ -86,7 +88,7 @@ class AddressWranglingService {
             return languages
         }
         Set<String> lang = []
-        String dataDir = grailsApplication.config.egrants.data.directory
+        String dataDir = grailsApplication.config.goodform.data.directory
         File countryFile = new File(dataDir, 'languages.txt')
         countryFile.eachLine { line ->
             lang.add(line.toUpperCase())
