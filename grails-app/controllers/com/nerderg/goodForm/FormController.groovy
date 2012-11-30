@@ -17,6 +17,8 @@ class FormController {
 
     def rulesEngineService
 
+    def pdfRenderingService
+
     def applicationService
 
     def index = {}
@@ -176,24 +178,4 @@ class FormController {
 
     }
 
-    /**
-     *
-     */
-    def submit = {
-        log.debug "submitForm: $params"
-        FormInstance formInstance = formDataService.checkInstance(params.id as Long)
-        if (!formInstance) {
-            flash.message = message(code:"goodform.form.invalid", args: [params.id])
-            return redirect(action: 'apply')
-        }
-
-        Map result = applicationService.submitFormInstance(formInstance)
-        if (result.errors.isEmpty()) {
-            flash.message = "Form Instance submitted"
-            return redirect(action: 'apply')
-        } else {
-            flash.message = "Form Instance had errors $result.errors"
-            return redirect(action: 'apply')
-        }
-    }
 }
