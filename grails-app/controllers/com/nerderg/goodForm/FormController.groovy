@@ -49,7 +49,7 @@ class FormController {
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
         } catch (RulesEngineException e) {
-            flash.message = message(code:  "goodform.rules.error", args: [e.message])
+            flash.message = message(code: "goodform.rules.error", args: [e.message])
             return redirect(action: 'index')
         }
     }
@@ -72,7 +72,7 @@ class FormController {
         log.debug "next: $params"
         FormInstance formInstance = formDataService.checkInstance(params.instanceId as Long)
         if (!formInstance) {
-            flash.message = message(code:"goodform.form.invalid", args: [params.instanceId])
+            flash.message = message(code: "goodform.form.invalid", args: [params.instanceId])
             return redirect(action: 'apply')
         }
 
@@ -111,7 +111,7 @@ class FormController {
                 render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, instance: formInstance])
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
-                flash.message = message(code:"goodform.rules.error", args: [e.message])
+                flash.message = message(code: "goodform.rules.error", args: [e.message])
                 return redirect(action: 'apply')
             }
         } else {
@@ -128,7 +128,7 @@ class FormController {
         log.debug "back: $params"
         FormInstance formInstance = formDataService.checkInstance(params.id as Long)
         if (!formInstance) {
-            flash.message = message(code:"goodform.form.invalid", args: [params.id])
+            flash.message = message(code: "goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
 
@@ -147,7 +147,7 @@ class FormController {
         log.debug "end: $params"
         FormInstance formInstance = formDataService.checkInstance(params.id as Long)
         if (!formInstance) {
-            flash.message = message(code:"goodform.form.invalid", args: [params.id])
+            flash.message = message(code: "goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
         Map formData = formInstance.storedFormData()
@@ -159,8 +159,6 @@ class FormController {
         render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
     }
 
-
-
     /**
      * Displays a read-only view of a form.
      */
@@ -168,13 +166,18 @@ class FormController {
         log.debug "view: $params"
         FormInstance formInstance = formDataService.checkInstance(params.id as Long)
         if (!formInstance) {
-            flash.message = message(code:"goodform.form.invalid", args: [params.id])
+            flash.message = message(code: "goodform.form.invalid", args: [params.id])
             return redirect(action: 'apply')
         }
 
         Map formData = formInstance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
-        return [formInstance: formInstance, formData: formData]
+        if (params.name) {
+            //TODO restore/create a generic template to be used for PDF rendering
+            return renderPdf([template: '/form/formView', model: [formInstance: formInstance, formData: formData]])
+        } else {
+            return [formInstance: formInstance, formData: formData]
+        }
 
     }
 
