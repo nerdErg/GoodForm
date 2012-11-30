@@ -17,6 +17,7 @@ class FormInstance {
     String userId
     String currentQuestion
     Long formVersion
+    Long formDefinitionId
     Date lastUpdated
 
     List storedState() {
@@ -54,5 +55,10 @@ class FormInstance {
         userId(maxSize: 40)
         currentQuestion(maxSize: 200)
         lastUpdated(nullable: true)
+    }
+
+    FormDefinition getFormDefinition() {
+        //find FormDefinition for id
+        FormDefinition.get(formDefinitionId)
     }
 }

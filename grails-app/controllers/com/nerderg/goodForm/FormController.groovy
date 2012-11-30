@@ -19,10 +19,6 @@ class FormController {
 
     def pdfRenderingService
 
-    def applicationService
-
-    def index = {}
-
     /**
      * Creates a new form instance.
      *
@@ -77,7 +73,7 @@ class FormController {
         }
 
         Map currentFormData = formDataService.cleanUpStateParams(params)
-        Form form = formDataService.getFormQuestions(formInstance.formVersion)
+        Form form = formDataService.getFormQuestions(formInstance.getFormDefinition())
         List asked = formDataService.getSubset(formInstance.storedCurrentQuestion(), form)
 
         //todo re look at this merged Data as we should merge after validate? Also multiple calls to storedFormData
@@ -173,7 +169,6 @@ class FormController {
         Map formData = formInstance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
         if (params.name) {
-            //TODO restore/create a generic template to be used for PDF rendering
             return renderPdf([template: '/form/formView', model: [formInstance: formInstance, formData: formData]])
         } else {
             return [formInstance: formInstance, formData: formData]

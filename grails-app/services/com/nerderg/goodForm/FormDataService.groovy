@@ -69,6 +69,7 @@ class FormDataService {
         Form form = GoodFormService.compileForm(formDefinition.formDefinition)
         form.version = formDefinition.version
         form.name = formDefinition.name
+        form.formDefinitionId = formDefinition.id
         return form
 
     }
@@ -320,11 +321,12 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), form: form)
+        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
         instance.storeFormData(formData)
         instance.storeState([formData.next])
         instance.storeCurrentQuestion(formData.next)
-        instance.formVersion = formDefinitionForName(form.name).version
+        instance.formVersion = form.version
+        instance.formDefinitionId = form.formDefinitionId
         instance.save()
         return instance
     }

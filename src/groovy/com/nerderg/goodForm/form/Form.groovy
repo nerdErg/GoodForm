@@ -15,6 +15,7 @@ class Form {
     def parent = null
     List<Question>  questions = []
     Map<String, Closure> updates = [:]
+    Long formDefinitionId
 
     Question getAt(String index) {
         Question q = questions.find{

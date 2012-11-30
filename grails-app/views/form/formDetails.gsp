@@ -10,7 +10,7 @@
 
 <div class="roundbox">
 <g:form action="next" enctype="multipart/form-data">
-        <input type="hidden" name="instanceId" value="${instance.id}"/>
+        <input type="hidden" name="instanceId" value="${formInstance.id}"/>
         <g:each in="${questions}" var="question" status="order">
             <input type="hidden" name="${question.ref}.order" value="${order}"/>
             <form:element element="${question.formElement}" store="${formData}"/>
