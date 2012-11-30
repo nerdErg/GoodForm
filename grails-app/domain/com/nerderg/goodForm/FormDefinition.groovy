@@ -15,6 +15,11 @@ class FormDefinition {
      */
     String name
 
+    /**
+     * Incrementing integer that represents the version number of the underlying form.
+     */
+    int formVersion
+
     static mapping = {
         if (GrailsUtil.getEnvironment() != 'test') {
             formDefinition column: "formDefinition", sqlType: "text"

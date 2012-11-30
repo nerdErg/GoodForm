@@ -37,34 +37,40 @@ class FormDataService {
     }
 
     Form getForm(String formName) {
-        return getFormQuestions(latestVersionOfFormForName(formName))
+        return getFormQuestions(formDefinitionForName(formName))
     }
 
     /**
      *
-     * @return
+     * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
-    Long latestVersionOfFormForName(String formName) {
-        FormDefinition.executeQuery("select max(id) from FormDefinition where name = ?", [formName]).first() as Long
+    FormDefinition formDefinitionForName(String formName) {
+        FormDefinition.executeQuery(
+                """select f from FormDefinition f
+                   where name = ?
+                   and f.formVersion =
+                         (select max(ff.formVersion)
+                         from FormDefinition ff
+                         where ff.id = f.id)
+                         """, [formName]).first()
+
     }
 
-    Form getFormQuestions(Long version) {
-        if (!forms[version]) {
-            Form form = createForm(version)
-            forms[version] = form
+    Form getFormQuestions(FormDefinition formDefinition) {
+        String key = formDefinition.name + formDefinition.formVersion
+        if (!forms[key]) {
+            Form form = createForm(formDefinition)
+            forms[key] = form
         }
-        return forms[version]
+        return forms[key]
     }
 
-    Form createForm(Long version) {
-        FormDefinition formDefinition = FormDefinition.get(version)
-        if (formDefinition) {
-            Form form = GoodFormService.compileForm(formDefinition.formDefinition)
-            form.version = version
-            form.name = formDefinition.name
-            return form
-        }
-        return null
+    Form createForm(FormDefinition formDefinition) {
+        Form form = GoodFormService.compileForm(formDefinition.formDefinition)
+        form.version = formDefinition.version
+        form.name = formDefinition.name
+        return form
+
     }
 
     FormInstance checkInstance(Long id) {
@@ -318,7 +324,7 @@ class FormDataService {
         instance.storeFormData(formData)
         instance.storeState([formData.next])
         instance.storeCurrentQuestion(formData.next)
-        instance.formVersion = latestVersionOfFormForName(form.name)
+        instance.formVersion = formDefinitionForName(form.name).version
         instance.save()
         return instance
     }
