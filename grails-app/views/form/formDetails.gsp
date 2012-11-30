@@ -21,7 +21,7 @@
 </g:form>
 </div>
 
-<form:answered instance="${instance}" store="${formData}"/>
+<form:answered formInstance="${formInstance}" store="${formData}"/>
 
 </body>
 </html>

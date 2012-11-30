@@ -7,6 +7,6 @@
 
 <body>
 <h1><g:message code="goodform.view.form"/></h1>
-<form:displayText instance="${instance}" store="${formData}" readOnly="true"/>
+<form:displayText formInstance="${formInstance}" store="${formData}" readOnly="true"/>
 </body>
 </html>
