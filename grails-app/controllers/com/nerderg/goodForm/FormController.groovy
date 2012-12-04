@@ -89,7 +89,7 @@ class FormController {
         boolean error = false
         asked.each { Question question ->
             //note the or error here makes sure error isn't reset whilst checking all form elements (so don't move it in front :-)
-            error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, formInstance) || error
+            error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, formInstance, request) || error
         }
         formInstance.storeFormData(mergedFormData)
 

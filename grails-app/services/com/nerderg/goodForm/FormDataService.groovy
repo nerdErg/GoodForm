@@ -2,11 +2,13 @@ package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import java.text.ParseException
 import com.nerderg.goodForm.form.Question
 import net.sf.json.JSONObject
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
+import org.codehaus.groovy.grails.commons.ConfigurationHolder
+import org.codehaus.groovy.grails.  plugins.web.taglib.ValidationTagLib
+import org.codehaus.groovy.grails.web.util.WebUtils
+
+import java.text.ParseException
 
 /**
  *
@@ -67,7 +69,7 @@ class FormDataService {
 
     Form createForm(FormDefinition formDefinition) {
         Form form = GoodFormService.compileForm(formDefinition.formDefinition)
-        form.version = formDefinition.version
+        form.version = formDefinition.formVersion
         form.name = formDefinition.name
         form.formDefinitionId = formDefinition.id
         return form
@@ -131,7 +133,8 @@ class FormDataService {
         //get attached file and store it, save the reference to it in the formData
         if (formElement.attr.containsKey('attachment')) {
             //get the uploaded file and store somewhere
-            def f = request.getFile(formElement.attr.name)
+            def webUtils = WebUtils.retrieveGrailsWebRequest()
+            def f = webUtils.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
                 String basedir = ConfigurationHolder.config.uploaded.file.location.toString() + 'applications/' + instance.id
                 File location = new File(basedir)
