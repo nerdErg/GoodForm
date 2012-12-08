@@ -5,9 +5,8 @@ import com.nerderg.goodForm.form.FormElement
 import com.nerderg.goodForm.form.Question
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
-import org.codehaus.groovy.grails.  plugins.web.taglib.ValidationTagLib
+import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.codehaus.groovy.grails.web.util.WebUtils
-
 import java.text.ParseException
 
 /**
@@ -24,18 +23,108 @@ class FormDataService {
 
     Map<Long, Form> forms = [:]
 
-    Map<String, List<Closure>> validators = createDefaultValidators()
+    /**
+     * Performs validation of date form elements.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @return
+     */
+    def validateDate = {FormElement formElement, fieldValue ->
+        def error = false
+        if (fieldValue && formElement.attr.containsKey('date')) {
+            try {
+                Date d = Date.parse(formElement.attr.date, fieldValue)
+                if (formElement.attr.max) {
+                    if (formElement.attr.max == 'today') {
+                        if (d.time > System.currentTimeMillis()) {
+                            formElement.attr.error += g.message(code: "goodform.validate.date.future")
+                            error = true
+                        }
+                    } else {
+                        Date max = Date.parse(formElement.attr.date, formElement.attr.max)
+                        if (d.time > max.time) {
+                            formElement.attr.error += g.message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
+                            error = true
+                        }
+                    }
+                }
+                if (formElement.attr.min) {
+                    Date min = Date.parse(formElement.attr.date, formElement.attr.min)
+                    if (d.time < min.time) {
+                        formElement.attr.error += g.message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
+                        error = true
+                    }
+                }
+            } catch (ParseException e) {
+                formElement.attr.error += g.message(code: "goodform.validate.date.invalid")
+                error = true
+
+            }
+        }
+        return error
+    }
+
+    /**
+     * Validates that a field value matches a defined regex pattern.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @return
+     */
+    def validatePattern = {FormElement formElement, fieldValue ->
+        def error = false
+        if (fieldValue && formElement.attr.containsKey('pattern')) {
+            String pattern
+            String message = g.message(code: "goodform.validate.invalid.pattern")
+            if (formElement.attr.pattern instanceof List) {
+                pattern = formElement.attr.pattern[0]
+                if (formElement.attr.pattern.size() > 1) {
+                    message = formElement.attr.pattern[1]
+                }
+            } else {
+                pattern = formElement.attr.pattern
+            }
+            if (fieldValue && !(fieldValue ==~ pattern)) {
+                formElement.attr.error += message
+                error = true
+            }
+        }
+        return error
+    }
+
+    /**
+     * Validates that a required field is present.
+     *
+     * @param formElement
+     * @param fieldValue
+     * @return
+     */
+    def validateMandatoryField = {FormElement formElement, fieldValue ->
+        def error = false
+        if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
+            formElement.attr.error += g.message(code: "goodform.validate.required.field")
+            error = true
+        }
+        return error
+    }
+
+    List<Closure> validators = createDefaultValidators()
 
     /**
      * Adds the default validators to the validator list.
      * @return
      */
-    Map<String, List<Closure>> createDefaultValidators() {
-        validators = [:]
-        addValidator("*", {formElement, fieldValue -> validateMandatoryField(formElement, fieldValue)})
-        addValidator("*", {formElement, fieldValue -> validateDate(formElement, fieldValue)})
-        addValidator("*", {formElement, fieldValue -> validatePattern(formElement, fieldValue)})
+    List<Closure> createDefaultValidators() {
+        validators = []
+        addValidator(validateMandatoryField)
+        addValidator(validateDate)
+        addValidator(validatePattern)
         return validators
+    }
+
+    def addValidator(Closure closure) {
+        validators.add(closure)
     }
 
     Form getForm(String formName) {
@@ -47,15 +136,7 @@ class FormDataService {
      * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
     FormDefinition formDefinitionForName(String formName) {
-        FormDefinition.executeQuery(
-                """select f from FormDefinition f
-                   where name = ?
-                   and f.formVersion =
-                         (select max(ff.formVersion)
-                         from FormDefinition ff
-                         where ff.id = f.id)
-                         """, [formName]).first()
-
+        FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion", [formName]).first()
     }
 
     Form getFormQuestions(FormDefinition formDefinition) {
@@ -133,8 +214,8 @@ class FormDataService {
         //get attached file and store it, save the reference to it in the formData
         if (formElement.attr.containsKey('attachment')) {
             //get the uploaded file and store somewhere
-            def webUtils = WebUtils.retrieveGrailsWebRequest()
-            def f = webUtils.getCurrentRequest().getFile(formElement.attr.name)
+            def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
+            def f = grailsWebRequest.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
                 String basedir = ConfigurationHolder.config.uploaded.file.location.toString() + 'applications/' + instance.id
                 File location = new File(basedir)
@@ -202,102 +283,9 @@ class FormDataService {
     boolean validateField(FormElement formElement, fieldValue, boolean error) {
 
         //iterate over validators
-        List<Closure> validators = getValidatorsForElement(formElement)
         validators.each {
             //invoke closure
-            error = error || it(formElement, fieldValue)
-        }
-        return error
-    }
-
-    List<Closure> getValidatorsForElement(FormElement formElement) {
-        List<Closure> matchingValidators = new ArrayList<Closure>()
-        (validators.findAll { it.key == formElement.attr || it.key == "*"}.values() as List<Closure>).each {matchingValidators.addAll(it)}
-        return matchingValidators
-    }
-
-    /**
-     * Performs validation of date form elements.
-     *
-     * @param fieldValue
-     * @param formElement
-     * @return
-     */
-    private boolean validateDate(FormElement formElement, fieldValue) {
-        def error = false
-        if (fieldValue && formElement.attr.containsKey('date')) {
-            try {
-                Date d = Date.parse(formElement.attr.date, fieldValue)
-                if (formElement.attr.max) {
-                    if (formElement.attr.max == 'today') {
-                        if (d.time > System.currentTimeMillis()) {
-                            formElement.attr.error += g.message(code: "goodform.validate.date.future")
-                            error = true
-                        }
-                    } else {
-                        Date max = Date.parse(formElement.attr.date, formElement.attr.max)
-                        if (d.time > max.time) {
-                            formElement.attr.error += g.message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
-                            error = true
-                        }
-                    }
-                }
-                if (formElement.attr.min) {
-                    Date min = Date.parse(formElement.attr.date, formElement.attr.min)
-                    if (d.time < min.time) {
-                        formElement.attr.error += g.message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
-                        error = true
-                    }
-                }
-            } catch (ParseException e) {
-                formElement.attr.error += g.message(code: "goodform.validate.date.invalid")
-                error = true
-
-            }
-        }
-        return error
-    }
-
-    /**
-     * Validates that a field value matches a defined regex pattern.
-     *
-     * @param fieldValue
-     * @param formElement
-     * @return
-     */
-    private boolean validatePattern(FormElement formElement, fieldValue) {
-        def error = false
-        if (fieldValue && formElement.attr.containsKey('pattern')) {
-            String pattern
-            String message = g.message(code: "goodform.validate.invalid.pattern")
-            if (formElement.attr.pattern instanceof List) {
-                pattern = formElement.attr.pattern[0]
-                if (formElement.attr.pattern.size() > 1) {
-                    message = formElement.attr.pattern[1]
-                }
-            } else {
-                pattern = formElement.attr.pattern
-            }
-            if (fieldValue && !(fieldValue ==~ pattern)) {
-                formElement.attr.error += message
-                error = true
-            }
-        }
-        return error
-    }
-
-    /**
-     * Validates that a required field is present.
-     *
-     * @param formElement
-     * @param fieldValue
-     * @return
-     */
-    private boolean validateMandatoryField(FormElement formElement, fieldValue) {
-        def error = false
-        if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
-            formElement.attr.error += g.message(code: "goodform.validate.required.field")
-            error = true
+            error = it(formElement, fieldValue) || error
         }
         return error
     }
@@ -441,20 +429,6 @@ class FormDataService {
         return trunkState
     }
 
-    /**
-     * Adds the closure to the validator map.
-     *
-     * @param fieldName
-     * @param cli
-     * @return
-     */
-    def addValidator(String fieldName, Closure cli) {
-        if (!validators.get(fieldName)) {
-            validators.put(fieldName, new ArrayList<Closure>())
-        }
-        validators.get(fieldName).add(cli)
-
-    }
 
 }
 class FormDataException extends Exception {

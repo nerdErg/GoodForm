@@ -10,7 +10,7 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
  *
  * <pre>
  * def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
- * ctx.formDataService.addValidator("someField", {formElement, fieldValue -> ctx.customValidationService.validateSomeField(formElement, fieldValue)})
+ * ctx.formDataService.addValidator({formElement, fieldValue -> ctx.customValidationService.validateSomeField(formElement, fieldValue)})
  * </pre>
  */
 class FormValidationService {
@@ -29,9 +29,9 @@ class FormValidationService {
         return addressWranglingService.isValidPostcode(postcode)
     }
 
-    def validatePostcode(FormElement formElement, String fieldValue) {
+    def validatePostcode = {FormElement formElement, String fieldValue ->
         def error = false
-        if (fieldValue && formElement.attr.containsKey('validate')) {
+        if (fieldValue && formElement.attr.containsKey('postcode')) {
             if (!validate(formElement.attr.validate, fieldValue)) {
                 formElement.attr.error += g.message(code: "goodform.validate.postcode.invalid")
                 error = true
@@ -46,7 +46,7 @@ class FormValidationService {
      * @param fieldValue
      * @return
      */
-    def validatePhone(FormElement formElement, String fieldValue) {
+    def validatePhone = {FormElement formElement, String fieldValue ->
         def error = false
         if (fieldValue && formElement.attr.containsKey('phone')) {
             String numbers = fieldValue.replaceAll(/[^0-9\+]/, '')

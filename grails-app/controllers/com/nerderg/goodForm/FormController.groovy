@@ -151,7 +151,6 @@ class FormController {
         formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
         formDataService.updateStoredFormInstance(formInstance, formData)
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
-        //[formInstance: formInstance, formData: formData]
         render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
     }
 
