@@ -285,7 +285,7 @@ class FormDataService {
         //iterate over validators
         validators.each {
             //invoke closure
-            error = it(formElement, fieldValue) || error
+            error = it.call(formElement, fieldValue) || error
         }
         return error
     }
