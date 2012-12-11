@@ -31,7 +31,7 @@ class FormValidationService {
 
     def validatePostcode = {FormElement formElement, String fieldValue ->
         def error = false
-        if (fieldValue && formElement.attr.containsKey('postcode')) {
+        if (fieldValue && formElement.attr.containsKey('validate')) {
             if (!validate(formElement.attr.validate, fieldValue)) {
                 formElement.attr.error += g.message(code: "goodform.validate.postcode.invalid")
                 error = true

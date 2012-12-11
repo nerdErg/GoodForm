@@ -109,19 +109,7 @@ class FormDataService {
         return error
     }
 
-    List<Closure> validators = createDefaultValidators()
-
-    /**
-     * Adds the default validators to the validator list.
-     * @return
-     */
-    List<Closure> createDefaultValidators() {
-        validators = []
-        addValidator(validateMandatoryField)
-        addValidator(validateDate)
-        addValidator(validatePattern)
-        return validators
-    }
+    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern]
 
     def addValidator(Closure closure) {
         validators.add(closure)
@@ -136,7 +124,7 @@ class FormDataService {
      * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
     FormDefinition formDefinitionForName(String formName) {
-        FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion", [formName]).first()
+        FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion desc", [formName]).first()
     }
 
     Form getFormQuestions(FormDefinition formDefinition) {
