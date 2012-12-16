@@ -1,8 +1,8 @@
-package com.nerderg.taglib
+package com.nerderg.goodForm
 
 import grails.test.*
 
-class HelpTagLibTests extends TagLibUnitTestCase {
+class FormTagLibTests extends TagLibUnitTestCase {
     protected void setUp() {
         super.setUp()
     }
@@ -11,7 +11,7 @@ class HelpTagLibTests extends TagLibUnitTestCase {
         super.tearDown()
     }
 
-    void testSomething() {
+    void testFilterName() {
 
     }
 }

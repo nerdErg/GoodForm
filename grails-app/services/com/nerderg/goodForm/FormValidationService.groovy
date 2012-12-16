@@ -4,7 +4,8 @@ import com.nerderg.goodForm.form.FormElement
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
- * Contains custom validators for form elements.
+ * Contains custom validators for form elements. The validators included in this class validate postcodes and phone numbers
+ * conform to Australian standards.
  *
  * Projects using Goodforms can add a custom validation service by executing the following as part of the Bootstrap:
  *
@@ -21,34 +22,42 @@ class FormValidationService {
 
     static transactional = true
 
-    def validate(String validationName, String fieldValue) {
-        "$validationName"(fieldValue)
+    def hasError(FormElement formElement, String fieldValue) {
+        def validationName = formElement.attr.validate
+        return "$validationName"(formElement, fieldValue)
     }
 
-    def postcode(postcode) {
-        return addressWranglingService.isValidPostcode(postcode)
+    /**
+     * Invokes the addressWranglingService to determine if a postcode is valid.
+     * @param postcode
+     * @return true if the postcode field contains an error, false if it is valid
+     */
+    def postcode(FormElement formElement, String postcode) {
+        return !addressWranglingService.isValidPostcode(postcode)
     }
 
-    def validatePostcode = {FormElement formElement, String fieldValue ->
+    /**
+     * Invokes the validation method corresponding the the 'validate' attribute.
+     */
+    def customValidation = {FormElement formElement, String fieldValue ->
         def error = false
-        if (fieldValue && formElement.attr.containsKey('validate')) {
-            if (!validate(formElement.attr.validate, fieldValue)) {
-                formElement.attr.error += g.message(code: "goodform.validate.postcode.invalid")
-                error = true
-            }
+        if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
+            formElement.attr.error += g.message(code: "goodform.validate." + formElement.attr.validate + ".invalid")
+            error = true
         }
         return error
     }
 
     /**
+     * Validates that a phone number conforms to Australian formatting standards.
      *
      * @param formElement
      * @param fieldValue
-     * @return
+     * @return true if the phone number field contains an error, false if it is valid
      */
-    def validatePhone = {FormElement formElement, String fieldValue ->
+    def phone(FormElement formElement, String fieldValue) {
         def error = false
-        if (fieldValue && formElement.attr.containsKey('phone')) {
+        if (fieldValue) {
             String numbers = fieldValue.replaceAll(/[^0-9\+]/, '')
             if (numbers.size() < 8) {
                 formElement.attr.error += g.message(code: "goodform.validate.phone.minLength")
