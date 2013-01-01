@@ -7,8 +7,7 @@ import net.sf.json.JSONObject
 import grails.converters.JSON
 
 /**
- * Controller which manages the display of goodform forms.
- *
+ * Controller which manages the display of goodform forms. This class can be subclassed if custom behaviour is required.
  *
  */
 class FormController {
@@ -40,7 +39,7 @@ class FormController {
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
-            Map formData = rulesEngineService.ask(formName, [loginType: whoIs()])
+            Map formData = rulesEngineService.ask(formName, [:])
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
@@ -51,17 +50,7 @@ class FormController {
     }
 
     /**
-     * TODO supply meaningful data
-     * @return
-     */
-    private String whoIs() {
-        return 'all'
-    }
-
-    /**
      * Invoked when the 'Submit' button is clicked on a form.
-     *
-     * TODO this method needs a refactor, can we move some/most of the logic into the service?
      *
      */
     def next = {
@@ -118,7 +107,7 @@ class FormController {
     }
 
     /**
-     *
+     *  Invoked when a user clicks the 'Back' button on a multi-page form.
      */
     def back = {
         log.debug "back: $params"
@@ -172,7 +161,5 @@ class FormController {
         } else {
             return [formInstance: formInstance, formData: formData]
         }
-
     }
-
 }

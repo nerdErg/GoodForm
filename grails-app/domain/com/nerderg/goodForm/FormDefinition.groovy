@@ -3,9 +3,7 @@ package com.nerderg.goodForm
 import grails.util.GrailsUtil
 
 /**
- * Persists the form definition in the database.
- *
- * Copied from GrantForm
+ * Handles persisting the form definition in the database.
  */
 class FormDefinition {
 
