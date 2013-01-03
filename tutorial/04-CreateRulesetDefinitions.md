@@ -1,4 +1,4 @@
-* Once the master rule list has been created, you can then create your ruleset files, which will be installed and made avaiable
+Once the master rule definition has been created, you can then create your ruleset files, which will be installed and made avaiable
 from the OneRing instance we setup previously.
 
 * There needs to be at least one ruleset file, whose name is 'your-form_FirstQuestion.ruleset', where 'your-form' is the

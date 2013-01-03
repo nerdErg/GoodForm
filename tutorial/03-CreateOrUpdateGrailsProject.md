@@ -1,18 +1,24 @@
-* If you don't already have a Grails project, you can create one by running
+We now need to install the goodform plugin within a Grails project.
 
-    grails create-app goodform_example
+If you don't already have a Grails project, you can create one by running:
 
-This will create a goodform_example directory containing the default Grails source files.
+    grails create-app goodform_tutorial
 
-* We now need to install the GoodForm Grails plugin within the Grails project.  To do this, change to the goodform_example directory and run the following:
+For the purposes of this tutorial, we are going to keep refering to the `goodform_tutorial` Grails project.
 
-    grails install-plugin goodform
+This will create a `goodform_tutorial` directory containing the default Grails source files.
 
-* Once the plugin has been installed, we can now include the form definition.  As we want the form definition to be present
-every time the application is run, we include it in the BootStrap.groovy file
+We now need to install the GoodForm Grails plugin within the Grails project.  To do this, change to the `goodform_tutorial` directory and run the following:
+
+    grails install-plugin goodform 1.0.0-SNAPSHOT
+
+#TODO change version number
+
+Once the plugin has been installed, we can now include the form definition.  As we want the form definition to be present
+every time the application is run, we include it in the `grails-app/conf/BootStrap.groovy` file.
 
 The form definition should include the complete set of questions you wish to be included in your form.  We can control the
-visibility of the questions through the rulesets, which will be covered later
+visibility of the questions through the rulesets, which will be covered later.
 
 ```groovy
  class BootStrap {
@@ -40,20 +46,25 @@ visibility of the questions through the rulesets, which will be covered later
                 formDefinition.save()
             }
  }
+```
 
- The goodform_example source code includes two sample form definitions defined in the BootStrap.groovy file.  The first
- form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is
- more complex, and is intedend to be displayed over several pages.
+This is a very simple form with just one question ('what is your name?').  However, the form does demonstrate some key
+features of Goodform.
 
- * We will also need to create a controller within our example grails application which will handle web requests for the form.
+The [goodform example]() source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
+form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is
+more complex, and is intended to be displayed over several pages.
+
+Now that we have populated our FormDefinition, we will also create a controller within our example grails application which
+will handle web requests for the form.
 
 To do this, run the following command:
 
     grails create-controller ContactDetails
 
-This will create a ContactDetailsController class within the goodform-example/grails-app/controllers directory.
+This will create a `ContactDetailsController` class within the `goodform-example/grails-app/controllers` directory.
 
-Update this class to extend from the com.nerderg.goodForm.FormController class, eg.
+Update this class to extend from the `com.nerderg.goodForm.FormController` class, eg.
 
 ```groovy
 import com.nerderg.goodForm.FormController
@@ -62,3 +73,7 @@ class ContactDetailsController extends FormController {
 
 }
 ```
+#TODO forms can be served up without the controller, we just need to reference localhost:8080/goodform_tutorial/form...
+#However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
+#send an email/generate a PDF), which we will cover later.
+
