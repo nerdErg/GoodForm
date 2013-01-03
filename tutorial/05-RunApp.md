@@ -13,4 +13,5 @@ Once the OneRing process is running, navigate to the goodform_example directory 
 
 We can now view to the form within the controller we created earlier.
 
-Navigate to
+Navigate to http://localhost:8080/goodform-example/contactDetails/createForm?formName=ContactDetails
+
