@@ -14,14 +14,16 @@ We now need to install the GoodForm Grails plugin within the Grails project.  To
 
 #TODO change version number
 
-Once the plugin has been installed, we can now include the form definition.  As we want the form definition to be present
+Once the plugin has been installed, we can now create the form definition.  As we want the form definition to be present
 every time the application is run, we include it in the `grails-app/conf/BootStrap.groovy` file.
 
 The form definition should include the complete set of questions you wish to be included in your form.  We can control the
 visibility of the questions through the rulesets, which will be covered later.
 
 ```groovy
- class BootStrap {
+import com.nerderg.goodForm.FormDefinition
+
+class BootStrap {
 
         def init = { servletContext ->
 
@@ -45,11 +47,17 @@ visibility of the questions through the rulesets, which will be covered later.
                 FormDefinition formDefinition = new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1)
                 formDefinition.save()
             }
- }
+}
 ```
 
 This is a very simple form with just one question ('what is your name?').  However, the form does demonstrate some key
 features of Goodform.
+
+#Sub-questions
+#Field types
+#Hints
+#Validation - field length, mandatory
+#Multi-values
 
 The [goodform example]() source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
 form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is
@@ -71,9 +79,12 @@ import com.nerderg.goodForm.FormController
 
 class ContactDetailsController extends FormController {
 
+    def index {}
+
 }
 ```
 #TODO forms can be served up without the controller, we just need to reference localhost:8080/goodform_tutorial/form...
 #However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
 #send an email/generate a PDF), which we will cover later.
 
+_Next_: [Create Ruleset Definitions](##04-CreateRulesetDefinitions.md##)

@@ -10,3 +10,5 @@ This tutorial contains the following steps:
     - change look and feel
     - add behaviour
     - add validators
+
+* _Next_: [Install OneRing](##02-InstallOneRing.md##)
