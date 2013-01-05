@@ -11,7 +11,9 @@ Good form features a form definition DSL that allows rapid human readable form c
     <resource>com.nerderg.goodForm.FormController</resource>
     <resource>com.nerderg.goodForm.FormDefinition</resource>
     <resource>com.nerderg.goodForm.FormInstance</resource>
+    <resource>com.nerderg.goodForm.AddressWranglingService</resource>
     <resource>com.nerderg.goodForm.FormDataService</resource>
+    <resource>com.nerderg.goodForm.FormValidationService</resource>
     <resource>com.nerderg.goodForm.GoodFormService</resource>
     <resource>com.nerderg.goodForm.LocalRulesEngineService</resource>
     <resource>com.nerderg.goodForm.RulesEngineService</resource>
@@ -22,9 +24,20 @@ Good form features a form definition DSL that allows rapid human readable form c
     <repository name='grailsCentral' url='http://grails.org/plugins' />
     <repository name='http://repo.grails.org/grails/core' url='http://repo.grails.org/grails/core/' />
     <repository name='mavenCentral' url='http://repo1.maven.org/maven2/' />
+    <repository name='http://download.java.net/maven/2/' url='http://download.java.net/maven/2/' />
   </repositories>
   <dependencies />
-  <plugins />
-  <runtimePluginRequirements />
+  <plugins>
+    <compile>
+      <plugin group='org.grails.plugins' name='cxf' version='1.0.7' />
+      <plugin group='org.grails.plugins' name='nerderg-form-tags' version='2.1' />
+      <plugin group='org.grails.plugins' name='rendering' version='0.4.3' />
+    </compile>
+  </plugins>
+  <runtimePluginRequirements>
+    <plugin name='cxf' version='1.0.7' />
+    <plugin name='rendering' version='0.4.3' />
+    <plugin name='nerdergFormTags' version='2.1' />
+  </runtimePluginRequirements>
   <behavior />
 </plugin>

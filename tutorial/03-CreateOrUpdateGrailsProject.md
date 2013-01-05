@@ -44,7 +44,7 @@ class BootStrap {
             }"""
 
             if (!FormDefinition.get(1)) {
-                FormDefinition formDefinition = new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1)
+                FormDefinition formDefinition = new FormDefinition(name: 'ContactDetails', formDefinition: sampleForm, formVersion: 1)
                 formDefinition.save()
             }
 }
@@ -86,5 +86,24 @@ class ContactDetailsController extends FormController {
 #TODO forms can be served up without the controller, we just need to reference localhost:8080/goodform_tutorial/form...
 #However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
 #send an email/generate a PDF), which we will cover later.
+
+The last thing we need to do is tell our Grails application where the OneRing web service is located.  To do this, we
+add the following to the `grails-app/conf/Config.groovy` file:
+
+```groovy
+environments {
+    production {
+
+    }
+    test {
+
+    }
+    development {
+        rulesEngine.uri = 'http://localhost:8081/rulesEngine'
+    }
+}
+```
+
+Now that we have setup our Grails project, let's create the ruleset definitions.
 
 _Next_: [Create Ruleset Definitions](##04-CreateRulesetDefinitions.md##)

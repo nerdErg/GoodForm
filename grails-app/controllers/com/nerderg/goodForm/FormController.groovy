@@ -39,7 +39,7 @@ class FormController {
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
-            Map formData = rulesEngineService.ask(formName, [:])
+            Map formData = rulesEngineService.ask(formName, getRuleFacts())
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
@@ -47,6 +47,10 @@ class FormController {
             flash.message = message(code: "goodform.rules.error", args: [e.message])
             return redirect(action: 'index')
         }
+    }
+
+    public LinkedHashMap getRuleFacts() {
+        ['dummy':'value']
     }
 
     /**
