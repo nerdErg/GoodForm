@@ -55,15 +55,13 @@ class RulesEngineService {
             }
             return data
 
-        } catch (URISyntaxException e) {
-            throw new RulesEngineException(e)
         } catch (ClientProtocolException e) {
             String errorMessage = e.message
             if (e.response?.responseData && e.response.responseData instanceof JSONArray && e.response.responseData.size() > 0 && e.response.responseData[0].error) {
                 errorMessage = e.response.responseData[0].error
             }
             throw new RulesEngineException(errorMessage)
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new RulesEngineException(e)
         }
     }

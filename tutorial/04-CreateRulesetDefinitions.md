@@ -26,7 +26,33 @@ This rule is saying that when the first question for the Contact Details form is
 ruleset is deliberately simplistic, and the subsequent tutorial pages will demonstrate how we can add more detailed logic within
 the ruleset.
 
-In later steps of the tutorial, we will update this ruleset to include some more complexity.
+We also need to create a ruleset that defines the bahaviour when the form has been submitted.  The ruleset file should be named
+'your-formLastQuestion.ruleset', where 'your-form' is the name of your form and 'LastQuestion' is the identifier of the last
+question in the form submission.
+
+For our example, let's create a `ContactDetailsQ1.ruleset` in the ~/OneRing/rules/application directory.  The contents of a sample ruleset is listed below:
+
+```groovy
+ruleset("ContactDetailsQ1") {
+
+    require(['Q1'])  //we need the answers to this question
+
+    abortOnFail = true
+
+	rule('finished') {
+        when {
+            true
+        }
+        then {
+            next = ['End']
+        }
+    }
+}
+```
+
+This ruleset is saying that when Q1 has been submitted, we can end the form process.
+
+In later steps of the tutorial, we will update these rulesets to include some more complexity.
 
 Now that we have created our ruleset, we can now run our app to see the form in action.
 

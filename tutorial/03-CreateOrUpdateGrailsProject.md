@@ -1,3 +1,5 @@
+# Install Plugin
+
 We now need to install the goodform plugin within a Grails project.
 
 If you don't already have a Grails project, you can create one by running:
@@ -12,7 +14,9 @@ We now need to install the GoodForm Grails plugin within the Grails project.  To
 
     grails install-plugin goodform 1.0.0-SNAPSHOT
 
-#TODO change version number
+_TODO change version number_
+
+#Add Form Definition(s) to Bootstrap
 
 Once the plugin has been installed, we can now create the form definition.  As we want the form definition to be present
 every time the application is run, we include it in the `grails-app/conf/BootStrap.groovy` file.
@@ -63,6 +67,8 @@ The [goodform example]() source code includes two sample form definitions define
 form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is
 more complex, and is intended to be displayed over several pages.
 
+#Create a Controller
+
 Now that we have populated our FormDefinition, we will also create a controller within our example grails application which
 will handle web requests for the form.
 
@@ -87,6 +93,21 @@ class ContactDetailsController extends FormController {
 #However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
 #send an email/generate a PDF), which we will cover later.
 
+#Update layout
+
+Update the `grails-app\views\layouts\main.gsp` to include the following lines
+
+```
+    <link rel="stylesheet" href="${resource(plugin: 'goodforms', dir: 'css', file: 'goodforms.css')}"/>
+    <r:require modules="nerdergFormTags"/>
+```
+
+These lines should be included before the <g:layoutHead/> line.
+
+
+
+#Reference OneRing location
+
 The last thing we need to do is tell our Grails application where the OneRing web service is located.  To do this, we
 add the following to the `grails-app/conf/Config.groovy` file:
 
@@ -103,6 +124,13 @@ environments {
     }
 }
 ```
+
+#Change Datasource to point to file-based H2 database
+
+```
+url = "jdbc:h2:~/devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;AUTO_SERVER=true"
+```
+
 
 Now that we have setup our Grails project, let's create the ruleset definitions.
 

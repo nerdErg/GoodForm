@@ -18,3 +18,7 @@ following content:
 
 ![Sample Form](##sample-form.png##)
 
+If we try to submit the form without filling in any of the fields, we get an error message.
+
+![Mandatory fields](##mandatory-fields.png##)
+

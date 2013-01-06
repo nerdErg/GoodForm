@@ -32,7 +32,13 @@ grails.project.dependency.resolution = {
               ":rest-client-builder:1.0.2") {
             export = false
         }
-        compile(":cxf:1.0.7", ":rendering:0.4.3", ":nerderg-form-tags:2.1") {
+        // including rendering plugin as a compile dependency seems to cause loading problems
+        compile(":cxf:1.0.7",
+                ":hibernate:2.1.1",
+                ":jquery:1.8.0",
+                ":jquery-ui:1.8.24",
+                ":nerderg-form-tags:2.1"
+                ) {
             export = true
         }
     }
