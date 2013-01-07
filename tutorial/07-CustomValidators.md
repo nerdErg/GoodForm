@@ -18,19 +18,15 @@ class JobApplicationValidatorService extends FormValidationService {
 
 ```
 
-The FormValidationService class contains a `customValidation` closure which
+Then define your validation logic as a method within the service.  The method should take two arguments, the first
+being a FormElement instance, and the second being a String, which represents the entered value.  The method should
+also return a boolean, which indicates whether the field passes validation or not.
 
+For our example, let's create a method which validates blah..
 
 ```groovy
-class BootStrap {
-
-    def init = { servletContext ->
-
-    //snip
-
-        def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
-        ctx.yourValidationService.addValidator(ctx.formValidationService.customValidation)
-
+    def postcode(FormElement formElement, String postcode) {
+        return !addressWranglingService.isValidPostcode(postcode)
     }
-
 ```
+

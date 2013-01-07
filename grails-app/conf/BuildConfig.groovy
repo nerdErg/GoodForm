@@ -38,6 +38,7 @@ grails.project.dependency.resolution = {
                 ":jquery:1.8.0",
                 ":jquery-ui:1.8.24",
                 ":nerderg-form-tags:2.1"
+//                ":rendering:0.4.3",
                 ) {
             export = true
         }

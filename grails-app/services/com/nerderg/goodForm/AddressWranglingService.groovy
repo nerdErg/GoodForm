@@ -7,7 +7,9 @@ import javax.naming.InitialContext
  * Validates the postcode, language and country field against a pre-defined CSV file.
  *
  * needs the pc-full csv file from here http://auspost.com.au/products-and-services/download-postcode-data.html
- * modified to remove all columns after the state and to make it tab separated
+ * modified to remove all columns after the state and to make it tab separated.
+ *
+ * TODO move this into a separate Grails plugin
  */
 class AddressWranglingService {
 
