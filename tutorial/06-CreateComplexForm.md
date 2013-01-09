@@ -15,7 +15,6 @@ Let's now create a new form that will span several pages.  Add the following to 
                            }
                        }
                    }
-
                    question("Job2") {
                        "Contact details" group: "contact", {
                            "Home address" text: 200
@@ -65,7 +64,7 @@ Let's now create a new form that will span several pages.  Add the following to 
                         }
                    }
             }"""
-    if (!FormDefinition.get(1)) {
+    if (!FormDefinition.get(2)) {
         FormDefinition formDefinition = new FormDefinition(name: 'JobApplication', formDefinition: jobApplicationDefinition, formVersion: 1)
         formDefinition.save()
     }
@@ -73,6 +72,12 @@ Let's now create a new form that will span several pages.  Add the following to 
 ```
 
 This creates a JobApplication form definition, which contains six questions.
+
+This form adds some extra form elements, notably:
+
+* phone -
+* attachment -
+* phone -
 
 To configure the questions to span multiple pages, create the following ruleset files in the ~/.OneRing/rules/application directory:
 
@@ -143,5 +148,29 @@ Let's go to our goodform_tutorial Grails application, and create a new controlle
 
 from the ~/goodform_tutorial directory.
 
-Once this has been done, go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?formName=JobApplication
+Update the controller to extend from the com.nerderg.goodForm.FormController class
+
+```groovy
+import com.nerderg.goodForm.FormController
+
+class JobApplicationController extends FormController {
+}
+```
+
+Once this has been done, run
+
+    grails compile
+
+and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?formName=JobApplication
+
+This will display the first three questions of the form.
+
+#TODO include screenshot of form
+
+Upon entering the mandatory fields and clicking submit, the second page of form questions will be displayed. The answers
+entered on the first page will be listed below the questions.
+
+#TODO include screenshot of form
+
+
 

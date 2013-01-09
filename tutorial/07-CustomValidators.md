@@ -22,11 +22,37 @@ Then define your validation logic as a method within the service.  The method sh
 being a FormElement instance, and the second being a String, which represents the entered value.  The method should
 also return a boolean, which indicates whether the field passes validation or not.
 
-For our example, let's create a method which validates blah..
+For our example, let's create a method which validates that the attachment is a pdf file.
+
+Add the following method to the FileValidationService class
 
 ```groovy
-    def postcode(FormElement formElement, String postcode) {
-        return !addressWranglingService.isValidPostcode(postcode)
+    def pdf_only(FormElement formElement, String filename) {
+        return filename.endsWith(".pdf")
     }
 ```
+
+#TODO error message can be defined as goodform.validate.pdf_only in messages.properties
+
+
+#Validators that don't extend from FormValidationService can be added by...
+
+```groovy
+def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
+ctx.formDataService.addValidator(ctx.yourService.customValidationClosure)
+```
+
+The closure should define FormElement and String input parameters, eg.
+
+```groovy
+def customValidation = {FormElement formElement, String fieldValue ->
+        def error = false
+        if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
+            formElement.attr.error += g.message(code: "goodform.validate." + formElement.attr.validate + ".invalid")
+            error = true
+        }
+        return error
+    }
+```
+
 
