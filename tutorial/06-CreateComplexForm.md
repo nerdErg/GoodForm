@@ -15,7 +15,6 @@ Let's now create a new form that will span several pages.  Add the following to 
                            }
                        }
                    }
-
                    question("Job2") {
                        "Contact details" group: "contact", {
                            "Home address" text: 200
@@ -65,7 +64,7 @@ Let's now create a new form that will span several pages.  Add the following to 
                         }
                    }
             }"""
-    if (!FormDefinition.get(1)) {
+    if (!FormDefinition.get(2)) {
         FormDefinition formDefinition = new FormDefinition(name: 'JobApplication', formDefinition: jobApplicationDefinition, formVersion: 1)
         formDefinition.save()
     }
@@ -73,6 +72,12 @@ Let's now create a new form that will span several pages.  Add the following to 
 ```
 
 This creates a JobApplication form definition, which contains six questions.
+
+This form adds some extra form elements, notably:
+
+* phone -
+* attachment -
+* phone -
 
 To configure the questions to span multiple pages, create the following ruleset files in the ~/.OneRing/rules/application directory:
 
@@ -116,7 +121,6 @@ ruleset("JobApplicationJob3") {
 }
 ```
 
-
 #JobApplicationJob6.ruleset
 
 ```groovy
@@ -137,11 +141,38 @@ ruleset("JobApplicationJob6") {
 }
 ```
 
-Let's go to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
+Let's go back to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
 
     grails create-controller JobApplication
 
 from the ~/goodform_tutorial directory.
 
-Once this has been done, go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?formName=JobApplication
+Update the controller to extend from the com.nerderg.goodForm.FormController class
+
+```groovy
+import com.nerderg.goodForm.FormController
+
+class JobApplicationController extends FormController {
+}
+```
+
+Once this has been done, run
+
+    grails compile
+
+and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?formName=JobApplication
+
+This will display the first three questions of the form.
+
+![Job Application Page 1](##job_application_page_1.png##)
+
+Upon entering the mandatory fields and clicking submit, the second page of form questions will be displayed.
+
+![Job Application Page 2](##job_application_page_2.png##)
+
+The answers entered on the first page will be listed below the questions.
+
+![Job Application Answered Questions](##job_application_answered_questions.png##)
+
+
 

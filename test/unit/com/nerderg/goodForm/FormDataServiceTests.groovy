@@ -77,7 +77,7 @@ class FormDataServiceTests {
 
     void testPhoneNumber() {
         form.question("Q1") {
-            "Phone Number" text: 50, required: true, validate: 'phone'
+            "Phone Number" phone: 50, required: true, map: 'phone'
         }
         Question question = form.getAt("Q1")
         //digit only

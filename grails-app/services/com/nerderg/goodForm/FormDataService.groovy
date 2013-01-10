@@ -19,6 +19,11 @@ class FormDataService {
 
     def rulesEngineService
 
+    /**
+     * Handles custom form validation
+     */
+    def formValidationService
+
     def g = new ValidationTagLib()
 
     Map<Long, Form> forms = [:]
@@ -109,7 +114,11 @@ class FormDataService {
         return error
     }
 
-    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern]
+    /**
+     * Adds the mandatory field, date, pattern and generic custom validators to the initial list of validators
+     * that process field data.  Validators can be explicitly added by invoking the {@link #addValidator} method.
+     */
+    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern, formValidationService.customValidation]
 
     def addValidator(Closure closure) {
         validators.add(closure)
@@ -348,7 +357,7 @@ class FormDataService {
      */
     Map processNext(FormInstance instance, Map mergedFormData) {
         String lastQuestion = instance.storedCurrentQuestion().last()
-        FormDefinition definition = FormDefinition.findById(instance.formVersion)
+        FormDefinition definition = FormDefinition.findById(instance.formDefinitionId)
         String ruleName = definition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {

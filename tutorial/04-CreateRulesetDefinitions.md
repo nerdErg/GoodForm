@@ -22,7 +22,40 @@ ruleset("ContactDetails") {
 }
 ```
 
-This rule is saying that when the first question for the Contact Details form is requested, always return 'Q1' as the question to display.  This
+Let's look at this file line by line...
+
+```groovy
+ruleset("ContactDetails") {
+```
+
+The line defines the name of the ruleset.  The name should match the name of the Form Definition defined in the previous page
+(ie. 'ContactDetails).
+
+```groovy
+   abortOnFail = false
+```
+
+This tells OneRing to continue processing if the form processing fails.
+
+```groovy
+   rule("Get contact details") {
+```
+
+This defines a rule for the ruleset.  The name of the rule can be anything you like, in this case we've named it 'Get contact details'.
+
+```groovy
+when {
+    true
+}
+then {
+    next = ['Q1']
+}
+```
+
+This is the actual rule to process when determining the questions to be displayed.  In this case, it's very simple, it's saying to
+always return Q1 as the question to display for this ruleset.
+
+This ruleset is saying that when the first question for the Contact Details form is requested, always return 'Q1' as the question to display.  This
 ruleset is deliberately simplistic, and the subsequent tutorial pages will demonstrate how we can add more detailed logic within
 the ruleset.
 
