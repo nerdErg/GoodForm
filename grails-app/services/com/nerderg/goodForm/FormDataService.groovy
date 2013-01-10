@@ -356,7 +356,7 @@ class FormDataService {
      */
     def Map processNext(FormInstance instance, Map mergedFormData) {
         String lastQuestion = instance.storedCurrentQuestion().last()
-        FormDefinition definition = FormDefinition.findById(instance.formVersion)
+        FormDefinition definition = FormDefinition.findById(instance.formDefinitionId)
         String ruleName = definition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {

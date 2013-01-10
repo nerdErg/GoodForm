@@ -121,7 +121,6 @@ ruleset("JobApplicationJob3") {
 }
 ```
 
-
 #JobApplicationJob6.ruleset
 
 ```groovy
@@ -142,7 +141,7 @@ ruleset("JobApplicationJob6") {
 }
 ```
 
-Let's go to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
+Let's go back to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
 
     grails create-controller JobApplication
 
@@ -165,12 +164,15 @@ and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?form
 
 This will display the first three questions of the form.
 
-#TODO include screenshot of form
+![Job Application Page 1](##job_application_page_1.png##)
 
-Upon entering the mandatory fields and clicking submit, the second page of form questions will be displayed. The answers
-entered on the first page will be listed below the questions.
+Upon entering the mandatory fields and clicking submit, the second page of form questions will be displayed.
 
-#TODO include screenshot of form
+![Job Application Page 2](##job_application_page_2.png##)
+
+The answers entered on the first page will be listed below the questions.
+
+![Job Application Answered Questions](##job_application_answered_questions.png##)
 
 
 

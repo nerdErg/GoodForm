@@ -32,14 +32,20 @@ Add the following method to the FileValidationService class
     }
 ```
 
-#TODO error message can be defined as goodform.validate.pdf_only in messages.properties
+The message to be displayed when the validation fails can be defined in the `grails-app\i18n\messages.properties` file
+for the goodform_tutorial project.  In this case, we'll add the following property:
 
+```
+goodform.validate.pdf_only.invalid=Only PDF files are supported
+```
 
-#Validators that don't extend from FormValidationService can be added by...
+Validators can be added for service classes which don't extend from the FormValidationService class.  To do this, add
+the following code into your BootStrap.groovy file.
+
 
 ```groovy
 def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
-ctx.formDataService.addValidator(ctx.yourService.customValidationClosure)
+ctx.formDataService.addValidator(ctx.yourService.someCustomValidationClosure)
 ```
 
 The closure should define FormElement and String input parameters, eg.
