@@ -7,7 +7,9 @@ import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.codehaus.groovy.grails.web.util.WebUtils
+
 import java.text.ParseException
+import javax.annotation.PostConstruct
 
 /**
  *
@@ -118,7 +120,12 @@ class FormDataService {
      * Adds the mandatory field, date, pattern and generic custom validators to the initial list of validators
      * that process field data.  Validators can be explicitly added by invoking the {@link #addValidator} method.
      */
-    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern, formValidationService.customValidation]
+    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern]
+
+    @PostConstruct
+    def initializeValidators() {
+        addValidator(formValidationService.customValidation)
+    }
 
     def addValidator(Closure closure) {
         validators.add(closure)
