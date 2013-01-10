@@ -1,4 +1,4 @@
-Once the master rule definition has been created, you can then create your ruleset files, which will be installed and made avaiable
+Once the master rule definition has been created, you can then create your ruleset files, which will be installed and made available
 from the OneRing instance we setup previously.
 
 There needs to be at least one ruleset file, whose name is 'your-form_FirstQuestion.ruleset', where 'your-form' is the
@@ -26,7 +26,7 @@ This rule is saying that when the first question for the Contact Details form is
 ruleset is deliberately simplistic, and the subsequent tutorial pages will demonstrate how we can add more detailed logic within
 the ruleset.
 
-We also need to create a ruleset that defines the bahaviour when the form has been submitted.  The ruleset file should be named
+We also need to create a ruleset that defines the behaviour when the form has been submitted.  The ruleset file should be named
 'your-formLastQuestion.ruleset', where 'your-form' is the name of your form and 'LastQuestion' is the identifier of the last
 question in the form submission.
 

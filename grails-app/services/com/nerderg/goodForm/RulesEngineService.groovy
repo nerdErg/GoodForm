@@ -27,13 +27,13 @@ class RulesEngineService {
      * @param facts a map of facts to pass to the ruleSet
      * @return a net.sf.JSONObject of results - a map of results
      * @see http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html
-     * @throws RulesEngineException
+     * @throws RulesEngineException, NullPointerException
      */
     def ask(String ruleSet, Map facts) {
-        if (!facts) {
-            log.warn "no facts set to ask rules engine to $ruleSet"
-            return []
+        if (facts == null) {
+            throw new NullPointerException("Facts Map can't be null")
         }
+
         try {
             def uri = getRulesEngineRestUri()
             def rulesEngine = new RESTClient(uri.toString())

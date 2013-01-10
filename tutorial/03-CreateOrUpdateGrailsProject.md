@@ -6,7 +6,7 @@ If you don't already have a Grails project, you can create one by running:
 
     grails create-app goodform_tutorial
 
-For the purposes of this tutorial, we are going to keep refering to the `goodform_tutorial` Grails project.
+For the purposes of this tutorial, we are going to keep referring to the `goodform_tutorial` Grails project.
 
 This will create a `goodform_tutorial` directory containing the default Grails source files.
 
@@ -128,7 +128,7 @@ environments {
 #Change Datasource to point to file-based H2 database
 
 ```
-url = "jdbc:h2:~/devDb;MVCC=TRUE;LOCK_TIMEOUT=10000;AUTO_SERVER=true"
+url = "jdbc:h2:~/devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
 ```
 
 

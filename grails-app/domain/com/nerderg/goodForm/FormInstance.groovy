@@ -17,8 +17,9 @@ class FormInstance {
     Long formVersion
     Long formDefinitionId
     Date lastUpdated
+    Boolean readOnly
 
-    List storedState() {
+    List<List> storedState() {
         JSON.parse(state) as List
     }
 
@@ -26,7 +27,7 @@ class FormInstance {
         JSON.parse(formData) as Map
     }
 
-    def storeState(List state) {
+    def storeState(List<List> state) {
         this.state = (state as JSON) as String
     }
 
@@ -40,6 +41,11 @@ class FormInstance {
 
     def storeCurrentQuestion(List questions) {
         this.currentQuestion = (questions as JSON) as String
+    }
+
+    boolean isAtEnd() {
+        List current = storedCurrentQuestion()
+        return current.size() == 1 && current.first() == 'End'
     }
 
     static mapping = {

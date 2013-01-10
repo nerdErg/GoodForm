@@ -16,7 +16,10 @@ class FormController {
 
     def rulesEngineService
 
-    def pdfRenderingService
+
+    def index() {
+        render(view: '/form/index', plugin: 'GoodForm')
+    }
 
     /**
      * Creates a new form instance.
@@ -30,16 +33,15 @@ class FormController {
      * TODO redirect to error page when FormDefinition not supplied
      *
      */
-    def createForm = {
+    def createForm(String formName) {
         log.debug "apply: $params"
         try {
-            String formName = params.formName
             if (!formName) {
                 flash.message = message(code: "goodform.formName.supplied")
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
-            Map formData = rulesEngineService.ask(formName, getRuleFacts())
+            Map formData = rulesEngineService.ask(formName, getRuleFacts()) as Map
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
@@ -49,20 +51,51 @@ class FormController {
         }
     }
 
-    public LinkedHashMap getRuleFacts() {
-        ['dummy':'value']
+    public Map getRuleFacts() {
+        [:]
+    }
+
+    def continueForm(Long id) {
+        log.debug "continue: $params"
+        FormInstance formInstance = formDataService.checkInstance(id)
+
+        if (!formInstance) {
+            flash.message = message(code: "goodform.form.invalid", args: [id])
+            return redirect(action: 'index')
+        }
+
+        if (formInstance.readOnly) {
+            flash.message = message(code: "goodform.form.readonly", args: [id])
+            redirect(action: 'index')
+        }
+
+        Map formData = formInstance.storedFormData()
+        Form form = formDataService.getFormQuestions(formInstance.getFormDefinition())
+
+        if (formInstance.isAtEnd()) {
+            return redirect(action: 'endForm', id: formInstance.id)
+        }
+
+        List<Question> current = formDataService.getSubset(formInstance.storedCurrentQuestion(), form)
+        List answered = formDataService.getAnsweredQuestions(formInstance, form)
+
+        render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: formData, formInstance: formInstance])
     }
 
     /**
      * Invoked when the 'Submit' button is clicked on a form.
      *
      */
-    def next = {
+    def next(Long instanceId) {
         log.debug "next: $params"
-        FormInstance formInstance = formDataService.checkInstance(params.instanceId as Long)
+        FormInstance formInstance = formDataService.checkInstance(instanceId)
         if (!formInstance) {
-            flash.message = message(code: "goodform.form.invalid", args: [params.instanceId])
-            return redirect(action: 'apply')
+            flash.message = message(code: "goodform.form.invalid", args: [instanceId])
+            return redirect(action: 'index')
+        }
+
+        if (formInstance.isAtEnd()) {
+            return redirect(action: 'view', id: instanceId)
         }
 
         Map currentFormData = formDataService.cleanUpStateParams(params)
@@ -88,9 +121,8 @@ class FormController {
 
         if (!error) {
             try {
-
                 Map processedFormData = formDataService.processNext(formInstance, mergedFormData)
-                log.debug "next processedFormData: ${processedFormData.toString(2)}"
+                log.debug "next processedFormData: ${processedFormData.toString()}"
                 //rules engine returns "End" as the next question at the end
                 if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
                     return redirect(action: 'endForm', id: formInstance.id)
@@ -101,7 +133,7 @@ class FormController {
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
                 flash.message = message(code: "goodform.rules.error", args: [e.message])
-                return redirect(action: 'apply')
+                return redirect(action: 'index')
             }
         } else {
             //error detected, redisplay form
@@ -113,36 +145,40 @@ class FormController {
     /**
      *  Invoked when a user clicks the 'Back' button on a multi-page form.
      */
-    def back = {
+    def back(Long id, int qset) {
         log.debug "back: $params"
-        FormInstance formInstance = formDataService.checkInstance(params.id as Long)
+        FormInstance formInstance = formDataService.checkInstance(id)
         if (!formInstance) {
-            flash.message = message(code: "goodform.form.invalid", args: [params.id])
-            return redirect(action: 'apply')
+            flash.message = message(code: "goodform.form.invalid", args: [id])
+            return redirect(action: 'index')
         }
 
-        List state = formInstance.storedState()
-        List currentQ = state.reverse()[params.qset as int]
+        List<List> state = formInstance.storedState()
+        List currentQ = state.reverse()[qset]
         formInstance.storeCurrentQuestion(currentQ)
         formInstance.storeState(formDataService.truncateState(state, currentQ))
         formInstance.save(flush: true)
-        redirect(action: 'continueApp', id: formInstance.id)
+        redirect(action: 'continueForm', id: formInstance.id)
     }
 
     /**
      * Handles the final submission of a form.
      */
-    def endForm = {
+    def endForm(Long id) {
         log.debug "end: $params"
-        FormInstance formInstance = formDataService.checkInstance(params.id as Long)
+        FormInstance formInstance = formDataService.checkInstance(id)
         if (!formInstance) {
-            flash.message = message(code: "goodform.form.invalid", args: [params.id])
-            return redirect(action: 'apply')
+            flash.message = message(code: "goodform.form.invalid", args: [id])
+            return redirect(action: 'index')
         }
         Map formData = formInstance.storedFormData()
-        JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData)
-        formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
-        formDataService.updateStoredFormInstance(formInstance, formData)
+        try {
+            JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData) as JSONObject
+            formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
+            formDataService.updateStoredFormInstance(formInstance, formData)
+        } catch (RulesEngineException e) {
+            log.error e.message
+        }
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
         render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
     }
@@ -150,20 +186,21 @@ class FormController {
     /**
      * Displays a read-only view of a form.
      */
-    def view = {
+    def view(Long id, String name) {
         log.debug "view: $params"
-        FormInstance formInstance = formDataService.checkInstance(params.id as Long)
+        FormInstance formInstance = formDataService.checkInstance(id)
         if (!formInstance) {
-            flash.message = message(code: "goodform.form.invalid", args: [params.id])
-            return redirect(action: 'apply')
+            flash.message = message(code: "goodform.form.invalid", args: [id])
+            return redirect(action: 'index')
         }
 
         Map formData = formInstance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
-        if (params.name) {
-            return renderPdf([template: '/form/formView', model: [formInstance: formInstance, formData: formData]])
+        if (name) {
+            //todo this gets called but it gets a NPE line 38 of PdfRenderingService
+            return renderPdf(template: '/form/formView', model: [formInstance: formInstance, formData: formData])
         } else {
-            return [formInstance: formInstance, formData: formData]
+            return render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
         }
     }
 }

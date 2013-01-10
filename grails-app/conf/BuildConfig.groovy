@@ -8,7 +8,7 @@ grails.project.dependency.resolution = {
         // uncomment to disable ehcache
         // excludes 'ehcache'
     }
-    log "warn" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
+    log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
         grailsCentral()
         // uncomment the below to enable remote dependency resolution
@@ -34,10 +34,11 @@ grails.project.dependency.resolution = {
         }
         // including rendering plugin as a compile dependency seems to cause loading problems
         compile(":cxf:1.0.7",
-                ":hibernate:2.1.1",
-                ":jquery:1.8.0",
+                ":hibernate:$grailsVersion",
+                ":jquery:1.8.3",
                 ":jquery-ui:1.8.24",
-                ":nerderg-form-tags:2.1"
+                ":nerderg-form-tags:2.1.3",
+                ":rendering:0.4.3"
                 ) {
             export = true
         }

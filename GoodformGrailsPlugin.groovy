@@ -5,8 +5,6 @@ class GoodformGrailsPlugin {
     def grailsVersion = "2.1 > *"
     // the other plugins this plugin depends on
 
-    def dependsOn = ["cxf":"1.0.7", "nerdergFormTags": "2.1"]
-
     def loadAfter = ["hibernate"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [

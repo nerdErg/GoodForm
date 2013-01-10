@@ -308,6 +308,7 @@ class FormDataService {
         instance.storeCurrentQuestion(formData.next)
         instance.formVersion = form.version
         instance.formDefinitionId = form.formDefinitionId
+        instance.readOnly = false
         instance.save()
         return instance
     }
@@ -345,13 +346,13 @@ class FormDataService {
      * @param mergedFormData
      * @return processedFormData up to the next un-asked question
      */
-    def Map processNext(FormInstance instance, Map mergedFormData) {
+    Map processNext(FormInstance instance, Map mergedFormData) {
         String lastQuestion = instance.storedCurrentQuestion().last()
         FormDefinition definition = FormDefinition.findById(instance.formVersion)
         String ruleName = definition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
-            JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData)
+            JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData) as JSONObject
             def processedFormData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
 
             if (processedFormData[lastQuestion].message) {

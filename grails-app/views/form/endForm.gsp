@@ -8,6 +8,6 @@
 
 <body>
 <h1>Form submitted</h1>
-<form:displayText formInstance="${formInstance}" store="${formData}" readOnly="true"/>
+<form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${false}"/>
 </body>
 </html>
