@@ -10,10 +10,10 @@ import org.codehaus.groovy.grails.web.util.WebUtils
 
 import java.text.ParseException
 import javax.annotation.PostConstruct
+import org.springframework.web.multipart.MultipartFile
 
 /**
- *
- * Copied from GrantFormService
+ * Handles processing and validating form data.
  */
 class FormDataService {
 
@@ -207,13 +207,17 @@ class FormDataService {
         formElement.attr.error = ""
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
 
+
         if (fieldValue instanceof String[]) {
             fieldValue.each {
                 error = validateField(formElement, it, error)
             }
+        } else if (fieldValue instanceof MultipartFile) {
+            error = validateField(formElement, fieldValue.getName(), error)
         } else {
             error = validateField(formElement, fieldValue, error)
         }
+
 
         //get attached file and store it, save the reference to it in the formData
         if (formElement.attr.containsKey('attachment')) {
@@ -286,6 +290,9 @@ class FormDataService {
      */
     boolean validateField(FormElement formElement, fieldValue, boolean error) {
 
+        if (fieldValue instanceof Map) {
+            return error
+        }
         //iterate over validators
         validators.each {
             //invoke closure

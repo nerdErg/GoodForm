@@ -10,9 +10,19 @@ For the purposes of this tutorial, we are going to keep referring to the `goodfo
 
 This will create a `goodform_tutorial` directory containing the default Grails source files.
 
-We now need to install the GoodForm Grails plugin within the Grails project.  To do this, change to the `goodform_tutorial` directory and run the following:
+We now need to install the GoodForm Grails plugin within the Grails project.  To do this, update the grails-app/conf/BuildConfig.groovy file to include the following::
 
-    grails install-plugin goodform 1.0.0-SNAPSHOT
+```groovy
+grails.project.dependency.resolution = {
+//snip
+    plugins {
+        //snip
+
+        compile ':rendering:0.4.3'
+        compile ':goodform:1.0.0-SNAPSHOT'
+    }
+}
+```
 
 _TODO change version number_
 
@@ -98,12 +108,10 @@ class ContactDetailsController extends FormController {
 Update the `grails-app\views\layouts\main.gsp` to include the following lines
 
 ```
-    <link rel="stylesheet" href="${resource(plugin: 'goodforms', dir: 'css', file: 'goodforms.css')}"/>
-    <r:require modules="nerdergFormTags"/>
+    <r:require modules="goodForm"/>
 ```
 
-These lines should be included before the <g:layoutHead/> line.
-
+This line should be included before the <g:layoutHead/> line.
 
 
 #Reference OneRing location
@@ -124,13 +132,6 @@ environments {
     }
 }
 ```
-
-#Change Datasource to point to file-based H2 database
-
-```
-url = "jdbc:h2:~/devDb;MVCC=TRUE;LOCK_TIMEOUT=10000"
-```
-
 
 Now that we have setup our Grails project, let's create the ruleset definitions.
 

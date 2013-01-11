@@ -9,6 +9,7 @@ Good form features a form definition DSL that allows rapid human readable form c
   <type>GoodformGrailsPlugin</type>
   <resources>
     <resource>GoodFormResources</resource>
+    <resource>GoodFormUrlMappings</resource>
     <resource>com.nerderg.goodForm.FormController</resource>
     <resource>com.nerderg.goodForm.FormDefinition</resource>
     <resource>com.nerderg.goodForm.FormInstance</resource>
@@ -30,17 +31,14 @@ Good form features a form definition DSL that allows rapid human readable form c
   <dependencies />
   <plugins>
     <compile>
-      <plugin group='org.grails.plugins' name='jquery-ui' version='1.8.24' />
-      <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
       <plugin group='org.grails.plugins' name='rendering' version='0.4.3' />
-      <plugin group='org.grails.plugins' name='nerderg-form-tags' version='2.1.3' />
-      <plugin group='org.grails.plugins' name='cxf' version='1.0.7' />
       <plugin group='org.grails.plugins' name='hibernate' version='2.1.1' />
+      <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
+      <plugin group='org.grails.plugins' name='jquery-ui' version='1.8.24' />
+      <plugin group='org.grails.plugins' name='cxf' version='1.0.7' />
+      <plugin group='org.grails.plugins' name='nerderg-form-tags' version='2.1.3' />
     </compile>
   </plugins>
-  <runtimePluginRequirements>
-    <plugin name='cxf' version='1.0.7' />
-    <plugin name='nerdergFormTags' version='2.1.3' />
-  </runtimePluginRequirements>
+  <runtimePluginRequirements />
   <behavior />
 </plugin>
