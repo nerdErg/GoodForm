@@ -70,22 +70,24 @@ more complex, and is intended to be displayed over several pages.
 #Create a Controller
 
 Now that we have populated our FormDefinition, we will also create a controller within our example grails application which
-will handle web requests for the form.
+will handle web requests for the form. By convention the form controller needs to end in `FormController`.
 
 To do this, run the following command:
 
-    grails create-controller ContactDetails
+    grails create-controller ContactDetailsForm
 
-This will create a `ContactDetailsController` class within the `goodform-example/grails-app/controllers` directory.
+This will create a `ContactDetailsFormController` class within the `goodform-example/grails-app/controllers` directory.
 
 Update this class to extend from the `com.nerderg.goodForm.FormController` class, eg.
 
 ```groovy
 import com.nerderg.goodForm.FormController
 
-class ContactDetailsController extends FormController {
+class ContactDetailsFormController extends FormController {
 
-    def index {}
+    def createForm() {
+        createForm('ContactDetails')
+    }
 
 }
 ```
