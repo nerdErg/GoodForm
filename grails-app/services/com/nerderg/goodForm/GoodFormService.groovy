@@ -98,13 +98,13 @@ class GoodFormService {
         throw new FieldNotMappedException(e)
     }
 
-    private isGrantParentPick1(FormElement e) {
+    private static isGrantParentPick1(FormElement e) {
         FormElement grandParent = getGrandParent(e)
         return grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1"
     }
 
     //get the grand parent only if it's a form element
-    private FormElement getGrandParent(FormElement e) {
+    private static FormElement getGrandParent(FormElement e) {
         if (e.parent && e.parent instanceof FormElement && e.parent.parent instanceof FormElement) {
             return e.parent.parent
         }
@@ -165,7 +165,7 @@ class GoodFormService {
         return closure(lastMap, fieldSplit.last())
     }
 
-    private indexedValue(value, Integer index) {
+    private static indexedValue(value, Integer index) {
         if (value != null && index != null) {
             if (value instanceof List || value instanceof Object[] || value instanceof JSONArray) {
                 return value[index]
@@ -250,7 +250,6 @@ class GoodFormService {
      * @param indent - a String of spaces(however defined) to use as an indent to represent nesting of questions
      */
     Closure defaultTextOut = { label, value, units, indent ->
-//        log.debug "in defaultTextOut"
         if (value) {
             return "$indent$label : $value ${units ?: ''}\n"
         }

@@ -176,7 +176,7 @@ class FormTagLib {
 
         out << "<div class='addAnotherForm'><img src='"
         out << g.resource(dir: 'images/icons', file: 'add.png')
-        out << " title='add another' alt='+'/><span class='hint'>"
+        out << "' title='add another' alt='+'/><span class='hint'>"
         out << g.message(code: "goodform.item.addAnother")
         out << "</span></div>"
 
