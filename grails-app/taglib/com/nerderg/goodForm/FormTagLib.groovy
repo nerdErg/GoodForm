@@ -408,7 +408,7 @@ class FormTagLib {
                         if (compress && !answerPresent) {
                             return ''
                         }
-                        String res = "<div title='$qRef'>"
+                        String res = "<div title='$qRef' class='goodformView'>"
                         res += "${indent.replaceAll(' ', '&nbsp;')}"
                         res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
                         if (value) {
@@ -446,7 +446,6 @@ class FormTagLib {
 
     /**
      * 
-     * TODO caseDetail class?
      */
     def displayFilteredText = { attrs ->
         log.debug "in display tag $attrs"
@@ -462,7 +461,7 @@ class FormTagLib {
         goodFormService.withQuestions(refs, questions) { q, qRef ->
             String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
                 if (value && value != 'No') {
-                    String res = "<div title='$qRef'>"
+                    String res = "<div title='$qRef' class='goodformView'>"
                     res += "${indent.replaceAll(' ', '&nbsp;')}"
                     res += "<span class='label'>${label ? label.encodeAsHTML() + ':' : ''}</span> "
                     if (value) {

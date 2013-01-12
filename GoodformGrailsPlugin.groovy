@@ -8,7 +8,11 @@ class GoodformGrailsPlugin {
     def loadAfter = ["hibernate"]
     // resources that are excluded from plugin packaging
     def pluginExcludes = [
-        "grails-app/views/error.gsp"
+            "grails-app/views/error.gsp",
+            "web-app/css/ui-lightness",
+            "web-app/css/errors.css",
+            "web-app/css/main.css",
+            "web-app/css/mobile.css"
     ]
 
     def title = "Goodform Plugin" // Headline display name of the plugin

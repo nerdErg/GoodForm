@@ -1413,3 +1413,19 @@ div.answer {
         left: 70%;
     }
 }
+
+/* Completed form view related CSS */
+div.goodformView {
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+
+div.goodformView .label {
+    color: #006dba;
+    font-weight: bold;
+}
+
+div.goodformView .value {
+    font-weight: normal;
+}
+/* End - Completed form view related CSS */
