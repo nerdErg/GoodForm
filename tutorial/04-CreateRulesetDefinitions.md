@@ -16,7 +16,7 @@ ruleset("ContactDetails") {
             true
         }
         then {
-            next = ['Q1']
+            next = ['Q1', 'Q2']
         }
     }
 }
@@ -48,25 +48,25 @@ when {
     true
 }
 then {
-    next = ['Q1']
+    next = ['Q1', 'Q2']
 }
 ```
 
 This is the actual rule to process when determining the questions to be displayed.  In this case, it's very simple, it's saying to
-always return Q1 as the question to display for this ruleset.
+always return Q1 and Q2 as the questions to display for this ruleset.
 
-This ruleset is saying that when the first question for the Contact Details form is requested, always return 'Q1' as the question to display.  This
+This ruleset is saying that when the first question for the Contact Details form is requested, always return 'Q1' and 'Q2' as the questions to display.  This
 ruleset is deliberately simplistic, and the subsequent tutorial pages will demonstrate how we can add more detailed logic within
 the ruleset.
 
 We also need to create a ruleset that defines the behaviour when the form has been submitted.  The ruleset file should be named
-'your-formLastQuestion.ruleset', where 'your-form' is the name of your form and 'LastQuestion' is the identifier of the last
+'[your-form][LastQuestion].ruleset', where 'your-form' is the name of your form and 'LastQuestion' is the identifier of the last
 question in the form submission.
 
-For our example, let's create a `ContactDetailsQ1.ruleset` in the ~/OneRing/rules/application directory.  The contents of a sample ruleset is listed below:
+For our example, let's create a `ContactDetailsQ2.ruleset` in the ~/OneRing/rules/application directory.  The contents of a sample ruleset is listed below:
 
 ```groovy
-ruleset("ContactDetailsQ1") {
+ruleset("ContactDetailsQ2") {
 
     require(['Q1'])  //we need the answers to this question
 

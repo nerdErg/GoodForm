@@ -13,9 +13,10 @@ import grails.converters.JSON
 class RulesEngineService {
 
     static transactional = false
+    def grailsApplication
 
     def getRulesEngineRestUri() {
-        return new URIBuilder(ConfigurationHolder.config.rulesEngine.uri.toString() + "/rest/applyRules")
+        return new URIBuilder(grailsApplication.config.rulesEngine.uri.toString() + "/rest/applyRules")
     }
 
     /**
@@ -26,7 +27,7 @@ class RulesEngineService {
      * @param ruleSet the name of the ruleSet to run
      * @param facts a map of facts to pass to the ruleSet
      * @return a net.sf.JSONObject of results - a map of results
-     * @see http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html
+     * @see <a href='http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html'>JSONObject</a>
      * @throws RulesEngineException, NullPointerException
      */
     def ask(String ruleSet, Map facts) {

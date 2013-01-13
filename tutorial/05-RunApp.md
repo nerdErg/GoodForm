@@ -13,7 +13,7 @@ Once the OneRing process is running, navigate to the `goodform_tutorial` directo
 
 We can now view to the form within the controller we created earlier.
 
-Navigate to [http://localhost:8080/goodform_tutorial/contactDetails/createForm?formName=ContactDetails].  You should see the
+Navigate to [http://localhost:8080/goodform_tutorial/contactDetailsForm/createForm].  You should see the
 following content:
 
 ![Sample Form](##sample-form.png##)
@@ -22,7 +22,8 @@ If we try to submit the form without filling in any of the fields, we get an err
 
 ![Mandatory fields](##mandatory-fields.png##)
 
-Once we fill in the mandatory fields and click submit, a confirmation screen is displayed.
+Once we fill in the mandatory fields and click submit, a confirmation screen is displayed. This displays the form contents
+in a easy to read format. You can click on the question panel to go back and edit the form.
 
 ![Confirmation](##form-confirmation.png##)
 
@@ -30,7 +31,32 @@ The completed form is stored in the FORM_INSTANCE table.  The contents of the fo
 within the FORM_DATA column, and are contained in JSON format, eg.
 
 ```json
-[{"Q1":{"order":"0","What_is_your_name":{"names":{"Given_Names":"test","Have_you_been_or_are_you_known_by_any_other_names":{"List_your_other_names":{"aliases":{"Type_of_name":"","Other_name":""}}},"Last_or_Family_Name":"test","Title":""}}},"next":["End"],"instanceId":"1","action":"next","require":[],"dummy":"value","controller":"contactDetails","formVersion":1}]
+{
+   "Q1": {
+      "order": "0",
+      "names": {
+         "lastName": "bong bong",
+         "title": "Ms",
+         "givenNames": "Fredita",
+         "hasAlias": {
+            "yes": "on",
+            "aliases": {
+               "alias": "mother",
+               "aliasType": "cute"
+            }
+         }
+      }
+   },
+   "Q2": {
+      "order": "1",
+      "faveColour": "blue with a burgundy hue "
+   },
+   "next": ["End"],
+   "instanceId": "2",
+   "action": "next",
+   "controller": "contactDetailsForm",
+   "formVersion": 1
+}
 ```
 
 Let's revisit what we've done so far:

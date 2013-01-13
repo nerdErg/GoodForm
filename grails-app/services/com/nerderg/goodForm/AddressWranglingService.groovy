@@ -25,7 +25,7 @@ class AddressWranglingService {
         try {
             Context initContext = new InitialContext()
             Context envContext = initContext.lookup("java:comp/env")
-            String dataDirectory = envContext.lookup("dataDirectory")
+            String dataDirectory = envContext.lookup("goodformDataDirectory")
             if (dataDirectory) {
                 println "Overriding data directory from context env (e.g. tomcat context.xml): $dataDirectory"
                 grailsApplication.config.goodform.data.directory = dataDirectory
@@ -75,7 +75,7 @@ class AddressWranglingService {
             return countries
         }
         Set<String> country = []
-        String dataDir = grailsApplication.config.goodform.data.directory
+        String dataDir = grailsApplication.config.goodform.data.directory ?: '.'
         File countryFile = new File(dataDir, 'countries.csv')
         countryFile.eachLine { line ->
             String[] fields = line.split('\t')
@@ -90,7 +90,7 @@ class AddressWranglingService {
             return languages
         }
         Set<String> lang = []
-        String dataDir = grailsApplication.config.goodform.data.directory
+        String dataDir = grailsApplication.config.goodform.data.directory ?: '.'
         File countryFile = new File(dataDir, 'languages.txt')
         countryFile.eachLine { line ->
             lang.add(line.toUpperCase())

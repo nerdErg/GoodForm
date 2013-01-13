@@ -4,7 +4,6 @@ import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 import com.nerderg.goodForm.form.Question
 import net.sf.json.JSONObject
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.codehaus.groovy.grails.web.util.WebUtils
 
@@ -18,8 +17,8 @@ import org.springframework.web.multipart.MultipartFile
 class FormDataService {
 
     def goodFormService
-
     def rulesEngineService
+    def grailsApplication
 
     /**
      * Handles custom form validation
@@ -200,11 +199,14 @@ class FormDataService {
     boolean validateAndProcessFields(FormElement formElement, Map formData, FormInstance instance) {
         //note makeElement name uses the attr.name of it's parent so it must be set. (side effect)
         boolean error = false
+
         if (formElement.attr.heading) {
             return error // ignore headings
         }
+
         formElement.attr.name = goodFormService.makeElementName(formElement)
         formElement.attr.error = ""
+
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
 
 
@@ -214,18 +216,16 @@ class FormDataService {
             }
         } else if (fieldValue instanceof MultipartFile) {
             error = validateField(formElement, fieldValue.getName(), error)
-        } else {
+        } else if (fieldValue instanceof String) {
             error = validateField(formElement, fieldValue, error)
         }
-
-
         //get attached file and store it, save the reference to it in the formData
         if (formElement.attr.containsKey('attachment')) {
             //get the uploaded file and store somewhere
             def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
             def f = grailsWebRequest.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
-                String basedir = ConfigurationHolder.config.uploaded.file.location.toString() + 'applications/' + instance.id
+                String basedir = grailsApplication.config.uploaded.file.location.toString() + 'applications/' + instance.id
                 File location = new File(basedir)
                 location.mkdirs()
                 def fieldSplit = formElement.attr.name.split(/\./)
@@ -261,13 +261,13 @@ class FormDataService {
             if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
                 log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
                 if (fieldValue instanceof String[] || fieldValue instanceof List) {
-                    goodFormService.setField(formData, formElement.attr.name, fieldValue.collect {
+                    goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue.collect {
                         if (it) {
                             it as BigDecimal
                         }
                     })
                 } else {
-                    goodFormService.setField(formData, formElement.attr.name, fieldValue as BigDecimal)
+                    goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue as BigDecimal)
                 }
             }
         } catch (NumberFormatException e) {
@@ -288,15 +288,14 @@ class FormDataService {
      * @param error
      * @return true if the field contains errors, false if not
      */
-    boolean validateField(FormElement formElement, fieldValue, boolean error) {
+    boolean validateField(FormElement formElement, String fieldValue, boolean error) {
 
         if (fieldValue instanceof Map) {
             return error
         }
         //iterate over validators
-        validators.each {
-            //invoke closure
-            error = it.call(formElement, fieldValue) || error
+        validators.each { Closure validator ->
+            error = validator(formElement, fieldValue) || error
         }
         return error
     }

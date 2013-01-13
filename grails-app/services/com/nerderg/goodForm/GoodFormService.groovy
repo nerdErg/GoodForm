@@ -55,10 +55,6 @@ class GoodFormService {
     }
 
     def String makeElementName(FormElement e) {
-        Form form = getFormFromElement(e)
-        if(form?.version < 10) {
-            return oldMakeElementName(e)
-        }
         String name = ""
         if (e.attr.group) {
             name = e.attr.group
@@ -98,13 +94,13 @@ class GoodFormService {
         throw new FieldNotMappedException(e)
     }
 
-    private isGrantParentPick1(FormElement e) {
+    private static isGrantParentPick1(FormElement e) {
         FormElement grandParent = getGrandParent(e)
         return grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1"
     }
 
     //get the grand parent only if it's a form element
-    private FormElement getGrandParent(FormElement e) {
+    private static FormElement getGrandParent(FormElement e) {
         if (e.parent && e.parent instanceof FormElement && e.parent.parent instanceof FormElement) {
             return e.parent.parent
         }
@@ -114,33 +110,6 @@ class GoodFormService {
     String filterName(String name) {
         String intermediate = name.replaceAll(/[^a-zA-Z 0-9]/, '')
         return intermediate.trim().replaceAll('  *', '_')
-    }
-
-    //need to use this for forms less than than version 10
-    def String oldMakeElementName(FormElement e, String name = "") {
-        if (!name) {
-            if (e.attr.group) {
-                name = filterName(e.text) + '.' + filterName(e.attr.group)
-            }
-            if (e.attr.listOf) {
-                name = filterName(e.text) + '.' + filterName(e.attr.listOf)
-            }
-            if (e.attr.'each') {
-                name = filterName(e.attr.'each')
-            }
-        }
-        if (name) {
-            return e.parent ? e.parent.attr.name + '.' + name : name
-        }
-        //if this is a sub element of a radio button (pick:1) then we need to disassociate from the radio button
-        //we do this by going back down the hierarchy to the radio buttons group name then adding "_" and the elements text
-        FormElement grandParent = getGrandParent(e)
-        if (grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1") {
-            return "${grandParent.attr.name}_${filterName(e.parent.text)}.${filterName(e.text)}"
-        }
-
-        String cleanName = filterName(e.text)
-        return e.parent ? e.parent.attr.name + '.' + cleanName : cleanName
     }
 
     def findField(Map map, String field, Integer index = null) {
@@ -165,7 +134,7 @@ class GoodFormService {
         return closure(lastMap, fieldSplit.last())
     }
 
-    private indexedValue(value, Integer index) {
+    private static indexedValue(value, Integer index) {
         if (value != null && index != null) {
             if (value instanceof List || value instanceof Object[] || value instanceof JSONArray) {
                 return value[index]
@@ -250,7 +219,6 @@ class GoodFormService {
      * @param indent - a String of spaces(however defined) to use as an indent to represent nesting of questions
      */
     Closure defaultTextOut = { label, value, units, indent ->
-//        log.debug "in defaultTextOut"
         if (value) {
             return "$indent$label : $value ${units ?: ''}\n"
         }

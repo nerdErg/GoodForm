@@ -176,7 +176,7 @@ class FormTagLib {
 
         out << "<div class='addAnotherForm'><img src='"
         out << g.resource(dir: 'images/icons', file: 'add.png')
-        out << " title='add another' alt='+'/><span class='hint'>"
+        out << "' title='add another' alt='+'/><span class='hint'>"
         out << g.message(code: "goodform.item.addAnother")
         out << "</span></div>"
 
@@ -257,13 +257,12 @@ class FormTagLib {
     private checkboxHiddenSubElements(store, index, value, FormElement e, boolean disabled) {
         def disabledAttr = disabled ? "disabled='disabled'" : ""
         def name = "${e.attr.name}.yes"
-        def checkBoxClass = 'hiddenFormCheckbox'
 
         if (value == 'on') {
             out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='${checkBoxClass}' checked='checked' ${disabledAttr}/>
+                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
                 <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
                 """
             }
@@ -273,7 +272,7 @@ class FormTagLib {
             out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='${checkBoxClass}' ${disabledAttr}/>
+                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' ${disabledAttr}/>
                 <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
                 """
             }
@@ -408,7 +407,7 @@ class FormTagLib {
                         if (compress && !answerPresent) {
                             return ''
                         }
-                        String res = "<div title='$qRef'>"
+                        String res = "<div title='$qRef' class='goodformView'>"
                         res += "${indent.replaceAll(' ', '&nbsp;')}"
                         res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
                         if (value) {
@@ -446,7 +445,6 @@ class FormTagLib {
 
     /**
      * 
-     * TODO caseDetail class?
      */
     def displayFilteredText = { attrs ->
         log.debug "in display tag $attrs"
@@ -462,7 +460,7 @@ class FormTagLib {
         goodFormService.withQuestions(refs, questions) { q, qRef ->
             String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
                 if (value && value != 'No') {
-                    String res = "<div title='$qRef'>"
+                    String res = "<div title='$qRef' class='goodformView'>"
                     res += "${indent.replaceAll(' ', '&nbsp;')}"
                     res += "<span class='label'>${label ? label.encodeAsHTML() + ':' : ''}</span> "
                     if (value) {

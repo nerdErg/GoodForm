@@ -120,9 +120,8 @@ $(function () {
         }).parents('div.prop').next('div').hide();
 
     $(".suggest").each(function () {
-        var url = '${g.createLink(controller: "suggest", action: "index")}'
         var action = $(this).attr("class").split(" ")[1];
-        var actionurl = url.replace('index', action);
+        var actionurl = '../suggest/' + action;
         $(this).autocomplete({
             minLength:1,
             source:actionurl,

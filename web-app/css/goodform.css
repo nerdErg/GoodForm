@@ -1,0 +1,201 @@
+/* need
+addAnotherForm
+*cbText
+dependantQuestions
+goodformView
+hiddenForm
+*hiddenFormCheckbox
+*hiddenFormRadio
+hint
+inlineCheck
+*label
+*listContainer
+*nospin
+*paddedBox
+preamble
+qset
+qsetReadOnly
+questionGroup
+questionListOfItem
+questionPick
+removeForm
+required
+textNote
+value
+*/
+.addAnotherForm,
+.removeForm {
+    margin-left: 3em;
+    margin-top: 1em;
+    margin-bottom: 1em;
+    cursor: pointer;
+}
+
+.addAnotherForm img,
+.removeForm img {
+    vertical-align: bottom;
+}
+
+.questionListOfItem .prop .value,
+.questionGroup .prop .value,
+.questionPick .prop .value,
+.dependantQuestions .prop .value,
+.questionListOfItem .prop .name,
+.questionGroup .prop .name,
+.questionPick .prop .name,
+.dependantQuestions .prop .name {
+    margin: 0;
+}
+
+.questionListOfItem,
+.questionGroup,
+.questionPick,
+.dependantQuestions {
+    margin: 1em;
+    padding: 1em;
+    border: 1px #dddddd solid;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.questionListOfItem {
+    display: block;
+}
+
+.questionPick .prop {
+    display: table-row;
+}
+
+.questionPick > .prop > .name,
+.questionPick > .prop > .value {
+    display: table-cell;
+    border-bottom: 1px solid #dddddd;
+    padding-top: 0.25em;
+    padding-bottom: 0.25em;
+}
+
+.value {
+    font-weight: bold;
+}
+
+
+.hiddenForm {
+    display: none;
+    white-space: nowrap;
+}
+
+.hint {
+    color: #888888;
+    display: inline-block;
+    font-weight: bold;
+    margin-left: 1em;
+    max-width: 20em;
+    /*vertical-align: middle;*/
+    white-space: normal;
+}
+
+.inlineCheck {
+    margin-left: 0;
+    display: block;
+}
+
+.inlineCheck .prop {
+    display: table-row;
+}
+
+.inlineCheck .name,
+.inlineCheck .value {
+    display: table-cell;
+}
+
+.inlineFields {
+    height: auto;
+}
+
+.inlineFields .prop {
+    background: none;
+}
+
+.inlineFields .value,
+.inlineFields .name {
+    background: none;
+    border: none;
+}
+
+.roundbox,
+.qset,
+.qsetReadOnly {
+    margin-top: 10px;
+    border: 1px solid;
+    border-radius: 10px;
+    box-shadow: 3px 3px 3px #AAAAAA;
+    padding: 10px;
+}
+
+.roundbox.activity {
+    height: 25em;
+    overflow-y: auto;
+}
+
+.qset {
+    background: #EDFFC6;
+}
+
+.qsetReadOnly {
+    background: #FEFCF2;
+}
+
+.prop {
+    padding-top: 5px;
+    display: block;
+}
+
+.prop .name {
+    display: block;
+    text-align: left; /*width: 15%;*/
+    white-space: nowrap;
+    margin-left: 2em;
+    margin-top: 0.5em;
+    font-weight: normal;
+}
+.prop .value {
+    display: block;
+    text-align: left; /*width: 85%;*/
+    margin-left: 2em;
+}
+
+.required {
+    color: red;
+    margin-left: 0.5em;
+}
+
+ul.required {
+    font-size: 1.1em;
+    font-weight: bold;
+    color: black;
+}
+
+div.preamble {
+    margin: 1em;
+    font-style: italic;
+}
+
+div.textNote {
+    white-space: pre-line;
+}
+
+/* Completed form view related CSS */
+div.goodformView {
+    font-size: 1.1em;
+    margin-bottom: 0.5em;
+}
+
+div.goodformView .label {
+    color: #006dba;
+    font-weight: bold;
+}
+
+div.goodformView .value {
+    font-weight: normal;
+}
+/* End - Completed form view related CSS */

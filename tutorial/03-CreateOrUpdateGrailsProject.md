@@ -42,29 +42,42 @@ class BootStrap {
         def init = { servletContext ->
 
             String sampleForm = """ form {  //start with a 'form' element
-                   question("Q1") {   //include a 'question' element with an identifier
-                       "What is your name?" group: "names", {
-                           "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title"
-                           "Given Names" text: 50, required: true
-                           "Last or Family Name" text: 50, required: true
-                           "Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", {
-                               "List your other names" listOf: "aliases", {
-                                   "Other name" text: 50
-                                   "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType"
+                               question("Q1") {   //include a 'question' element with an identifier
+                                   "What is your name?" group: "names", {
+                                       "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: 'title'
+                                       "Given Names" text: 50, required: true, map: 'givenNames'
+                                       "Last or Family Name" text: 50, required: true, map: 'lastName'
+                                       "Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", map: 'hasAlias', {
+                                           "List your other names" listOf: "aliases", {
+                                               "Other name" text: 50, map: 'alias'
+                                               "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
+                                           }
+                                       }
+                                   }
                                }
-                           }
-                       }
-                   }
-            }"""
+                               question("Q2") { //second question
+                                   "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
+                               }
+                        }"""
+
 
             if (!FormDefinition.get(1)) {
                 FormDefinition formDefinition = new FormDefinition(name: 'ContactDetails', formDefinition: sampleForm, formVersion: 1)
                 formDefinition.save()
             }
+
+            suggestService.addSuggestionHandler('colour') { String term ->
+                File colorsNames = new File('colourNames.txt')
+                List<String> colours = []
+                colorsNames.eachLine { colours.add(it.toString())}
+                String q = term.toUpperCase()
+                return colours.findAll { it.toUpperCase().contains(q) }
+            }
+
 }
 ```
 
-This is a very simple form with just one question ('what is your name?').  However, the form does demonstrate some key
+This is a very simple form with just two questions ('what is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
 features of Goodform.
 
 #Sub-questions
@@ -80,22 +93,24 @@ more complex, and is intended to be displayed over several pages.
 #Create a Controller
 
 Now that we have populated our FormDefinition, we will also create a controller within our example grails application which
-will handle web requests for the form.
+will handle web requests for the form. By convention the form controller needs to end in `FormController`.
 
 To do this, run the following command:
 
-    grails create-controller ContactDetails
+    grails create-controller ContactDetailsForm
 
-This will create a `ContactDetailsController` class within the `goodform-example/grails-app/controllers` directory.
+This will create a `ContactDetailsFormController` class within the `goodform-example/grails-app/controllers` directory.
 
 Update this class to extend from the `com.nerderg.goodForm.FormController` class, eg.
 
 ```groovy
 import com.nerderg.goodForm.FormController
 
-class ContactDetailsController extends FormController {
+class ContactDetailsFormController extends FormController {
 
-    def index {}
+    def createForm() {
+        createForm('ContactDetails')
+    }
 
 }
 ```
