@@ -55,6 +55,15 @@ class BootStrap {
                 FormDefinition formDefinition = new FormDefinition(name: 'ContactDetails', formDefinition: sampleForm, formVersion: 1)
                 formDefinition.save()
             }
+
+            suggestService.addSuggestionHandler('colour') { String term ->
+                File colorsNames = new File('colourNames.txt')
+                List<String> colours = []
+                colorsNames.eachLine { colours.add(it.toString())}
+                String q = term.toUpperCase()
+                return colours.findAll { it.toUpperCase().contains(q) }
+            }
+
 }
 ```
 

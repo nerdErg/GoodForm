@@ -11,6 +11,8 @@
   <div class="message">${flash.message}</div>
 </g:if>
 
+<a href="createForm">New form</a>
+
 <ul>
   <g:each in="${FormInstance.list()}" var="formInstance">
     <li>${formInstance.givenNames} ${formInstance.lastName}</li>
