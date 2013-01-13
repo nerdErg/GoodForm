@@ -375,7 +375,7 @@ class FormDataService {
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
             JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData) as JSONObject
-            def processedFormData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
+            def processedFormData = cleanUpJSONNullMap(processedJSONFormData)
 
             if (processedFormData[lastQuestion].message) {
                 //TODO how to handle adding message into flash?
@@ -440,6 +440,36 @@ class FormDataService {
         return trunkState
     }
 
+    Map cleanUpJSONNullMap(Map m) {
+            m.each {
+                if (it.value.equals(null)) {
+                    it.value = null
+                } else if (it.value instanceof Map) {
+                    it.value = cleanUpJSONNullMap(it.value)
+                } else if (it.value instanceof Collection) {
+                    it.value = cleanUpJSONNullCollection(it.value)
+                }
+            }
+        }
+
+        Collection cleanUpJSONNullCollection(Collection c) {
+            //create a new collection sans JSONObject.Null objects
+            List collect = []
+            c.each { v ->
+                if (!v.equals(null)) {
+                    if (v instanceof Collection) {
+                        collect.add(cleanUpJSONNullCollection(v))
+                    } else if (v instanceof Map) {
+                        collect.add(cleanUpJSONNullMap(v))
+                    } else {
+                        collect.add(v)
+                    }
+                } else {
+                    collect.add(null)
+                }
+            }
+            return collect
+        }
 
 }
 class FormDataException extends Exception {

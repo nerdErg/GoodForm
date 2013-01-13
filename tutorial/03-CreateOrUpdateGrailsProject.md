@@ -80,11 +80,14 @@ class BootStrap {
 This is a very simple form with just two questions ('what is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
 features of Goodform.
 
+#TODO cover these features
+
 #Sub-questions
 #Field types
 #Hints
 #Validation - field length, mandatory
 #Multi-values
+#Suggest entry
 
 The [goodform example]() source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
 form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is

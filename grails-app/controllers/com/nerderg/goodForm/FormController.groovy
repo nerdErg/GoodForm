@@ -103,7 +103,7 @@ class FormController {
         List asked = formDataService.getSubset(formInstance.storedCurrentQuestion(), form)
 
         //todo re look at this merged Data as we should merge after validate? Also multiple calls to storedFormData
-        Map mergedFormData = rulesEngineService.cleanUpJSONNullMap(formInstance.storedFormData()) << currentFormData
+        Map mergedFormData = formDataService.cleanUpJSONNullMap(formInstance.storedFormData()) << currentFormData
         mergedFormData.formVersion = formInstance.formVersion
 
         formInstance.storedCurrentQuestion().each { ref ->
@@ -174,7 +174,7 @@ class FormController {
         Map formData = formInstance.storedFormData()
         try {
             JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData) as JSONObject
-            formData = rulesEngineService.cleanUpJSONNullMap(processedJSONFormData)
+            formData = formDataService.cleanUpJSONNullMap(processedJSONFormData)
             formDataService.updateStoredFormInstance(formInstance, formData)
         } catch (RulesEngineException e) {
             log.error e.message

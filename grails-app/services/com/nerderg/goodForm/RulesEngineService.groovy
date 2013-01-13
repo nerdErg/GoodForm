@@ -1,11 +1,9 @@
 package com.nerderg.goodForm
 
-import groovyx.net.http.URIBuilder
-import org.codehaus.groovy.grails.commons.ConfigurationHolder
 import groovyx.net.http.RESTClient
-import org.apache.http.client.ClientProtocolException
+import groovyx.net.http.URIBuilder
 import net.sf.json.JSONArray
-import grails.converters.JSON
+import org.apache.http.client.ClientProtocolException
 
 /**
  * Handles making REST requests to a One-Ring instance to process rules.
@@ -91,36 +89,6 @@ class RulesEngineService {
                 requestContentType: groovyx.net.http.ContentType.JSON)
     }
 
-    Map cleanUpJSONNullMap(Map m) {
-        m.each {
-            if (it.value.equals(null)) {
-                it.value = null
-            } else if (it.value instanceof Map) {
-                it.value = cleanUpJSONNullMap(it.value)
-            } else if (it.value instanceof Collection) {
-                it.value = cleanUpJSONNullCollection(it.value)
-            }
-        }
-    }
-
-    Collection cleanUpJSONNullCollection(Collection c) {
-        //create a new collection sans JSONObject.Null objects
-        List collect = []
-        c.each { v ->
-            if (!v.equals(null)) {
-                if (v instanceof Collection) {
-                    collect.add(cleanUpJSONNullCollection(v))
-                } else if (v instanceof Map) {
-                    collect.add(cleanUpJSONNullMap(v))
-                } else {
-                    collect.add(v)
-                }
-            } else {
-                collect.add(null)
-            }
-        }
-        return collect
-    }
 }
 
 class RulesEngineException extends Throwable {

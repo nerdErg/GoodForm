@@ -1,7 +1,5 @@
 package com.nerderg.goodForm
 
-import grails.util.GrailsUtil
-
 /**
  * Handles persisting the form definition in the database.
  */
@@ -19,9 +17,7 @@ class FormDefinition {
     int formVersion
 
     static mapping = {
-        if (GrailsUtil.getEnvironment() != 'test') {
-            formDefinition column: "formDefinition", sqlType: "text"
-        }
+        formDefinition column: "formDefinition", sqlType: "text"
     }
 
     static constraints = {

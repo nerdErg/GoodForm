@@ -153,6 +153,9 @@ Update the controller to extend from the com.nerderg.goodForm.FormController cla
 import com.nerderg.goodForm.FormController
 
 class JobApplicationController extends FormController {
+    def createForm() {
+        createForm('JobApplication')
+    }
 }
 ```
 
@@ -160,7 +163,7 @@ Once this has been done, run
 
     grails compile
 
-and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm?formName=JobApplication
+and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm
 
 This will display the first three questions of the form.
 
