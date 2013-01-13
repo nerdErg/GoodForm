@@ -257,13 +257,12 @@ class FormTagLib {
     private checkboxHiddenSubElements(store, index, value, FormElement e, boolean disabled) {
         def disabledAttr = disabled ? "disabled='disabled'" : ""
         def name = "${e.attr.name}.yes"
-        def checkBoxClass = 'hiddenFormCheckbox'
 
         if (value == 'on') {
             out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='${checkBoxClass}' checked='checked' ${disabledAttr}/>
+                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
                 <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
                 """
             }
@@ -273,7 +272,7 @@ class FormTagLib {
             out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='${checkBoxClass}' ${disabledAttr}/>
+                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' ${disabledAttr}/>
                 <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
                 """
             }
