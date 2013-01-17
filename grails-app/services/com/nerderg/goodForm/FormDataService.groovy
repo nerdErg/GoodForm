@@ -139,10 +139,17 @@ class FormDataService {
      * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
     FormDefinition formDefinitionForName(String formName) {
-        FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion desc", [formName]).first()
+        List<FormDefinition> formDefinitions = FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion desc", [formName])
+        if (formDefinitions)
+            return formDefinitions.first()
+        else
+            return null
     }
 
     Form getFormQuestions(FormDefinition formDefinition) {
+        if (!formDefinition) {
+            return null
+        }
         String key = formDefinition.name + formDefinition.formVersion
         if (!forms[key]) {
             Form form = createForm(formDefinition)

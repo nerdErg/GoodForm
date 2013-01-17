@@ -30,7 +30,7 @@ class GoodFormServiceTests {
         shouldFail(FieldNotFoundException) {
             service.compileForm('form { question("Q1") {}}')
         }
-        //questions should have at least one field
+        //questions need to be mapped
         shouldFail(FieldNotMappedException) {
             service.compileForm('form { question("Q1") {"Title" text: 10}}')
         }

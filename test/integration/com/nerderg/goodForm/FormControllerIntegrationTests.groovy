@@ -2,6 +2,7 @@ package com.nerderg.goodForm
 
 import grails.test.mixin.TestFor
 import net.sf.json.JSONArray
+import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
@@ -12,6 +13,8 @@ class FormControllerIntegrationTests {
     def rulesEngineService
 
     def formDataService
+
+    def g = new ValidationTagLib()
 
     @Before
     void setUp() {
@@ -56,16 +59,28 @@ class FormControllerIntegrationTests {
         def id = controller.modelAndView.model.formInstance.id
         //todo is there an easier way to simulate the form parameters?
         controller.params.putAll(
-                ['Q1.names.aliases.alias':'',
-                'Q1.names.lastName':'',
-                'Q1.names.title':'',
-                'Q1.names.aliases.aliases.aliasType':'',
-                'Q1.names.givenNames':'',
-                'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
-                        'aliases': ['alias': '', 'aliasType': '']]]
+                ['Q1.names.aliases.alias': '',
+                        'Q1.names.lastName': '',
+                        'Q1.names.title': '',
+                        'Q1.names.aliases.aliases.aliasType': '',
+                        'Q1.names.givenNames': '',
+                        'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
+                                'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
         controller.modelAndView.model.form
         //TODO validate that mandatory field errors are displayed
+    }
+
+    @Test
+    void testNoFormName() {
+        controller.createForm(null)
+        org.junit.Assert.assertEquals g.message(code: "goodform.formName.supplied"), flash.message
+    }
+
+    @Test
+    void testInvalidFormName() {
+        controller.createForm("Blah")
+        org.junit.Assert.assertEquals g.message(code: "goodform.formName.invalid"), flash.message
     }
 }

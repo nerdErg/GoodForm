@@ -45,6 +45,10 @@ class FormController {
                 return redirect(action: 'index')
             }
             Form form = formDataService.getForm(formName)
+            if (!form) {
+                flash.message = message(code: "goodform.formName.invalid")
+                return redirect(action: 'index')
+            }
             Map formData = rulesEngineService.ask(formName, getRuleFacts()) as Map
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
