@@ -152,7 +152,7 @@ class FormDataService {
     }
 
     Form createForm(FormDefinition formDefinition) {
-        Form form = GoodFormService.compileForm(formDefinition.formDefinition)
+        Form form = goodFormService.compileForm(formDefinition.formDefinition)
         form.version = formDefinition.formVersion
         form.name = formDefinition.name
         form.formDefinitionId = formDefinition.id
