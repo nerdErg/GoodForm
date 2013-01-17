@@ -1,6 +1,5 @@
 package com.nerderg.goodForm.form
 
-import com.nerderg.goodForm.GoodFormService
 
 /**
  * User: pmcneil

@@ -15,13 +15,13 @@ class GoodFormService {
 
     static List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading']
 
-    static Form compileForm(String formDefinition) {
+    Form compileForm(String formDefinition) {
         Script dsl = new GroovyShell().parse(formDefinition)
         Form form = processFormScript(dsl, new Form(goodFormService: this))
         return form
     }
 
-    static Form processFormScript(Script dslScript, Form formInstance) {
+    Form processFormScript(Script dslScript, Form formInstance) {
 
         dslScript.metaClass = createEMC(dslScript.class) {
             ExpandoMetaClass emc ->
@@ -35,7 +35,7 @@ class GoodFormService {
         return formInstance
     }
 
-    static ExpandoMetaClass createEMC(Class clazz, Closure cl) {
+    ExpandoMetaClass createEMC(Class clazz, Closure cl) {
 
         ExpandoMetaClass emc = new ExpandoMetaClass(clazz, false)
         cl(emc)

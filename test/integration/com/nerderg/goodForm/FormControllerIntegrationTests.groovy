@@ -7,7 +7,7 @@ import org.junit.Before
 import org.junit.Test
 
 @TestFor(FormController)
-class FormControllerTestTests {
+class FormControllerIntegrationTests {
 
     def rulesEngineService
 
@@ -65,6 +65,7 @@ class FormControllerTestTests {
                         'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
+        controller.modelAndView.model.form
         //TODO validate that mandatory field errors are displayed
     }
 }

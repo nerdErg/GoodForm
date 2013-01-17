@@ -152,7 +152,7 @@ class FormDataService {
     }
 
     Form createForm(FormDefinition formDefinition) {
-        Form form = GoodFormService.compileForm(formDefinition.formDefinition)
+        Form form = goodFormService.compileForm(formDefinition.formDefinition)
         form.version = formDefinition.formVersion
         form.name = formDefinition.name
         form.formDefinitionId = formDefinition.id
@@ -441,35 +441,35 @@ class FormDataService {
     }
 
     Map cleanUpJSONNullMap(Map m) {
-            m.each {
-                if (it.value.equals(null)) {
-                    it.value = null
-                } else if (it.value instanceof Map) {
-                    it.value = cleanUpJSONNullMap(it.value)
-                } else if (it.value instanceof Collection) {
-                    it.value = cleanUpJSONNullCollection(it.value)
-                }
+        m.each {
+            if (it.value.equals(null)) {
+                it.value = null
+            } else if (it.value instanceof Map) {
+                it.value = cleanUpJSONNullMap(it.value)
+            } else if (it.value instanceof Collection) {
+                it.value = cleanUpJSONNullCollection(it.value)
             }
         }
+    }
 
-        Collection cleanUpJSONNullCollection(Collection c) {
-            //create a new collection sans JSONObject.Null objects
-            List collect = []
-            c.each { v ->
-                if (!v.equals(null)) {
-                    if (v instanceof Collection) {
-                        collect.add(cleanUpJSONNullCollection(v))
-                    } else if (v instanceof Map) {
-                        collect.add(cleanUpJSONNullMap(v))
-                    } else {
-                        collect.add(v)
-                    }
+    Collection cleanUpJSONNullCollection(Collection c) {
+        //create a new collection sans JSONObject.Null objects
+        List collect = []
+        c.each { v ->
+            if (!v.equals(null)) {
+                if (v instanceof Collection) {
+                    collect.add(cleanUpJSONNullCollection(v))
+                } else if (v instanceof Map) {
+                    collect.add(cleanUpJSONNullMap(v))
                 } else {
-                    collect.add(null)
+                    collect.add(v)
                 }
+            } else {
+                collect.add(null)
             }
-            return collect
         }
+        return collect
+    }
 
 }
 class FormDataException extends Exception {

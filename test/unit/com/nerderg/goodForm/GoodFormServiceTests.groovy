@@ -1,64 +1,65 @@
 package com.nerderg.goodForm
 
-import grails.test.*
 import grails.converters.JSON
+import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.json.JSONArray
 
-class GoodFormServiceTests extends GrailsUnitTestCase {
-    protected void setUp() {
-        super.setUp()
+@TestFor(GoodFormService)
+class GoodFormServiceTests {
+
+    //TODO compileForm
+
+    void testValidForm() {
+        service.compileForm('blah')
     }
 
-    protected void tearDown() {
-        super.tearDown()
-    }
+    //TODO makeElementName
+
+
+
 
     void testFindField() {
-        def goodFormService = new GoodFormService()
-        assert goodFormService.findField([Q1: [question_one: [yes: 'on']]], "Q1.question_one.yes") == 'on'
-        assert goodFormService.findField([Q1: [question_one: [yes: 'on']]], "Q1.question_one.yes.on") == null
-        assert goodFormService.findField([Q1: ''], "Q1.question_one") == null
-        assert goodFormService.findField([:], "Q1.question_one") == null
+        assert service.findField([Q1: [question_one: [yes: 'on']]], "Q1.question_one.yes") == 'on'
+        assert service.findField([Q1: [question_one: [yes: 'on']]], "Q1.question_one.yes.on") == null
+        assert service.findField([Q1: ''], "Q1.question_one") == null
+        assert service.findField([:], "Q1.question_one") == null
 
-        assert goodFormService.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName", 0) == 'Peter'
-        assert goodFormService.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName", 2) == 'David'
-        assert goodFormService.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName") == ['Peter', 'James', 'David']
-        assert goodFormService.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one") == [firstName: ['Peter', 'James', 'David']]
+        assert service.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName", 0) == 'Peter'
+        assert service.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName", 2) == 'David'
+        assert service.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one.firstName") == ['Peter', 'James', 'David']
+        assert service.findField([Q1: [question_one: [firstName: ['Peter', 'James', 'David']]]], "Q1.question_one") == [firstName: ['Peter', 'James', 'David']]
 
         String[] names = ['John', 'Malcom', 'Wal', 'Adam']
-        assert goodFormService.findField([Q1: [question_one: [firstName: names]]], "Q1.question_one.firstName", 1) == 'Malcom'
+        assert service.findField([Q1: [question_one: [firstName: names]]], "Q1.question_one.firstName", 1) == 'Malcom'
 
         Map formData = JSON.parse(familyFormDataJson) as Map
-        assert goodFormService.findField(formData, "F2.Does_this_matter_involve_children.Please_list_the_children.children.Given_Names") instanceof JSONArray
-        assert goodFormService.findField(formData, "F2.Does_this_matter_involve_children.Please_list_the_children.children.Given_Names", 0) == 'Linda'
-        assert goodFormService.findField(formData, "G5.Gender", 0) == 'Female'
+        assert service.findField(formData, "F2.Does_this_matter_involve_children.Please_list_the_children.children.Given_Names") instanceof JSONArray
+        assert service.findField(formData, "F2.Does_this_matter_involve_children.Please_list_the_children.children.Given_Names", 0) == 'Linda'
+        assert service.findField(formData, "G5.Gender", 0) == 'Female'
 
     }
 
     void testSetField() {
-        def goodFormService = new GoodFormService()
         Map m = [Q1: [question_one: [yes: 'on']]]
-        assert goodFormService.findField(m, "Q1.question_one.yes") == 'on'
-        goodFormService.setField(m, "Q1.question_one.yes", "off")
+        assert service.findField(m, "Q1.question_one.yes") == 'on'
+        service.setField(m, "Q1.question_one.yes", "off")
         assert m.Q1.question_one.yes == 'off'
         assert m == [Q1: [question_one: [yes: 'off']]]
-        goodFormService.setField(m, "Q1.question_one.wobble", [horiz: 12, vert: 1])
+        service.setField(m, "Q1.question_one.wobble", [horiz: 12, vert: 1])
         assert m == [Q1: [question_one: [yes: 'off', wobble: [horiz: 12, vert: 1]]]]
     }
 
     void testRemoveField() {
-        def goodFormService = new GoodFormService()
         Map m = [Q1: [question_one: [yes: 'off', wobble: [horiz: 12, vert: 1]]]]
-        goodFormService.removeField(m, "Q1.question_one.wobble")
+        service.removeField(m, "Q1.question_one.wobble")
         assert m == [Q1: [question_one: [yes: 'off']]]
     }
 
     void testPrintFormDataAnswer() {
-        def goodFormService = new GoodFormService()
         Map formData = JSON.parse(familyFormDataJson) as Map
         formData.each { key, data ->
             if (data instanceof Map) {
-                String result = goodFormService.printFormDataAnswer(data as Map, '')
+                String result = service.printFormDataAnswer(data as Map, '')
                 println result
             }
         }
