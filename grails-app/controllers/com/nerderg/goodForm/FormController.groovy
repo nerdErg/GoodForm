@@ -33,8 +33,6 @@ class FormController {
      * <li>FormDefinition must be defined in the database (typically in Bootstrap).</li>
      * <li>Form name must be supplied as an input parameter (eg. http://localhost:8080/your-app/form/createForm?form=jobForm Instance)</li>
      * </ul>
-     * TODO retrieve form name from input parameters and redirect to error page if not supplied
-     * TODO redirect to error page when FormDefinition not supplied
      *
      */
     def createForm(String formName) {
