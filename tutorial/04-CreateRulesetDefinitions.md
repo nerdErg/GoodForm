@@ -78,12 +78,16 @@ ruleset("ContactDetailsQ2") {
         }
         then {
             next = ['End']
+            description = "$Q1.names.givenNames $Q1.names.lastName"
         }
     }
 }
 ```
 
 This ruleset is saying that when Q1 has been submitted, we can end the form process.
+
+It also sets the description (from the form data) for this form instance which is displayed by default in the list of
+forms in the index of your form controller.
 
 In later steps of the tutorial, we will update these rulesets to include some more complexity.
 

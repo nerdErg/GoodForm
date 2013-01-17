@@ -25,7 +25,9 @@
     </g:if>
   </g:else>
 </g:else>
-<b>Assisted by:</b> ${formInstance.userId.encodeAsHTML()}
+<g:if test="${formInstance.userId != 'unknown'}">
+  <b>Entered by:</b> ${formInstance.userId.encodeAsHTML()}
+</g:if>
 <b>Started:</b> <g:formatDate date="${formInstance.started}" format="hh:mm a dd/MM/yyyy"/>
 <g:if test="${formInstance.lastUpdated}">,
   <b>Updated:</b> <g:formatDate date="${formInstance.lastUpdated}" format="hh:mm a dd/MM/yyyy"/>

@@ -17,8 +17,9 @@
 
   <ul>
     <g:each in="${FormInstance.list()}" var="formInstance">
-      <li><a
-          href="${g.createLink(action: 'continueForm', id: formInstance.id)}">(${formInstance.id}) ${formInstance.givenNames} ${formInstance.lastName}</a>
+      <li><a href="${g.createLink(action: 'continueForm', id: formInstance.id)}">
+        (${formInstance.id}) ${formInstance.instanceDescription}
+      </a>
       </li>
     </g:each>
   </ul>
