@@ -223,7 +223,7 @@ class FormDataService {
             }
         } else if (fieldValue instanceof MultipartFile) {
             error = validateField(formElement, fieldValue.getName(), error)
-        } else if (fieldValue instanceof String) {
+        } else if (fieldValue == null || fieldValue instanceof String) {
             error = validateField(formElement, fieldValue, error)
         }
         //get attached file and store it, save the reference to it in the formData
@@ -297,9 +297,6 @@ class FormDataService {
      */
     boolean validateField(FormElement formElement, String fieldValue, boolean error) {
 
-        if (fieldValue instanceof Map) {
-            return error
-        }
         //iterate over validators
         validators.each { Closure validator ->
             error = validator(formElement, fieldValue) || error

@@ -21,6 +21,16 @@ class GoodFormService {
         return form
     }
 
+    Closure unify = { Closure doit ->
+      try {
+         doit()
+      } catch (GoodFormException e) {
+        throw e
+      } catch (Exception e) {
+        throw new InvalidFormDefinitionException(e)
+      }
+    }
+
     Form processFormScript(Script dslScript, Form formInstance) {
 
         dslScript.metaClass = createEMC(dslScript.class) {
@@ -31,13 +41,9 @@ class GoodFormService {
                 formDef()
             }
         }
-        try {
+        unify {
             dslScript.run()
             testForm(formInstance)
-        } catch (GoodFormException e) {
-            throw e
-        } catch (Exception e) {
-            throw new InvalidFormDefinitionException(e)
         }
         return formInstance
     }

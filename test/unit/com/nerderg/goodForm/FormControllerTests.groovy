@@ -17,6 +17,5 @@ class FormControllerTests {
     }
 
     void testSingleForm() {
-        controller.createForm("SampleForm")
     }
 }

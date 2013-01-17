@@ -1,11 +1,13 @@
 package com.nerderg.goodForm
 
+import com.nerderg.goodForm.form.Form
 import grails.test.mixin.TestFor
 import net.sf.json.JSONArray
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+import com.nerderg.goodForm.form.FormElement
 
 @TestFor(FormController)
 class FormControllerIntegrationTests {
@@ -68,8 +70,14 @@ class FormControllerIntegrationTests {
                                 'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
-        controller.modelAndView.model.form
-        //TODO validate that mandatory field errors are displayed
+        Form form = controller.modelAndView.model.form
+        def foundError = false
+        form.getQuestions().each {
+            it.formElement.subElements.each { FormElement sub ->
+                foundError = sub.attr.error || foundError
+            }
+        }
+        org.junit.Assert.assertTrue("Error was not found", foundError)
     }
 
     @Test
