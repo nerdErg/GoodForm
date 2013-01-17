@@ -2,6 +2,9 @@ package com.nerderg.goodForm.form
 
 
 /**
+ *
+ * Contains the set of form questions retrieved from a form definition.
+ *
  * User: pmcneil
  * Date: 11/11/11
  * 

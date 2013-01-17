@@ -3,7 +3,7 @@ package com.nerderg.goodForm
 /**
  * @author Ross Rowe
  */
-class InvalidFormDefinitionException extends Exception {
+class InvalidFormDefinitionException extends GoodFormException {
     InvalidFormDefinitionException() {
     }
 

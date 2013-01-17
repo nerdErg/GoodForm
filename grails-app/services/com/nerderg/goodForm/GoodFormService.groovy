@@ -34,7 +34,7 @@ class GoodFormService {
         try {
             dslScript.run()
             testForm(formInstance)
-        } catch (FieldNotMappedException e) {
+        } catch (GoodFormException e) {
             throw e
         } catch (Exception e) {
             throw new InvalidFormDefinitionException(e)
@@ -51,7 +51,13 @@ class GoodFormService {
     }
 
     void testForm(Form form) {
+        if (!form.questions) {
+            throw new InvalidFormDefinitionException("Form must have at least one question")
+        }
         form.questions.each {Question q ->
+            if (!q.formElement) {
+                throw new FieldNotFoundException("Question must define a form element")
+            }
             makeElementName(q.formElement)
         }
     }
@@ -104,16 +110,17 @@ class GoodFormService {
         if (e.parent && e.parent.attr.pick && e.parent.attr.pick.toString() == "1") {
             return e.parent.attr.name
         }
+
         throw new FieldNotMappedException(e)
     }
 
-    private static isGrantParentPick1(FormElement e) {
+    private isGrantParentPick1(FormElement e) {
         FormElement grandParent = getGrandParent(e)
         return grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1"
     }
 
     //get the grand parent only if it's a form element
-    private static FormElement getGrandParent(FormElement e) {
+    private FormElement getGrandParent(FormElement e) {
         if (e.parent && e.parent instanceof FormElement && e.parent.parent instanceof FormElement) {
             return e.parent.parent
         }
@@ -147,7 +154,7 @@ class GoodFormService {
         return closure(lastMap, fieldSplit.last())
     }
 
-    private static indexedValue(value, Integer index) {
+    private indexedValue(value, Integer index) {
         if (value != null && index != null) {
             if (value instanceof List || value instanceof Object[] || value instanceof JSONArray) {
                 return value[index]

@@ -5,6 +5,9 @@ import grails.converters.JSON
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.json.JSONArray
 
+/**
+ * Validates the behaviour for the {@link GoodFormService} class.
+ */
 @TestFor(GoodFormService)
 class GoodFormServiceTests {
 
@@ -18,12 +21,27 @@ class GoodFormServiceTests {
         shouldFail(InvalidFormDefinitionException) {
             service.compileForm('form')
         }
+
+        shouldFail(InvalidFormDefinitionException) {
+            service.compileForm('form {}')
+        }
+
+        //questions should have at least one field
+        shouldFail(FieldNotFoundException) {
+            service.compileForm('form { question("Q1") {}}')
+        }
+        //questions should have at least one field
+        shouldFail(FieldNotMappedException) {
+            service.compileForm('form { question("Q1") {"Title" text: 10}}')
+        }
     }
 
     void testValidForm() {
-        Form form = service.compileForm('form {}')
+        Form form = service.compileForm('form { question("Q1") {"Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: "title"}}')
         assertNotNull("Form is null", form)
+        assertFalse("Questions are empty", form.questions.empty)
     }
+
     //TODO makeElementName tests
 
     void testFindField() {

@@ -5,7 +5,7 @@ package com.nerderg.goodForm
  * Date: 6/08/12
  * 
  */
-class FieldNotFoundException extends Exception {
+class FieldNotFoundException extends GoodFormException {
     FieldNotFoundException() {
     }
 

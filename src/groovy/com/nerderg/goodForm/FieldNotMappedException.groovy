@@ -7,7 +7,7 @@ import com.nerderg.goodForm.form.FormElement
  * Date: 6/08/12
  * 
  */
-class FieldNotMappedException extends Exception {
+class FieldNotMappedException extends GoodFormException {
     FieldNotMappedException() {
     }
 

@@ -1,6 +1,8 @@
 package com.nerderg.goodForm.form
 
 /**
+ * Handles updating question information at runtime.
+ *
  * User: pmcneil
  * Date: 6/08/12
  *

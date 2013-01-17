@@ -1,6 +1,8 @@
 package com.nerderg.goodForm.form
 
 /**
+ * Represents a element within a form.
+ *
  * User: pmcneil
  * Date: 11/11/11
  *
