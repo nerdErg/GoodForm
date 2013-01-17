@@ -8,8 +8,7 @@ import grails.converters.JSON
 class FormInstance {
 
     Date started
-    String givenNames
-    String lastName
+    String instanceDescription // eg first and last name
     String formData
     String state
     String userId
@@ -53,8 +52,7 @@ class FormInstance {
     }
 
     static constraints = {
-        givenNames(maxSize: 200)
-        lastName(maxSize: 200)
+        instanceDescription(maxSize: 200)
         state(maxSize: 1000)
         userId(maxSize: 40)
         currentQuestion(maxSize: 200)

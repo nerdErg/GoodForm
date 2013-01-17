@@ -6,17 +6,23 @@
 </head>
 
 <body>
-<h1>My Forms</h1>
-<g:if test="${flash.message}">
-  <div class="message">${flash.message}</div>
-</g:if>
+<div class="goodFormContainer">
 
-<a href="createForm">New form</a>
+  <h1>My Forms</h1>
+  <g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+  </g:if>
 
-<ul>
-  <g:each in="${FormInstance.list()}" var="formInstance">
-    <li>${formInstance.givenNames} ${formInstance.lastName}</li>
-  </g:each>
-</ul>
+  <a href="createForm">New form</a>
+
+  <ul>
+    <g:each in="${FormInstance.list()}" var="formInstance">
+      <li><a href="${g.createLink(action: 'continueForm', id: formInstance.id)}">
+        (${formInstance.id}) ${formInstance.instanceDescription}
+      </a>
+      </li>
+    </g:each>
+  </ul>
+</div>
 </body>
 </html>

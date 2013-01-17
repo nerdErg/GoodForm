@@ -1,8 +1,8 @@
 (goodform = {
+    baseContextPath: '/',
     active:0,
     x:0,
     y:0,
-    dataChanged:0,
     postData:function (uri, data, func, opts) {
         $.ajax({
             type:"POST",
@@ -121,7 +121,7 @@ $(function () {
 
     $(".suggest").each(function () {
         var action = $(this).attr("class").split(" ")[1];
-        var actionurl = '../suggest/' + action;
+        var actionurl = goodform.baseContextPath + '/suggest/' + action;
         $(this).autocomplete({
             minLength:1,
             source:actionurl,

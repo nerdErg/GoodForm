@@ -407,7 +407,7 @@ class FormTagLib {
                         if (compress && !answerPresent) {
                             return ''
                         }
-                        String res = "<div title='$qRef' class='goodformView'>"
+                        String res = "<div class='goodformView'>"
                         res += "${indent.replaceAll(' ', '&nbsp;')}"
                         res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
                         if (value) {
@@ -460,7 +460,7 @@ class FormTagLib {
         goodFormService.withQuestions(refs, questions) { q, qRef ->
             String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
                 if (value && value != 'No') {
-                    String res = "<div title='$qRef' class='goodformView'>"
+                    String res = "<div class='goodformView'>"
                     res += "${indent.replaceAll(' ', '&nbsp;')}"
                     res += "<span class='label'>${label ? label.encodeAsHTML() + ':' : ''}</span> "
                     if (value) {
@@ -519,9 +519,6 @@ class FormTagLib {
         log.debug "end display tag"
     }
 
-    /**
-     * TODO how to handle back
-     */
     def linkToQset = { attrs, body ->
         log.debug "in linkToQset tag $attrs"
         FormInstance formInstance = attrs.formInstance

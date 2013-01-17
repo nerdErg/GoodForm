@@ -324,7 +324,7 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', givenNames: 'unknown', lastName: 'unknown', currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
+        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
         instance.storeFormData(formData)
         instance.storeState([formData.next])
         instance.storeCurrentQuestion(formData.next)
@@ -415,6 +415,9 @@ class FormDataService {
         if (!nextInState) {
             state.add(processedFormData.next)
             instance.storeState(state)
+        }
+        if (processedFormData.description) {
+            instance.instanceDescription = processedFormData.description
         }
         instance.storeCurrentQuestion(processedFormData.next)
         instance.storeFormData(processedFormData)

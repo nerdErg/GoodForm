@@ -32,6 +32,7 @@ class GoodFormService {
             }
         }
         dslScript.run()
+        testForm(formInstance)
         return formInstance
     }
 
@@ -41,6 +42,12 @@ class GoodFormService {
         cl(emc)
         emc.initialize()
         return emc
+    }
+
+    void testForm(Form form) {
+        form.questions.each {Question q ->
+            makeElementName(q.formElement)
+        }
     }
 
     Form getFormFromElement(FormElement e) {

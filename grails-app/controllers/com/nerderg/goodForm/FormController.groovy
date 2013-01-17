@@ -21,6 +21,10 @@ class FormController {
         render(view: '/form/index', plugin: 'GoodForm')
     }
 
+    def submit(Long id) {
+        render(view: '/form/submit', plugin: 'GoodForm')
+    }
+
     /**
      * Creates a new form instance.
      *

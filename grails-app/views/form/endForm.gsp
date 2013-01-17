@@ -7,7 +7,11 @@
 </head>
 
 <body>
-<h1>Form submitted</h1>
-<form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${false}"/>
+<div class="goodFormContainer">
+
+  <h1>Form complete</h1>
+  <g:render template="/form/viewCommon" model="[formInstance: formInstance, formData: formData]"/>
+  <form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${formInstance.readOnly}"/>
+</div>
 </body>
 </html>
