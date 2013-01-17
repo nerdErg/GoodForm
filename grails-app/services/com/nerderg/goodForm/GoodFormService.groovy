@@ -31,8 +31,14 @@ class GoodFormService {
                 formDef()
             }
         }
-        dslScript.run()
-        testForm(formInstance)
+        try {
+            dslScript.run()
+            testForm(formInstance)
+        } catch (FieldNotMappedException e) {
+            throw e
+        } catch (Exception e) {
+            throw new InvalidFormDefinitionException(e)
+        }
         return formInstance
     }
 
@@ -52,8 +58,8 @@ class GoodFormService {
 
     Form getFormFromElement(FormElement e) {
         def parent = e
-        while(parent.parent) {
-            parent =  parent.parent
+        while (parent.parent) {
+            parent = parent.parent
         }
         if (parent instanceof Form) {
             return parent

@@ -1,5 +1,6 @@
 package com.nerderg.goodForm
 
+import com.nerderg.goodForm.form.Form
 import grails.converters.JSON
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.json.JSONArray
@@ -7,16 +8,23 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 @TestFor(GoodFormService)
 class GoodFormServiceTests {
 
-    //TODO compileForm
-
-    void testValidForm() {
-        service.compileForm('blah')
+    void testInvalidFormDefinitions() {
+        shouldFail(InvalidFormDefinitionException) {
+            service.compileForm('blah')
+        }
+        shouldFail(InvalidFormDefinitionException) {
+            service.compileForm('blah {}')
+        }
+        shouldFail(InvalidFormDefinitionException) {
+            service.compileForm('form')
+        }
     }
 
-    //TODO makeElementName
-
-
-
+    void testValidForm() {
+        Form form = service.compileForm('form {}')
+        assertNotNull("Form is null", form)
+    }
+    //TODO makeElementName tests
 
     void testFindField() {
         assert service.findField([Q1: [question_one: [yes: 'on']]], "Q1.question_one.yes") == 'on'
