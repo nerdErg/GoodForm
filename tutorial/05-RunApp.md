@@ -13,8 +13,13 @@ Once the OneRing process is running, navigate to the `goodform_tutorial` directo
 
 We can now view to the form within the controller we created earlier.
 
-Navigate to [http://localhost:8080/goodform_tutorial/contactDetailsForm/createForm].  You should see the
-following content:
+Navigate to [http://localhost:8080/goodform_tutorial/contactDetailsForm].
+
+You should see the following content:
+
+![Sample Controller](##sample-controller.png##)
+
+Clicking on the `New Form` link invokes our `createForm()` controller method:
 
 ![Sample Form](##sample-form.png##)
 

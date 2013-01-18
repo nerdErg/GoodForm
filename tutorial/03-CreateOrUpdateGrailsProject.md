@@ -77,17 +77,62 @@ class BootStrap {
 }
 ```
 
-This is a very simple form with just two questions ('what is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
+This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
 features of Goodform.
 
 #TODO cover these features
 
 #Sub-questions
 #Field types
-#Hints
+
+GoodForm supports the following field types 'out-of-the-box':
+
+* Text
+* Number
+* Date
+* Headings
+* File attachments
+* Money
+* Check-boxes (booleans)
+
+Hints can be added to fields by including a 'hint' attribute, eg
+
+    "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", map: 'title'
+
 #Validation - field length, mandatory
+
+Fields can be marked as mandatory by specifying a 'required' attribute, eg.
+
+    "Given Names" text: 50, required: true, map: 'givenNames'
+
 #Multi-values
+
+Repeating groups of fields can be specified using the 'listOf' attribute, eg.
+
+    "List your other names" listOf: "aliases", {
+       "Other name" text: 50, map: 'alias'
+       "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
+    }
+
 #Suggest entry
+
+GoodForm includes support for predictive text suggestions.  This can be implemented by defining a field with a 'suggest' attribute, eg.
+
+    "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
+
+and registering a suggestion handler matching the value of the suggest attribute, eg.
+
+```
+suggestService.addSuggestionHandler('colour') { String term ->
+                File colorsNames = new File('colourNames.txt')
+                List<String> colours = []
+                colorsNames.eachLine { colours.add(it.toString())}
+                String q = term.toUpperCase()
+                return colours.findAll { it.toUpperCase().contains(q) }
+            }
+```
+
+---
 
 The [goodform example]() source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
 form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is

@@ -143,7 +143,7 @@ ruleset("JobApplicationJob6") {
 
 Let's go back to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
 
-    grails create-controller JobApplication
+    grails create-controller JobApplicationForm
 
 from the ~/goodform_tutorial directory.
 
@@ -152,7 +152,7 @@ Update the controller to extend from the com.nerderg.goodForm.FormController cla
 ```groovy
 import com.nerderg.goodForm.FormController
 
-class JobApplicationController extends FormController {
+class JobApplicationFormController extends FormController {
     def createForm() {
         createForm('JobApplication')
     }
