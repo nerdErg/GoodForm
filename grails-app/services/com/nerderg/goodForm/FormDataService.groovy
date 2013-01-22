@@ -20,6 +20,8 @@ class FormDataService {
     def rulesEngineService
     def grailsApplication
 
+    def springSecurityService
+
     /**
      * Handles custom form validation
      */
@@ -328,7 +330,8 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        FormInstance instance = new FormInstance(started: new Date(), userId: 'unknown', instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
+        def userId = springSecurityService ? springSecurityService.principal.username : 'unknown';
+        FormInstance instance = new FormInstance(started: new Date(), userId: userId, instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
         instance.storeFormData(formData)
         instance.storeState([formData.next])
         instance.storeCurrentQuestion(formData.next)

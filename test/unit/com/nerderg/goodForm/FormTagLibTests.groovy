@@ -1,15 +1,10 @@
 package com.nerderg.goodForm
 
-import grails.test.*
+import grails.test.mixin.TestFor
 
-class FormTagLibTests extends TagLibUnitTestCase {
-    protected void setUp() {
-        super.setUp()
-    }
+@TestFor(FormTagLib)
+class FormTagLibTests {
 
-    protected void tearDown() {
-        super.tearDown()
-    }
 
     void testFilterName() {
 

@@ -16,7 +16,6 @@ class FormController {
 
     def rulesEngineService
 
-
     def index() {
         render(view: '/form/index', plugin: 'GoodForm')
     }
