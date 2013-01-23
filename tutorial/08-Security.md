@@ -32,21 +32,64 @@ Add the following code to the Bootstrap.groovy file, to create some dummy users 
 ```groovy
     def init = { servletContext ->
         //snip
+        String loadApplicationDefinition = """
+            form {
+                question("Loan1") { //Loan amount
+                    "Enter the details for the loan amount you are applying for" group: "amount", {
+                              "Loan amount" money: 10, required: true, map: "amount"
+                              "Years" text: 1, required: true, map: "years"
+                              "Interest Rate" text: 5, required: true, map: "interest_rate"
+                    }
+                }
+                question("Loan2") { //Current employment and income
+                    "Enter the current employment details" group: "amount", {
+                              "Monthly pay" money: 10, required: true, map: "monthly_pay"
+                              "Employer" text: 1, required: true, map: "employer"
+                              "Date Started" text: 5, required: true, map: "date_started"
+                    }
+                }
+                question("Loan3") { //Current assets
+                     "Enter details of your assets" group: "assets", {
+                          "Asset" listOf: "asset", {
+                              "Name" text: 50, required: true, map: 'name'
+                              "Value" text: 50, required: true, map: 'value'
+                          }
+                    }
+                }
+                question("Loan4") { //Current liabilities
+                     "Enter details of your liabilities" group: "liabilities", {
+                          "Liability" listOf: "liability", {
+                              "Name" text: 50, required: true, map: 'name'
+                              "Value" text: 50, required: true, map: 'value'
+                          }
+                    }
+                }
+                question("Loan5") { //Account information
+                     "Enter details of your account" group: "account", {
+                          "Account Name" text: 50, required: true, map: 'name'
+                          "Number" text: 50, required: true, map: 'value'
+                    }
+                }
+        }"""
+
+        if (!FormDefinition.get(3)) {
+            FormDefinition formDefinition = new FormDefinition(name: 'LoanApplication', formDefinition: loadApplicationDefinition, formVersion: 1)
+            formDefinition.save()
+        }
         if (!SecRole.findByAuthority('ROLE_APPROVER')) {
-                    SecRole approverRole = new SecRole(authority: "ROLE_APPROVER")
-                    save approverRole
-                    SecUser jane = createUser("Jane Approver", "jane", "password")
-                    addRole(jane, approverRole)
-                }
+            SecRole approverRole = new SecRole(authority: "ROLE_APPROVER")
+            save approverRole
+            SecUser jane = createUser("Jane Approver", "jane", "password")
+            addRole(jane, approverRole)
+        }
 
-                if (!SecRole.findByAuthority('ROLE_LOANEE')) {
-                    SecRole loaneeRole = new SecRole(authority: "ROLE_LOANEE")
-                    save loaneeRole
-                    SecUser joe = createUser("Joe Loanee", "joe", "password")
-                    addRole(joe, loaneeRole)
-                }
-
-    }
+        if (!SecRole.findByAuthority('ROLE_LOANEE')) {
+            SecRole loaneeRole = new SecRole(authority: "ROLE_LOANEE")
+            save loaneeRole
+            SecUser joe = createUser("Joe Loanee", "joe", "password")
+            addRole(joe, loaneeRole)
+        }
+     }
      def createUser(fullname, name, password) {
         def user = new SecUser(fullname: fullname, username: name, password: password,
                 enabled: true, accountExpired: false, accountLocked: false, passwordExpired: false)
@@ -209,6 +252,9 @@ Update the LoanApplicationFormController class to extend from the GoodForm FormC
 ```groovy
 class LoanApplicationFormController extends FormController {
 
+    def createForm() {
+        createForm('LoanApplication')
+    }
 }
 ```
 
@@ -227,3 +273,6 @@ Now let's update the controller to override the getRuleFacts() method so that we
    }
 ```
 
+If we login with the joe user account, we can enter the details for the loan application.
+
+If we login with the jane user account, we see the loan details that the joe user can enter, plus some additional fields.
