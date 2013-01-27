@@ -16,8 +16,6 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
  */
 class FormValidationService {
 
-    def addressWranglingService
-
     def g = new ValidationTagLib()
 
     static transactional = true
@@ -27,14 +25,6 @@ class FormValidationService {
         return "$validationName"(formElement, fieldValue)
     }
 
-    /**
-     * Invokes the addressWranglingService to determine if a postcode is valid.
-     * @param postcode
-     * @return true if the postcode field contains an error, false if it is valid
-     */
-    def postcode(FormElement formElement, String postcode) {
-        return !addressWranglingService.isValidPostcode(postcode)
-    }
 
     /**
      * Invokes the validation method corresponding the the 'validate' attribute.
@@ -48,28 +38,6 @@ class FormValidationService {
         return error
     }
 
-    /**
-     * Validates that a phone number conforms to Australian formatting standards.
-     *
-     * @param formElement
-     * @param fieldValue
-     * @return true if the phone number field contains an error, false if it is valid
-     */
-    def phone(FormElement formElement, String fieldValue) {
-        def error = false
-        if (fieldValue) {
-            String numbers = fieldValue.replaceAll(/[^0-9\+]/, '')
-            if (numbers.size() < 8) {
-                formElement.attr.error += g.message(code: "goodform.validate.phone.minLength")
-                error = true
-            }
-            //TODO store phone prefix in properties somewhere?
-            if (!(numbers =~ /^(\+|02|03|04|07|08|[2-9])/)) {
-                formElement.attr.error += g.message(code: "goodform.validate.phone.invalid")
-                error = true
-            }
-        }
-        return error
-    }
+
 
 }

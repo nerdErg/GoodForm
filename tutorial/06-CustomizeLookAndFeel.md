@@ -1,6 +1,6 @@
 Let's customize the JobApplicationController to generate a PDF of the entered form.
 
-Let's include the pdfRenderingService within the controller override the submit() method:
+Let's include the pdfRenderingService within the controller and override the submit() method:
 ```groovy
 class JobApplicationController extends FormController {
 

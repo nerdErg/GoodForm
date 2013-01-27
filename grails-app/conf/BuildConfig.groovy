@@ -1,6 +1,8 @@
 grails.project.class.dir = "target/classes"
 grails.project.test.class.dir = "target/test-classes"
 grails.project.test.reports.dir = "target/test-reports"
+grails.project.target.level = 1.6
+grails.project.source.level = 1.6
 
 grails.project.dependency.resolution = {
     // inherit Grails' default dependencies
@@ -10,10 +12,12 @@ grails.project.dependency.resolution = {
     }
     log "info" // log level of Ivy resolver, either 'error', 'warn', 'info', 'debug' or 'verbose'
     repositories {
+        grailsPlugins()
+        grailsHome()
         grailsCentral()
-        // uncomment the below to enable remote dependency resolution
-        // from public Maven repositories
-        //mavenLocal()
+
+        mavenLocal()
+        mavenCentral()
         //mavenCentral()
         //mavenRepo "http://snapshots.repository.codehaus.org"
         //mavenRepo "http://repository.codehaus.org"
@@ -28,10 +32,11 @@ grails.project.dependency.resolution = {
 
     plugins {
         build(":tomcat:$grailsVersion",
-              ":release:2.0.3",
-              ":rest-client-builder:1.0.2") {
+                ":release:2.0.3",
+                ":rest-client-builder:1.0.2") {
             export = false
         }
+
         // including rendering plugin as a compile dependency seems to cause loading problems
         compile(":rendering:0.4.3",
                 ":cxf:1.0.7",
@@ -39,8 +44,9 @@ grails.project.dependency.resolution = {
                 ":jquery:1.8.3",
                 ":jquery-ui:1.8.24",
                 ":nerderg-form-tags:2.1.3",
-                ) {
+        ) {
             export = true
         }
+
     }
 }

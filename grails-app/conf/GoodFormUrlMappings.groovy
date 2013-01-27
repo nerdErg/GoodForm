@@ -1,7 +1,7 @@
 class GoodFormUrlMappings {
 
     static mappings = {
-        "/suggest/$subject"(controller: 'suggest', action: 'suggest')
+
         "/$controller/view/$id/$name?"(action: 'view') {
             constraints {
                 controller(matches: /.*Form/)

@@ -10,7 +10,7 @@ For the purposes of this tutorial, we are going to keep referring to the `goodfo
 
 This will create a `goodform_tutorial` directory containing the default Grails source files.
 
-We now need to install the GoodForm Grails plugin within the Grails project.  To do this, update the grails-app/conf/BuildConfig.groovy file to include the following::
+We now need to include the GoodForm plugin within the Grails project.  To do this, update the grails-app/conf/BuildConfig.groovy file to include the following::
 
 ```groovy
 grails.project.dependency.resolution = {
@@ -20,9 +20,12 @@ grails.project.dependency.resolution = {
 
         compile ':rendering:0.4.3'
         compile ':goodform:1.0.0-SNAPSHOT'
+        compile ':goodform-extras:1.0.0-SNAPSHOT'
     }
 }
 ```
+
+We have also included the GoodForm Extras plugin which includes some additonal services
 
 _TODO change version number_
 
@@ -80,9 +83,47 @@ class BootStrap {
 This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
 features of Goodform.
 
-#TODO cover these features
+#Naming convention
 
-#Sub-questions
+The basic structure of a form definition in GoodForm is as follows:
+
+```groovy
+form {
+   question("some_id") {
+      "A field"
+      "Another field"
+  }
+}
+```
+
+All form definitions must start with a `form` element.  Within this `form`, one or more `question` elements can be defined.  And
+within each `question` one or more fields can be defined.
+
+The structure of a field is as follows:
+
+    "Field Label" field_type:field_length, hint: "Field Label Hint", map: "Field variable name"
+
+eg.
+    "Name" text: 10, hint: "Your name goes here", map: "name", required: "true"
+
+The `map` attribute is required for all fields (except `group` and `list` fields).  If a map attribute is not defined, then
+a FieldNotMappedException will be thrown when the form is rendered.
+
+![Field Not Mapped](##field-not-mapped.png##)
+
+#Sub-fields
+
+Sub-fields can defined within fields, eg.
+
+```groovy
+"Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", map: 'hasAlias', {
+   "List your other names" listOf: "aliases", {
+       "Other name" text: 50, map: 'alias'
+       "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
+   }
+}
+```
+
 #Field types
 
 GoodForm supports the following field types 'out-of-the-box':
@@ -116,7 +157,7 @@ Repeating groups of fields can be specified using the 'listOf' attribute, eg.
 
 #Suggest entry
 
-GoodForm includes support for predictive text suggestions.  This can be implemented by defining a field with a 'suggest' attribute, eg.
+The GoodForm Extras plugin includes support for predictive text suggestions.  This can be implemented by defining a field with a 'suggest' attribute, eg.
 
     "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
 
