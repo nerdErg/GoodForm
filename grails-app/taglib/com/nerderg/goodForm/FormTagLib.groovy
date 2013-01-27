@@ -4,6 +4,14 @@ import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 
 /**
+ * Provides GoodForm-specific tag elements. The main tag elements used by views are:
+ *
+ * <ul>
+ * <li>{@link FormTagLib#display} - </li>
+ * <li>{@link FormTagLib#displayText} - </li>
+ * <li>{@link FormTagLib#answered} - </li>
+ * <li>{@link FormTagLib#element} - </li>
+ * </ul>
  *
  */
 class FormTagLib {

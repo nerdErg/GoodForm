@@ -52,7 +52,15 @@ class RulesEngineServiceTests {
     void testNoData() {
         config.rulesEngine.uri = 'http://localhost'
         def results = service.ask("Test", [:])
-        assertNull(results)
+        assertTrue(results.isEmpty())
 
+    }
+
+    void testNoFacts() {
+        config.rulesEngine.uri = 'http://localhost'
+        Map map = null
+        shouldFail(NullPointerException) {
+            service.ask("Test", map)
+        }
     }
 }

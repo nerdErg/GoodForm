@@ -56,6 +56,13 @@ class GoodFormService {
         return emc
     }
 
+    /**
+     * Performs a sanity check on the structure of the form.  If the form is invalid, then an exception will be thrown.
+     * @param form
+     * @throws InvalidFormDefinitionException thrown if a form does not contain any questions
+     * @throws FieldNotFoundException thrown if question does not contain any fields
+     * @throws FieldNotMappedException thrown if a field does not contain a 'map' attribute
+     */
     void testForm(Form form) {
         if (!form.questions) {
             throw new InvalidFormDefinitionException("Form must have at least one question")
@@ -238,7 +245,7 @@ class GoodFormService {
     }
 
     /**
-     * takes the params and formats the output as a string
+     * Takes the params and formats the output as a string
      * @param label - the data label
      * @param value - the data
      * @param units - the units of the data
@@ -441,7 +448,7 @@ class GoodFormService {
     //---- end print formElement support
 
     /**
-     * print, using the closure, the form Data by question NOT using the form definition
+     * Print, using the closure, the form Data by question NOT using the form definition
      * @param question a Map of a question generally the sub-map of formData.question
      * @param out closure to call to format the values   { label, value, units, indent -> ... }* @return formatted string of the values
      */

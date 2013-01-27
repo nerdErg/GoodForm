@@ -4,8 +4,8 @@ import com.nerderg.goodForm.form.FormElement
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
- * Contains custom validators for form elements. The validators included in this class validate postcodes and phone numbers
- * conform to Australian standards.
+ * Contains custom validators for form elements. This class should be subclassed to include project-specific validation
+ * logic within a project using GoodForms.
  *
  * Projects using Goodforms can add a custom validation service by executing the following as part of the Bootstrap:
  *

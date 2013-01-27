@@ -340,9 +340,21 @@ class FormDataService {
         return answered
     }
 
+    String getCurrentUser() {
+        if (springSecurityService) {
+           if (springSecurityService.principal instanceof String) {
+               springSecurityService.principal
+           } else {
+               springSecurityService.principal.username
+           }
+        } else {
+            'unknown'
+        }
+    }
+
     FormInstance createFormInstance(Form form, Map formData) {
-        def userId = springSecurityService ? springSecurityService.principal.username : 'unknown';
-        FormInstance instance = new FormInstance(started: new Date(), userId: userId, instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
+
+        FormInstance instance = new FormInstance(started: new Date(), userId: getCurrentUser(), instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
         instance.storeFormData(formData)
         instance.storeState([formData.next])
         instance.storeCurrentQuestion(formData.next)

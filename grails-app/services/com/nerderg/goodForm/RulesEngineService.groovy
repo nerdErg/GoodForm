@@ -23,7 +23,7 @@ class RulesEngineService {
     }
 
     /**
-     * ask the rules engine to process a single map of facts and return a processed JSON object. This method handles
+     * Ask the rules engine to process a single map of facts and return a processed JSON object. This method handles
      * errors by throwing a RulesEngineException if a response other than 200 is received, the response includes
      * an error element or any exception is caught.
      *
@@ -39,15 +39,8 @@ class RulesEngineService {
         }
 
         try {
-            def uri = getRulesEngineRestUri()
-            if (!rulesEngine) {
-                rulesEngine = new RESTClient(uri)
-            }
-            log.debug "ask json ${uri.toString()} $ruleSet"
             log.debug facts.toMapString(2)
-
-            def resp = rulesEngine.post(body: [ruleSet: ruleSet, facts: [facts]],
-                    requestContentType: groovyx.net.http.ContentType.JSON)
+            def resp = askRuleset(ruleSet, [facts])
             if (resp.status != 200) {
                 throw new RulesEngineException("Error talking to Rules Engine: $resp.status")
             }
@@ -76,7 +69,7 @@ class RulesEngineService {
     }
 
     /**
-     * ask the rules engine to process a list of maps of facts and return the raw JSON Object
+     * Ask the rules engine to process a list of maps of facts and return the raw JSON Object
      * This leaves the processing of errors to the caller.
      * @param ruleSet
      * @param facts
@@ -85,16 +78,16 @@ class RulesEngineService {
      * @see groovyx.net.http.RESTClient http://groovy.codehaus.org/modules/http-builder/doc/rest.html
      * @throws java.net.URISyntaxException , org.apache.http.client.ClientProtocolException, java.io.IOException
      */
-    def ask(String ruleSet, List facts) {
+    def askRuleset(String ruleSet, List facts) {
         if (!facts) {
             log.warn "no facts set to ask rules engine to $ruleSet"
             return []
         }
         def uri = getRulesEngineRestUri()
-        def rulesEngine = new RESTClient(uri.toString())
-
-//        log.debug "ask json ${uri.toString()} $ruleSet ${facts.toString(2)}"
-        def results
+        if (!rulesEngine) {
+            rulesEngine = new RESTClient(uri)
+        }
+        log.debug "ask json ${uri.toString()} $ruleSet"
         return rulesEngine.post(body: [ruleSet: ruleSet, facts: facts],
                 requestContentType: groovyx.net.http.ContentType.JSON)
     }
