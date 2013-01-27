@@ -6,10 +6,12 @@ import com.nerderg.goodForm.form.Question
 import net.sf.json.JSONObject
 import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 import org.codehaus.groovy.grails.web.util.WebUtils
+import org.springframework.web.multipart.MultipartFile
 
 import java.text.ParseException
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
 import javax.annotation.PostConstruct
-import org.springframework.web.multipart.MultipartFile
 
 /**
  * Handles processing and validating form data.
@@ -42,26 +44,31 @@ class FormDataService {
         def error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
-                Date d = Date.parse(formElement.attr.date, fieldValue)
-                if (formElement.attr.max) {
-                    if (formElement.attr.max == 'today') {
-                        if (d.time > System.currentTimeMillis()) {
-                            formElement.attr.error += g.message(code: "goodform.validate.date.future")
-                            error = true
-                        }
-                    } else {
-                        Date max = Date.parse(formElement.attr.date, formElement.attr.max)
-                        if (d.time > max.time) {
-                            formElement.attr.error += g.message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
-                            error = true
+                if (!isLegalDate(formElement.attr.date, fieldValue)) {
+                    error = true
+                    formElement.attr.error += g.message(code: "goodform.validate.date.invalid")
+                } else {
+                    Date d = Date.parse(formElement.attr.date, fieldValue)
+                    if (formElement.attr.max) {
+                        if (formElement.attr.max == 'today') {
+                            if (d.time > System.currentTimeMillis()) {
+                                formElement.attr.error += g.message(code: "goodform.validate.date.future")
+                                error = true
+                            }
+                        } else {
+                            Date max = Date.parse(formElement.attr.date, formElement.attr.max)
+                            if (d.time > max.time) {
+                                formElement.attr.error += g.message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
+                                error = true
+                            }
                         }
                     }
-                }
-                if (formElement.attr.min) {
-                    Date min = Date.parse(formElement.attr.date, formElement.attr.min)
-                    if (d.time < min.time) {
-                        formElement.attr.error += g.message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
-                        error = true
+                    if (formElement.attr.min) {
+                        Date min = Date.parse(formElement.attr.date, formElement.attr.min)
+                        if (d.time < min.time) {
+                            formElement.attr.error += g.message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
+                            error = true
+                        }
                     }
                 }
             } catch (ParseException e) {
@@ -71,6 +78,12 @@ class FormDataService {
             }
         }
         return error
+    }
+
+    boolean isLegalDate(String format, String text) {
+        SimpleDateFormat sdf = new SimpleDateFormat(format);
+        sdf.setLenient(false);
+        return sdf.parse(text, new ParsePosition(0)) != null;
     }
 
     /**

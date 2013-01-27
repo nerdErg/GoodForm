@@ -46,8 +46,7 @@ class FormDataServiceTests {
         }
         Question question = form.getAt("Q1")
         def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '2012/01/01']], formInstance)
-        //TODO this actually parses into a date, but not the expected value - should the validator handle this somehow?
-        assertFalse("Error was not detected", error)
+        assertTrue("Error was not detected", error)
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2012']], formInstance)
         assertFalse("Error was detected", error)
     }
