@@ -1,9 +1,9 @@
 package com.nerderg.goodForm
 
 import groovyx.net.http.RESTClient
-import groovyx.net.http.URIBuilder
 import net.sf.json.JSONArray
 import org.apache.http.client.ClientProtocolException
+import groovyx.net.http.URIBuilder
 
 /**
  * Handles making REST requests to a One-Ring instance to process rules.
@@ -13,7 +13,12 @@ class RulesEngineService {
     static transactional = false
     def grailsApplication
 
+    def rulesEngine
+
     def getRulesEngineRestUri() {
+        if (!grailsApplication.config.rulesEngine.uri.toString()) {
+            throw new RulesEngineException("rulesEngine.uri must be defined in grails-app/conf/Config.groovy")
+        }
         return new URIBuilder(grailsApplication.config.rulesEngine.uri.toString() + "/rest/applyRules")
     }
 
@@ -26,7 +31,7 @@ class RulesEngineService {
      * @param facts a map of facts to pass to the ruleSet
      * @return a net.sf.JSONObject of results - a map of results
      * @see <a href='http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html'>JSONObject</a>
-     * @throws RulesEngineException, NullPointerException
+     * @throws RulesEngineException , NullPointerException
      */
     def ask(String ruleSet, Map facts) {
         if (facts == null) {
@@ -35,8 +40,9 @@ class RulesEngineService {
 
         try {
             def uri = getRulesEngineRestUri()
-            def rulesEngine = new RESTClient(uri.toString())
-
+            if (!rulesEngine) {
+                rulesEngine = new RESTClient(uri)
+            }
             log.debug "ask json ${uri.toString()} $ruleSet"
             log.debug facts.toMapString(2)
 
@@ -60,7 +66,11 @@ class RulesEngineService {
                 errorMessage = e.response.responseData[0].error
             }
             throw new RulesEngineException(errorMessage)
-        } catch (Exception e) {
+        }
+        catch (RulesEngineException e) {
+            throw e
+        }
+        catch (Exception e) {
             throw new RulesEngineException(e)
         }
     }
