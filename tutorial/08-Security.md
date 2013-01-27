@@ -1,4 +1,4 @@
-Now let's create a more complicated form that simulates a loan application which uses Spring Security.
+Now let's create a more complicated form that simulates a loan application which uses [Spring Security](http://grails.org/plugin/spring-security-core).
 
 Update the `grails-app\conf\BuildConfig.groovy` file in the `goodform_tutorial` project to include the following
 
@@ -27,7 +27,8 @@ grails.plugins.springsecurity.interceptUrlMap = [
 ]
 ```
 
-Add the following code to the Bootstrap.groovy file, to create some dummy users and groups:
+Add the following code to the Bootstrap.groovy file, which will create our Loan Application form and some sample users
+and groups:
 
 ```groovy
     def init = { servletContext ->

@@ -1,16 +1,16 @@
 # Install Plugin
 
-We now need to install the goodform plugin within a Grails project.
+We can now install the GoodForm plugin within a Grails project.
 
 If you don't already have a Grails project, you can create one by running:
 
     grails create-app goodform_tutorial
 
-For the purposes of this tutorial, we are going to keep referring to the `goodform_tutorial` Grails project.
-
 This will create a `goodform_tutorial` directory containing the default Grails source files.
 
-We now need to include the GoodForm plugin within the Grails project.  To do this, update the grails-app/conf/BuildConfig.groovy file to include the following::
+For the purposes of this tutorial, we are going to continue referencing to the `goodform_tutorial` Grails project.
+
+We now need to include the GoodForm plugin within the goodform_tutorial project.  To do this, update the grails-app/conf/BuildConfig.groovy file to include the following::
 
 ```groovy
 grails.project.dependency.resolution = {
@@ -25,7 +25,7 @@ grails.project.dependency.resolution = {
 }
 ```
 
-We have also included the GoodForm Extras plugin which includes some additonal services
+We have also included the GoodForm Extras plugin which includes some additonal services, such as a predictive text service.
 
 _TODO change version number_
 
@@ -44,24 +44,25 @@ class BootStrap {
 
         def init = { servletContext ->
 
-            String sampleForm = """ form {  //start with a 'form' element
-                               question("Q1") {   //include a 'question' element with an identifier
-                                   "What is your name?" group: "names", {
-                                       "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: 'title'
-                                       "Given Names" text: 50, required: true, map: 'givenNames'
-                                       "Last or Family Name" text: 50, required: true, map: 'lastName'
-                                       "Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", map: 'hasAlias', {
-                                           "List your other names" listOf: "aliases", {
-                                               "Other name" text: 50, map: 'alias'
-                                               "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
-                                           }
-                                       }
-                                   }
+            String sampleForm = """
+                form {  //start with a 'form' element
+                   question("Q1") {   //include a 'question' element with an identifier
+                       "What is your name?" group: "names", {
+                           "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: 'title'
+                           "Given Names" text: 50, required: true, map: 'givenNames'
+                           "Last or Family Name" text: 50, required: true, map: 'lastName'
+                           "Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", map: 'hasAlias', {
+                               "List your other names" listOf: "aliases", {
+                                   "Other name" text: 50, map: 'alias'
+                                   "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
                                }
-                               question("Q2") { //second question
-                                   "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
-                               }
-                        }"""
+                           }
+                       }
+                   }
+                   question("Q2") { //second question
+                       "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
+                   }
+            }"""
 
 
             if (!FormDefinition.get(1)) {
@@ -80,7 +81,7 @@ class BootStrap {
 }
 ```
 
-This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).  However, the form does demonstrate some key
+This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).  However, the form demonstrates some key
 features of Goodform.
 
 #Naming convention
@@ -203,9 +204,9 @@ class ContactDetailsFormController extends FormController {
 
 }
 ```
-#TODO forms can be served up without the controller, we just need to reference localhost:8080/goodform_tutorial/form...
-#However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
-#send an email/generate a PDF), which we will cover later.
+Forms can be served up without the controller, we just need to reference `/goodform_tutorial/form/createForm?formName='ContactDetails'`
+However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
+send an email/generate a PDF), which we will cover later.
 
 #Update layout
 
@@ -216,7 +217,6 @@ Update the `grails-app\views\layouts\main.gsp` to include the following lines
 ```
 
 This line should be included before the <g:layoutHead/> line.
-
 
 #Reference OneRing location
 

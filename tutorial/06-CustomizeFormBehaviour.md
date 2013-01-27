@@ -1,6 +1,7 @@
 Let's customize the JobApplicationController to generate a PDF of the entered form.
 
-Let's include the pdfRenderingService within the controller and override the submit() method:
+First, include the pdfRenderingService within the controller and override the submit() method:
+
 ```groovy
 class JobApplicationController extends FormController {
 
@@ -25,6 +26,7 @@ class JobApplicationController extends FormController {
     }
 }
 ```
+
 We also need to define a template that will be used to render the PDF.  Let's create a _view.gsp file in the `grails-app/views/jobApplication`
 directory with the following contents:
 
@@ -58,3 +60,5 @@ environments {
 ```
 
 Now when we click the 'Submit' link, a PDF will be generated in the goodform_tutorial/form
+
+_Next_: [Custom Validators](##07-CustomValidators.md##)

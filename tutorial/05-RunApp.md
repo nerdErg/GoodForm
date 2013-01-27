@@ -7,11 +7,11 @@ Run the OneRing Grails application by navigating to the OneRing directory and ru
 
     grails run-app
 
-Once the OneRing process is running, navigate to the `goodform_tutorial` directory and run
+Once the OneRing process is running, navigate to the `goodform_tutorial` directory and run:
 
     grails run-app
 
-We can now view to the form within the controller we created earlier.
+We can now view the Contact Details form from the controller we created earlier.
 
 Navigate to [http://localhost:8080/goodform_tutorial/contactDetailsForm].
 
