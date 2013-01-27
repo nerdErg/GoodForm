@@ -169,10 +169,8 @@ class FormDataService {
 
     }
 
-    FormInstance checkInstance(Long id) {
-        FormInstance instance = FormInstance.get(id)
-        //TODO include security check?
-        return instance
+    FormInstance getFormInstance(Long id) {
+        return FormInstance.get(id)
     }
 
     /**

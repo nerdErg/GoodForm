@@ -62,7 +62,7 @@ class FormController {
 
     def continueForm(Long id) {
         log.debug "continue: $params"
-        FormInstance formInstance = formDataService.checkInstance(id)
+        FormInstance formInstance = formDataService.getFormInstance(id)
 
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
@@ -93,7 +93,7 @@ class FormController {
      */
     def next(Long instanceId) {
         log.debug "next: $params"
-        FormInstance formInstance = formDataService.checkInstance(instanceId)
+        FormInstance formInstance = formDataService.getFormInstance(instanceId)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [instanceId])
             return redirect(action: 'index')
@@ -152,7 +152,7 @@ class FormController {
      */
     def back(Long id, int qset) {
         log.debug "back: $params"
-        FormInstance formInstance = formDataService.checkInstance(id)
+        FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
             return redirect(action: 'index')
@@ -171,7 +171,7 @@ class FormController {
      */
     def endForm(Long id) {
         log.debug "end: $params"
-        FormInstance formInstance = formDataService.checkInstance(id)
+        FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
             return redirect(action: 'index')
@@ -193,7 +193,7 @@ class FormController {
      */
     def view(Long id, String name) {
         log.debug "view: $params"
-        FormInstance formInstance = formDataService.checkInstance(id)
+        FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
             return redirect(action: 'index')
