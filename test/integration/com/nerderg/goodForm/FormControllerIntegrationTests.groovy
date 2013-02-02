@@ -81,6 +81,24 @@ class FormControllerIntegrationTests {
     }
 
     @Test
+    void testFormSubmission() {
+        controller.createForm("SampleForm")
+        def id = controller.modelAndView.model.formInstance.id
+        //todo is there an easier way to simulate the form parameters?
+        controller.params.putAll(
+                ['Q1.names.aliases.alias': '',
+                        'Q1.names.lastName': 'Test',
+                        'Q1.names.title': '',
+                        'Q1.names.aliases.aliases.aliasType': '',
+                        'Q1.names.givenNames': 'Test',
+                        'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
+                                'aliases': ['alias': '', 'aliasType': '']]]
+                ])
+        controller.next(id)
+        controller.endForm(id)
+    }
+
+    @Test
     void testNoFormName() {
         controller.createForm(null)
         org.junit.Assert.assertEquals g.message(code: "goodform.formName.supplied"), flash.message

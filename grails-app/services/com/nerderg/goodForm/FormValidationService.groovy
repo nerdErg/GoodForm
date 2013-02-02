@@ -20,9 +20,17 @@ class FormValidationService {
 
     static transactional = true
 
+    def customValidationMap = [:]
+
+    def addCustomValidator(String validationName, Closure closure) {
+        customValidationMap.put(validationName, closure)
+    }
+
     def hasError(FormElement formElement, String fieldValue) {
         def validationName = formElement.attr.validate
-        return "$validationName"(formElement, fieldValue)
+        Closure validator = customValidationMap[validationName]
+        if (validator)
+            return validator(formElement, fieldValue)
     }
 
 
