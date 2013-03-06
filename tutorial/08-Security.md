@@ -4,9 +4,9 @@ Update the `grails-app\conf\BuildConfig.groovy` file in the `goodform_tutorial` 
 
 ```groovy
 plugins {
-É
+...
     compile ':spring-security-core:1.2.7.3'
-É
+...
 }
 ```
 
@@ -22,8 +22,8 @@ Add the following lines to the grails-app/conf/UrlMappings.groovy within the map
 Define the access control rules in the grails-app/conf/Config.groovy file
 ```groovy
 grails.plugins.springsecurity.interceptUrlMap = [
-    '/loanApplicationForm/*':         ['ROLE_USER'],
-    '/**':               ['IS_AUTHENTICATED_ANONYMOUSLY']
+    '/loanApplicationForm/*': ['ROLE_USER'],
+    '/**': ['IS_AUTHENTICATED_ANONYMOUSLY']
 ]
 ```
 
@@ -77,6 +77,7 @@ and groups:
             FormDefinition formDefinition = new FormDefinition(name: 'LoanApplication', formDefinition: loadApplicationDefinition, formVersion: 1)
             formDefinition.save()
         }
+
         if (!SecRole.findByAuthority('ROLE_APPROVER')) {
             SecRole approverRole = new SecRole(authority: "ROLE_APPROVER")
             save approverRole

@@ -30,8 +30,15 @@ goodform.validate.pdf_only.invalid=Only PDF files are supported
 We then need to register the custom validator.  To do this, add the following code into your BootStrap.groovy file.
 
 ```groovy
-def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
-ctx.formValidationService.addCustomValidator("pdf_only", {formElement, fieldValue -> ctx.jobApplicationValidatorService.pdf_only(formElement, fieldValue)})
+class BootStrap {
+    def formValidationService
+
+    def init = { servletContext ->
+        ...
+        formValidationService.addCustomValidator("pdf_only", {formElement, fieldValue -> ctx.jobApplicationValidatorService.pdf_only(formElement, fieldValue)})
+        ...
+    }
+}
 ```
 
 We can now define our forms which reference the `pdf_only` validator, eg.
