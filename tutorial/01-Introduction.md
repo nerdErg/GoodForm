@@ -1,5 +1,3 @@
-* TODO deploy GoodForm plugin to a repo
-
 This tutorial contains the following steps:
 
 * [Install OneRing](02-InstallOneRing.md)

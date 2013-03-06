@@ -4,7 +4,8 @@ from the OneRing instance we setup previously.
 There needs to be at least one ruleset file, whose name is 'your-form_FirstQuestion.ruleset', where 'your-form' is the
 name of the form definition.
 
-For our example, let's create a `ContactDetails_firstQuestion.ruleset` file in the ~/OneRing/rules/application directory.  The contents of a sample ruleset is listed below:
+For our example, let's create a `ContactDetails_firstQuestion.ruleset` file in the ~/OneRing/rules/application directory.
+The contents of a sample ruleset is listed below:
 
 ```groovy
 ruleset("ContactDetails") {

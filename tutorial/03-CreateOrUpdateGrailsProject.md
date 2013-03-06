@@ -19,15 +19,13 @@ grails.project.dependency.resolution = {
         //snip
 
         compile ':rendering:0.4.3'
-        compile ':goodform:1.0.0-SNAPSHOT'
-        compile ':goodform-extras:1.0.0-SNAPSHOT'
+        compile ':goodform:1.0'
+        compile ':simple-suggestions:0.1'
     }
 }
 ```
 
-We have also included the GoodForm Extras plugin which includes some additonal services, such as a predictive text service.
-
-_TODO change version number_
+We have also included the Simple Suggestions plugin which provides an autocomplete services that can be used by GoodForm.
 
 #Add Form Definition(s) to Bootstrap
 
@@ -70,19 +68,13 @@ class BootStrap {
                 formDefinition.save()
             }
 
-            suggestService.addSuggestionHandler('colour') { String term ->
-                File colorsNames = new File('colourNames.txt')
-                List<String> colours = []
-                colorsNames.eachLine { colours.add(it.toString())}
-                String q = term.toUpperCase()
-                return colours.findAll { it.toUpperCase().contains(q) }
-            }
-
 }
 ```
 
-This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).  However, the form demonstrates some key
-features of Goodform.
+Put a text file with colour names in a folder called suggestions. [See Suggestions Plugin] (http://nerderg.com/Simple+Suggestions+plugin)
+
+This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).
+However, the form demonstrates some key features of Goodform.
 
 #Naming convention
 
@@ -135,7 +127,7 @@ GoodForm supports the following field types 'out-of-the-box':
 * Headings
 * File attachments
 * Money
-* Check-boxes (booleans)
+* Check-boxes and Radio buttons (booleans)
 
 Hints can be added to fields by including a 'hint' attribute, eg
 
@@ -158,11 +150,12 @@ Repeating groups of fields can be specified using the 'listOf' attribute, eg.
 
 #Suggest entry
 
-The GoodForm Extras plugin includes support for predictive text suggestions.  This can be implemented by defining a field with a 'suggest' attribute, eg.
+The Simple Suggestions plugin includes support for predictive text suggestions.  This can be implemented by defining a
+field with a 'suggest' attribute, eg.
 
     "What is your favorite colour?" text: 20, suggest: "colour", map: 'faveColour'
 
-and registering a suggestion handler matching the value of the suggest attribute, eg.
+You can register a suggestion handler matching the value of the suggest attribute, eg.
 
 ```
 suggestService.addSuggestionHandler('colour') { String term ->
@@ -173,6 +166,8 @@ suggestService.addSuggestionHandler('colour') { String term ->
                 return colours.findAll { it.toUpperCase().contains(q) }
             }
 ```
+
+or you can just stick a text file with colour names on each line in the suggestions folder.
 
 ---
 
