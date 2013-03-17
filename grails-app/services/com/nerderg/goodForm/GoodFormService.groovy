@@ -7,7 +7,6 @@ import com.nerderg.goodForm.form.Form
 
 /**
  * Handles the rendering of form elements.
- * Todo add groupList method
  * Todo add a sanitised name method for each
  *
  */
@@ -507,4 +506,50 @@ class GoodFormService {
         }
     }
 
+    /**
+     * take a map of lists and invert/pivot to a list of maps
+     * So you pass a map that looks like this:
+     * <code>
+     *     [firstName: ['jim','jane'], lastName: ['smith','jones']]
+     * </code>
+     * and it returns
+     * <code>
+     *     [[firstName: 'jim', lastName: 'smith'], [firstName: 'jane', lastName: 'jones']]
+     * </code>
+     * @param mapOfLists
+     * @return listOfMaps
+     */
+    public List<Map> groupList(Map mapOfLists) {
+        List<Map> listOfMaps = []
+        mapOfLists.each { e ->
+            def value = e.value
+            if (value instanceof Map) {
+                //if it's a boolean it gets sub mapped to a yes:[..] so flatten
+                Map m = value
+                if (m.size() == 1) {
+                    if (m.yes) {
+                        value = m.yes
+                    }
+                }
+            }
+            if (value instanceof List) {
+                value.eachWithIndex { v, i ->
+                    getOrMakeMap(listOfMaps, i)[e.key] = (v == 'on' ? 'yes' : v)
+                }
+            } else {
+                getOrMakeMap(listOfMaps, 0)[e.key] = (value == 'on' ? 'yes' : value)
+            }
+        }
+        return listOfMaps
+    }
+
+    private Map getOrMakeMap(List<Map> source, int index) {
+        if (source.size() > index) {
+            return source[index]
+        } else {
+            Map n = [:]
+            source.add(n)
+            return n
+        }
+    }
 }
