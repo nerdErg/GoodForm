@@ -16,6 +16,14 @@ class GoodFormService {
 
     static List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading']
 
+    /**
+     * compile a form DSL string and return a form instance
+     * @param formDefinition
+     * @throws InvalidFormDefinitionException thrown if a form does not contain any questions
+     * @throws FieldNotFoundException thrown if question does not contain any fields
+     * @throws FieldNotMappedException thrown if a field does not contain a 'map' attribute
+     * @return
+     */
     Form compileForm(String formDefinition) {
         Script dsl = new GroovyShell().parse(formDefinition)
         Form form = processFormScript(dsl, new Form(goodFormService: this))
@@ -32,7 +40,16 @@ class GoodFormService {
       }
     }
 
-    Form processFormScript(Script dslScript, Form formInstance) {
+    /**
+     * Process a form DSL script and create a form structure under the formInstance
+     * @param dslScript
+     * @param formInstance
+     * @throws InvalidFormDefinitionException thrown if a form does not contain any questions
+     * @throws FieldNotFoundException thrown if question does not contain any fields
+     * @throws FieldNotMappedException thrown if a field does not contain a 'map' attribute
+     * @return the formInstance
+     */
+    private Form processFormScript(Script dslScript, Form formInstance) {
 
         dslScript.metaClass = createEMC(dslScript.class) {
             ExpandoMetaClass emc ->
@@ -49,7 +66,7 @@ class GoodFormService {
         return formInstance
     }
 
-    ExpandoMetaClass createEMC(Class clazz, Closure cl) {
+    private ExpandoMetaClass createEMC(Class clazz, Closure cl) {
 
         ExpandoMetaClass emc = new ExpandoMetaClass(clazz, false)
         cl(emc)
@@ -76,6 +93,11 @@ class GoodFormService {
         }
     }
 
+    /**
+     * Traverse the form element structure to get the form that this element belongs to.
+     * @param e
+     * @return a Form
+     */
     Form getFormFromElement(FormElement e) {
         def parent = e
         while (parent.parent) {
@@ -87,7 +109,12 @@ class GoodFormService {
         return null
     }
 
-    def String makeElementName(FormElement e) {
+    /**
+     * Using conventions from the Form DSL create the element name that will be the map reference.
+     * @param e
+     * @return the elements name
+     */
+    String makeElementName(FormElement e) {
         String name = ""
         if (e.attr.group) {
             name = e.attr.group
@@ -141,11 +168,26 @@ class GoodFormService {
         return null
     }
 
+    /**
+     * filter a user supplied name so it can be used as a map key. The name is usually a value in a list inserted by the
+     * rules engine from user input, e.g. a list of children, cars, dogs...
+     *
+     * @param name
+     * @return
+     */
     String filterName(String name) {
         String intermediate = name.replaceAll(/[^a-zA-Z 0-9]/, '')
         return intermediate.trim().replaceAll('  *', '_')
     }
 
+    /**
+     * Travers the map of maps to the desired field and return the value.
+     *
+     * @param map the map (of maps) to traverse to get the field
+     * @param field a String specifying the field in the map of maps, e.g G2.name.firstName
+     * @param index if the value is a list it returns the indexed value
+     * @return
+     */
     def findField(Map map, String field, Integer index = null) {
         return traverseMapToField(field, map) { lastMap, lastField ->
             def value = lastMap != null ? lastMap[lastField] : null
@@ -155,7 +197,7 @@ class GoodFormService {
 
     private traverseMapToField(String field, Map map, Closure closure) {
         String[] fieldSplit = field.split(/\./)
-        def lastMap = map
+        Map lastMap = map
         //traverse to the last, inner most map
         for (int i = 0; i < fieldSplit.size() - 1; i++) {
             String fieldName = fieldSplit[i]
@@ -177,8 +219,18 @@ class GoodFormService {
         return value
     }
 
+    /**
+     * Traverse the map to the desired field and set its value to value. If the field is not found it will throw a
+     * FieldNotFoundException.
+     *
+     * @param map the map (of maps) to traverse to get the field
+     * @param field a String specifying the field in the map of maps, e.g G2.name.firstName
+     * @param value the value to set the field
+     * @throws FieldNotFoundException
+     * @return the value
+     */
     def setField(Map map, String field, value) {
-        return traverseMapToField(field, map) { lastMap, lastField ->
+        return traverseMapToField(field, map) { Map lastMap, lastField ->
             if (lastMap) {
                 lastMap[lastField] = value
             } else {
@@ -187,8 +239,17 @@ class GoodFormService {
         }
     }
 
+    /**
+     * Remove the field specified from the map and return its value. If the field is not found it will throw a
+     * FieldNotFoundException.
+     *
+     * @param map the map (of maps) to traverse to get the field
+     * @param field a String specifying the field in the map of maps, e.g G2.name.firstName
+     * @throws FieldNotFoundException
+     * @return the value of the field removed,
+     */
     def removeField(Map map, String field) {
-        return traverseMapToField(field, map) { lastMap, lastField ->
+        return traverseMapToField(field, map) { Map lastMap, lastField ->
             if (lastMap) {
                 lastMap.remove(lastField)
             } else {
@@ -197,6 +258,12 @@ class GoodFormService {
         }
     }
 
+    /**
+     * Given a form element return it's type as a String from the known types. If the element doesn't have a type specified
+     * then it is a boolean type 'bool'
+     * @param e
+     * @return
+     */
     String getElementType(FormElement e) {
         String type = 'bool'
         if (e.attr) {
