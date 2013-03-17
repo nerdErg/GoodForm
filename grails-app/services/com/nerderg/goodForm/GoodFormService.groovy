@@ -7,6 +7,8 @@ import com.nerderg.goodForm.form.Form
 
 /**
  * Handles the rendering of form elements.
+ * Todo add groupList method
+ * Todo add a sanitised name method for each
  *
  */
 class GoodFormService {
