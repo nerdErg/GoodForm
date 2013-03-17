@@ -234,4 +234,4 @@ environments {
 
 Now that we have setup our Grails project, let's create the ruleset definitions.
 
-_Next_: [Create Ruleset Definitions](##04-CreateRulesetDefinitions.md##)
+_Next_: [Create Ruleset Definitions](04-CreateRulesetDefinitions.md)

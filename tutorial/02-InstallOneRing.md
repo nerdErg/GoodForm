@@ -19,4 +19,4 @@ or
 
 download the [OneRing + Tomcat package] (http://nerderg.com/media/show/1356?file=one-ring-0.9.2-apache-tomcat-7.0.22.zip)
 
-* _Next_: [Create or Update a Grails Project](##03-CreateOrUpdateGrailsProject.md##)
+* _Next_: [Create or Update a Grails Project](03-CreateOrUpdateGrailsProject.md)
