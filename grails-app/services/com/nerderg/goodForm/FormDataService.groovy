@@ -248,7 +248,7 @@ class FormDataService {
                 String basedir = grailsApplication.config.uploaded.file.location.toString() + 'applications/' + instance.id
                 File location = new File(basedir)
                 location.mkdirs()
-                def fieldSplit = formElement.attr.name.split(/\./)
+                List<String> fieldSplit = formElement.attr.name.split(/\./)
                 String filename = "${fieldSplit[0]}.${fieldSplit.last()}-${f.getOriginalFilename()}"
                 File upload = new File(location, filename)
                 f.transferTo(upload)
