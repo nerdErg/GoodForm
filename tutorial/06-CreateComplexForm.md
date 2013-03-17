@@ -177,5 +177,5 @@ The answers entered on the first page will be listed below the questions.
 
 ![Job Application Answered Questions](##job_application_answered_questions.png##)
 
-_Next_: [Customize Form Behaviour](##06-CustomizeFormBehaviour.md##)
+_Next_: [Customize Form Behaviour](06-CustomizeFormBehaviour.md)
 

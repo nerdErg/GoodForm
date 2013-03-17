@@ -94,4 +94,4 @@ In later steps of the tutorial, we will update these rulesets to include some mo
 
 Now that we have created our ruleset, we can now run our app to see the form in action.
 
-_Next_: [Run the Application](##05-RunApp.md##)
+_Next_: [Run the Application](05-RunApp.md)

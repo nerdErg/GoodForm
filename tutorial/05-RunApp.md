@@ -74,4 +74,4 @@ Let's revisit what we've done so far:
 
 Now let's create another sample form, this time demonstrating some more complexity in the ruleset definitions.
 
-_Next_: [Create Complex Form](##06-CreateComplexForm.md##)
+_Next_: [Create Complex Form](06-CreateComplexForm.md)

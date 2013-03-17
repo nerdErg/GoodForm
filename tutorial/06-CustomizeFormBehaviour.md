@@ -61,4 +61,4 @@ environments {
 
 Now when we click the 'Submit' link, a PDF will be generated in the goodform_tutorial/form
 
-_Next_: [Custom Validators](##07-CustomValidators.md##)
+_Next_: [Custom Validators](07-CustomValidators.md)
