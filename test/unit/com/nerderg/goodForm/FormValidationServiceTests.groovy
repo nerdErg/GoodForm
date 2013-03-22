@@ -29,7 +29,7 @@ class FormValidationServiceTests {
         form.question("Q1") {
             "New Validator" text: 50, required: true, validate: 'newValidator'
         }
-        Question question = form.getAt("Q1")
+        Question question = form["Q1"]
         def error = service.customValidation(question.formElement, 'abc')
         assertTrue("Error was not detected", error)
     }
@@ -41,7 +41,7 @@ class FormValidationServiceTests {
         form.question("Q1") {
             "New Validator" text: 50, required: true, validate: 'newValidator'
         }
-        Question question = form.getAt("Q1")
+        Question question = form["Q1"]
         def error = service.customValidation(question.formElement, 'abc')
         assertFalse("Error was not detected", error)
     }
