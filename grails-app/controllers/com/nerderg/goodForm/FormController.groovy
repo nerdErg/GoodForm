@@ -16,10 +16,21 @@ class FormController {
 
     def rulesEngineService
 
+    /**
+     * default view. By default this allows you to create a new form from the list of form instances available.
+     * @return
+     */
     def index() {
         render(view: '/form/index', plugin: 'GoodForm')
     }
 
+    /**
+     * A place holder action for the final submission of a completed form. You should override this action to handle the
+     * completed form data.
+     *
+     * @param id
+     * @return
+     */
     def submit(Long id) {
         render(view: '/form/submit', plugin: 'GoodForm')
     }
@@ -60,6 +71,12 @@ class FormController {
         [:]
     }
 
+    /**
+     * Continue editing a form from where it was left. This is called from the 'Back' action after setting the next
+     * question attribute in the form data.
+     * @param id
+     * @return
+     */
     def continueForm(Long id) {
         log.debug "continue: $params"
         FormInstance formInstance = formDataService.getFormInstance(id)
@@ -88,8 +105,10 @@ class FormController {
     }
 
     /**
-     * Invoked when the 'Submit' button is clicked on a form.
+     * Invoked when the 'Submit' button is clicked on a form. This action processes the form data and then shows the
+     * next set of questions based on the response from the rules engine.
      *
+     * @param instanceId the form instance id.
      */
     def next(Long instanceId) {
         log.debug "next: $params"
@@ -148,7 +167,11 @@ class FormController {
     }
 
     /**
-     *  Invoked when a user clicks the 'Back' button on a multi-page form.
+     *  Invoked when a user clicks the 'Back' button on a multi-page form. The back button is the form panel you wish to
+     *  edit. The javascript for the panel supplies the question set to go back to as an index into the 'state' variable.
+     *
+     *  @param id the form instance id
+     *  @param qset the index of the question set in the state array
      */
     def back(Long id, int qset) {
         log.debug "back: $params"
@@ -167,7 +190,12 @@ class FormController {
     }
 
     /**
-     * Handles the final submission of a form.
+     * Handles the end of a form. If the next questions returned by the rules engine is 'End' it redirects to here to
+     * display the form in a text readable format. Here we ask the rules engine to check all required fields and documents
+     * have been supplied. Documents and optional fields may have been skipped, but are required based on certain
+     * responses to questions.
+     *
+     * @param id the form instance id
      */
     def endForm(Long id) {
         log.debug "end: $params"
@@ -189,7 +217,13 @@ class FormController {
     }
 
     /**
-     * Displays a read-only view of a form.
+     * Displays a text view of a form. This displays the form in a text readable format. If the form is editable, clicking
+     * on a form pane will take you back to edit that panel. If a name parameter is supplied then a pdf rendered version
+     * of this view will be returned to the browser. The name forms part of the url and so the pdf version will be given
+     * the name by default.
+     *
+     * @param id form instance id
+     * @param name the name given to the PDF rendered file.
      */
     def view(Long id, String name) {
         log.debug "view: $params"
