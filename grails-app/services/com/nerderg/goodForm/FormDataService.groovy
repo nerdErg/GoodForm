@@ -231,8 +231,8 @@ class FormDataService {
 
 
         if (fieldValue instanceof String[]) {
-            fieldValue.each {
-                error = validateField(formElement, it, error)
+            fieldValue.each { String fv ->
+                error = validateField(formElement, fv, error)
             }
         } else if (fieldValue instanceof MultipartFile) {
             error = validateField(formElement, fieldValue.getName(), error)
@@ -308,7 +308,7 @@ class FormDataService {
      * @param error
      * @return true if the field contains errors, false if not
      */
-    boolean validateField(FormElement formElement, String fieldValue, boolean error) {
+    boolean validateField(FormElement formElement, fieldValue, boolean error) {
 
         //iterate over validators
         validators.each { Closure validator ->

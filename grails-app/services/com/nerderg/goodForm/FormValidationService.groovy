@@ -29,8 +29,11 @@ class FormValidationService {
     def hasError(FormElement formElement, String fieldValue) {
         def validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
-        if (validator)
+        if (validator) {
             return validator(formElement, fieldValue)
+        } else {
+            throw new FormValidatorMissingException("No validator called $validationName found. Add it using formValidationService.addCustomValidator()")
+        }
     }
 
 
@@ -45,7 +48,23 @@ class FormValidationService {
         }
         return error
     }
+}
 
+class FormValidatorMissingException extends Exception {
+    def FormValidatorMissingException() {
+        super()
+    }
 
+    def FormValidatorMissingException(String message) {
+        super(message)
+    }
+
+    def FormValidatorMissingException(String message, Throwable cause) {
+        super(message, cause)
+    }
+
+    def FormValidatorMissingException(Throwable cause) {
+        super(cause)
+    }
 
 }
