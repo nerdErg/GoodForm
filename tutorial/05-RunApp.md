@@ -1,3 +1,6 @@
+Run the Grails app
+===
+
 Once the ruleset(s) and form definition has been defined, we can now run the `goodform_tutorial` Grails application.
 
 We first need to run the OneRing Grails application - this will act as a web service that responds to requests from our
@@ -17,20 +20,20 @@ Navigate to [http://localhost:8080/goodform_tutorial/contactDetailsForm].
 
 You should see the following content:
 
-![Sample Controller](##sample-controller.png##)
+![Sample Controller](img/sample-controller.png)
 
 Clicking on the `New Form` link invokes our `createForm()` controller method:
 
-![Sample Form](##sample-form.png##)
+![Sample Form](img/sample-form.png)
 
 If we try to submit the form without filling in any of the fields, we get an error message.
 
-![Mandatory fields](##mandatory-fields.png##)
+![Mandatory fields](img/mandatory-fields.png)
 
 Once we fill in the mandatory fields and click submit, a confirmation screen is displayed. This displays the form contents
 in a easy to read format. You can click on the question panel to go back and edit the form.
 
-![Confirmation](##form-confirmation.png##)
+![Confirmation](img/form-confirmation.png)
 
 The completed form is stored in the FORM_INSTANCE table.  The contents of the form are contained
 within the FORM_DATA column, and are contained in JSON format, eg.
