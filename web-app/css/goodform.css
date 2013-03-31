@@ -133,11 +133,11 @@ div.goodFormContainer .inlineFields .name {
 div.goodFormContainer .roundbox,
 div.goodFormContainer .qset,
 div.goodFormContainer .qsetReadOnly {
-    margin-top: 10px;
-    border: 1px solid;
-    border-radius: 10px;
+    margin-top: 0.5em;
+    border: 1px solid #333333;
+    border-radius: 0.5em;
     box-shadow: 3px 3px 3px #AAAAAA;
-    padding: 10px;
+    padding: 0.5em;
 }
 
 div.goodFormContainer .roundbox.activity {
@@ -149,8 +149,21 @@ div.goodFormContainer .qset {
     background: #EDFFC6;
 }
 
+div.goodFormContainer .qset:hover {
+    background: #D0FF70;
+    box-shadow: 5px 5px 5px 4px #999999;
+}
+
 div.goodFormContainer .qsetReadOnly {
     background: #FEFCF2;
+}
+div.goodFormContainer div.clickToEdit {
+    color: #999999;
+    float: right;
+}
+div.goodFormContainer .qset:hover div.clickToEdit {
+    color: #333333;
+    float: right;
 }
 
 div.goodFormContainer .prop {
@@ -191,6 +204,7 @@ div.goodFormContainer div.preamble {
 div.goodFormContainer div.textNote {
     white-space: pre-line;
 }
+
 
 /* Completed form view related CSS */
 div.goodFormContainer div.goodformView {
