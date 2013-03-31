@@ -1,3 +1,6 @@
+Install OneRing
+====
+
 The Goodforms plugin for Grails is dependant on a [OneRing](http://nerderg.com/One+Ring) instance running.  OneRing provides a web service
 that will provide information to Goodforms regarding the question sets to be displayed based on where the processing
 of a form instance is up to.

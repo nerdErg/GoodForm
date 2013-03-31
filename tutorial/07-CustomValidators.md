@@ -1,3 +1,6 @@
+Custom Validators
+===
+
 Now let's define some custom validation logic for our JobApplication form.
 
 An easy way to add a custom validator is to extend the `FormValidationService` class,

@@ -1,3 +1,6 @@
+Introduction
+====
+
 This tutorial contains the following steps:
 
 * [Install OneRing](02-InstallOneRing.md)
@@ -8,4 +11,4 @@ This tutorial contains the following steps:
     - [add functionality and behaviour](06-CustomizeFormBehaviour.md)
     - [add validators](07-CustomValidators.md)
 
-* _Next_: [Install OneRing](##02-InstallOneRing.md##)
+* _Next_: [Install OneRing](02-InstallOneRing.md)

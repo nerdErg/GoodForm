@@ -1,3 +1,6 @@
+Complex Forms
+===
+
 Let's now create a new form that will span several pages.  Add the following to your BootStrap.groovy file:
 
 ```groovy
@@ -167,15 +170,15 @@ and go to http://localhost:8080/goodform_tutorial/jobApplication/createForm
 
 This will display the first three questions of the form.
 
-![Job Application Page 1](##job_application_page_1.png##)
+![Job Application Page 1](img/job_application_page_1.png)
 
 Upon entering the mandatory fields and clicking submit, the second page of form questions will be displayed.
 
-![Job Application Page 2](##job_application_page_2.png##)
+![Job Application Page 2](img/job_application_page_2.png)
 
 The answers entered on the first page will be listed below the questions.
 
-![Job Application Answered Questions](##job_application_answered_questions.png##)
+![Job Application Answered Questions](job_application_answered_questions.png)
 
 _Next_: [Customize Form Behaviour](06-CustomizeFormBehaviour.md)
 

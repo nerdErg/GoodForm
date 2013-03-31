@@ -1,3 +1,6 @@
+Security
+===
+
 Now let's create a more complicated form that simulates a loan application which uses [Spring Security](http://grails.org/plugin/spring-security-core).
 
 Update the `grails-app\conf\BuildConfig.groovy` file in the `goodform_tutorial` project to include the following

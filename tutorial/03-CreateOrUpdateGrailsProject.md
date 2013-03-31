@@ -1,3 +1,6 @@
+Create (or update) Grails Project
+====
+
 # Install Plugin
 
 We can now install the GoodForm plugin within a Grails project.
@@ -102,7 +105,7 @@ eg.
 The `map` attribute is required for all fields (except `group` and `list` fields).  If a map attribute is not defined, then
 a FieldNotMappedException will be thrown when the form is rendered.
 
-![Field Not Mapped](##field-not-mapped.png##)
+![Field Not Mapped](img/field-not-mapped.png)
 
 #Sub-fields
 

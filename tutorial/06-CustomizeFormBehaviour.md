@@ -1,3 +1,6 @@
+Customize the form behaviour
+===
+
 Let's customize the JobApplicationController to generate a PDF of the entered form.
 
 First, include the pdfRenderingService within the controller and override the submit() method:
