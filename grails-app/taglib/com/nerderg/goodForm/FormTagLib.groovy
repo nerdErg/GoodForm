@@ -13,6 +13,7 @@ import com.nerderg.goodForm.form.FormElement
  * <li>{@link FormTagLib#element} - </li>
  * </ul>
  *
+ * @author Peter McNeil
  */
 class FormTagLib {
 

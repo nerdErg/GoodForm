@@ -1,7 +1,9 @@
 package com.nerderg.goodForm
 
 /**
+ * Custom taglib which can be used to render help for form elements.
  *
+ * @author Peter McNeil
  */
 class HelpTagLib {
     def help = {attrs, body ->

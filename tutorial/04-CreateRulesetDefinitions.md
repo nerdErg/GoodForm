@@ -26,6 +26,8 @@ ruleset("ContactDetails") {
 }
 ```
 
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-f...tutorial-step4-a)
+
 Let's look at this file line by line...
 
 ```groovy
@@ -87,6 +89,8 @@ ruleset("ContactDetailsQ2") {
     }
 }
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step4-a...tutorial-step4-b)
 
 This ruleset is saying that when Q1 has been submitted, we can end the form process.
 

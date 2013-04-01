@@ -75,6 +75,8 @@ Let's now create a new form that will span several pages.  Add the following to 
 
 ```
 
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step4-b...tutorial-step6-a)
+
 This creates a JobApplication form definition, which contains six questions.
 
 This form adds some extra form elements, notably:
@@ -144,6 +146,8 @@ ruleset("JobApplicationJob6") {
 }
 ```
 
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step6-a...tutorial-step6-b)
+
 Let's go back to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
 
     grails create-controller JobApplicationForm
@@ -162,6 +166,8 @@ class JobApplicationFormController extends FormController {
 }
 ```
 
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step6-b...tutorial-step6-c)
+
 Once this has been done, run
 
     grails compile
@@ -178,7 +184,7 @@ Upon entering the mandatory fields and clicking submit, the second page of form 
 
 The answers entered on the first page will be listed below the questions.
 
-![Job Application Answered Questions](job_application_answered_questions.png)
+![Job Application Answered Questions](img/job_application_answered_questions.png)
 
 _Next_: [Customize Form Behaviour](06-CustomizeFormBehaviour.md)
 

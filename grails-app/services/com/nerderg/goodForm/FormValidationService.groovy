@@ -13,6 +13,9 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
  * def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
  * ctx.formDataService.addValidator({formElement, fieldValue -> ctx.customValidationService.validateSomeField(formElement, fieldValue)})
  * </pre>
+ *
+ * @author Peter McNeil
+ * @author Ross Rowe
  */
 class FormValidationService {
 
@@ -26,6 +29,12 @@ class FormValidationService {
         customValidationMap.put(validationName, closure)
     }
 
+    /**
+     *
+     * @param formElement
+     * @param fieldValue
+     * @return
+     */
     def hasError(FormElement formElement, String fieldValue) {
         def validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
@@ -50,6 +59,10 @@ class FormValidationService {
     }
 }
 
+/**
+ *
+ * @author Peter McNeil
+ */
 class FormValidatorMissingException extends Exception {
     def FormValidatorMissingException() {
         super()

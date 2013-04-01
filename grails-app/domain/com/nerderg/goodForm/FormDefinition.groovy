@@ -2,6 +2,8 @@ package com.nerderg.goodForm
 
 /**
  * Handles persisting the form definition in the database.
+ *
+ * @author Peter McNeil
  */
 class FormDefinition {
 

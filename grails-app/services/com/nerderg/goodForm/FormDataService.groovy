@@ -15,6 +15,8 @@ import javax.annotation.PostConstruct
 
 /**
  * Handles processing and validating form data.
+ *
+ * @author Peter McNeil
  */
 class FormDataService {
 
@@ -505,6 +507,11 @@ class FormDataService {
     }
 
 }
+/**
+ * Custom exception thrown when errors are detected in the processing of form definitions.
+ *
+ * @author Peter McNeil
+ */
 class FormDataException extends Exception {
     def FormDataException() {
         super()

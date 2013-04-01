@@ -4,6 +4,8 @@ import grails.converters.JSON
 
 /**
  * Represents a form submission for a user.
+ *
+ * @author Peter McNeil
  */
 class FormInstance {
 
