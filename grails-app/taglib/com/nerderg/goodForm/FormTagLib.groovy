@@ -30,7 +30,7 @@ class FormTagLib {
         goodFormService.findField(bean, field, index)
     }
 
-    def element = {attrs ->
+    def element = { attrs ->
         FormElement e = attrs.element
         Map store = attrs.store
         Integer index = attrs.index
@@ -93,7 +93,7 @@ class FormTagLib {
         }
     }
 
-    def date = {FormElement e, Map store, Integer index, boolean disabled ->
+    def date = { FormElement e, Map store, Integer index, boolean disabled ->
         e.attr.name = makeElementName(e)
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         out << nerderg.datefield(label: e.text, value: value, format: e.attr.date, field: e.attr.name, error: e.attr.error, disabled: disabled) {
@@ -101,7 +101,7 @@ class FormTagLib {
         }
     }
 
-    def datetime = {FormElement e, Map store, Integer index, boolean disabled ->
+    def datetime = { FormElement e, Map store, Integer index, boolean disabled ->
         e.attr.name = makeElementName(e)
         def value = findFieldValue(store, e.attr.name, index)
         String datetime = (value && value instanceof Map) ? "$value.date $value.time" : ''
@@ -126,7 +126,7 @@ class FormTagLib {
         }
     }
 
-    def pick = {FormElement e, Map store, Integer index, boolean disabled ->
+    def pick = { FormElement e, Map store, Integer index, boolean disabled ->
         out << "<div class='prop'><span class='name'>$e.text<span class='required'>${e.attr.required ? '*' : ''}</span></span>"
         out << "<div class='questionPick'>"
         e.attr.name = makeElementName(e)
@@ -345,6 +345,7 @@ class FormTagLib {
                 out << "<div class='qset' title='"
                 out << g.message(code: "goodform.click.edit")
                 out << "' id='${formInstance.id}/${i}'>"
+                out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
                 out << qSet.toString()
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
                     out << element([element: q.formElement, store: formData, disabled: true])
@@ -368,6 +369,7 @@ class FormTagLib {
             out << "<div class='qset' title='"
             out << g.message(code: "goodform.click.edit")
             out << "' id='${formInstance.id}/${i}'>"
+            out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
             goodFormService.withQuestions(qSet, questions) { q, qRef ->
                 out << element([element: q.formElement, store: formData, disabled: true])
             }
@@ -385,75 +387,74 @@ class FormTagLib {
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(formInstance.getFormDefinition())
-        Boolean compress = false //attrs.compress || attrs.readOnly
 
         List state = formInstance.storedState()
         def i = state.size() - 1
         state.each() { List qSet ->
+            if (!qSet.isEmpty() && qSet[0] != 'End') {
+                List output = []
+                Boolean contentPresent = false
 
-            List output = []
-            Boolean contentPresent = false
-
-            goodFormService.withQuestions(qSet, questions) { q, qRef ->
-                String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent, type ->
-                    if (type == 'heading') {
-                        String res
-                        switch (value) {
-                            case 1:
-                                res = "<h1>${label.encodeAsHTML()}</h1>"
-                                break
-                            case 2:
-                                res = "<h3>${label.encodeAsHTML()}</h3>"
-                                break
-                            default:
-                                res = "<h3>${label.encodeAsHTML()}</h3>"
-                        }
-                        return res
-
-                    } else {
-                        Boolean answerPresent = (value && value != 'No')
-                        contentPresent = contentPresent || answerPresent
-                        if (compress && !answerPresent) {
-                            return ''
-                        }
-                        String res = "<div class='goodformView'>"
-                        res += "${indent.replaceAll(' ', '&nbsp;')}"
-                        res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
-                        if (value) {
-                            if (value instanceof String && value.contains("\n")) {
-                                res += "<div class='textNote'>${value.encodeAsHTML()}</div>"
-                            } else {
-                                res += "${value.encodeAsHTML()}"
+                goodFormService.withQuestions(qSet, questions) { q, qRef ->
+                    String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent, type ->
+                        if (type == 'heading') {
+                            String res
+                            switch (value) {
+                                case 1:
+                                    res = "<h1>${label.encodeAsHTML()}</h1>"
+                                    break
+                                case 2:
+                                    res = "<h3>${label.encodeAsHTML()}</h3>"
+                                    break
+                                default:
+                                    res = "<h3>${label.encodeAsHTML()}</h3>"
                             }
+                            return res
+
                         } else {
-                            res += " - "
+                            Boolean answerPresent = (value && value != 'No')
+                            contentPresent = contentPresent || answerPresent
+
+                            String res = "<div class='goodformView'>"
+                            res += "${indent.replaceAll(' ', '&nbsp;')}"
+                            res += "${label ? "<span class='label'>${label.encodeAsHTML()}:</span>" : ''} "
+                            if (value) {
+                                if (value instanceof String && value.contains("\n")) {
+                                    res += "<div class='textNote'>${value.encodeAsHTML()}</div>"
+                                } else {
+                                    res += "${value.encodeAsHTML()}"
+                                }
+                            } else {
+                                res += " - "
+                            }
+                            res += "&nbsp;${units ? units.encodeAsHTML() : ''}</div>"
+                            return res
                         }
-                        res += "&nbsp;${units ? units.encodeAsHTML() : ''}</div>"
-                        return res
                     }
+                    output.add(qa)
                 }
-                output.add(qa)
-            }
 
 
-            if (!compress || contentPresent) {
-                if (attrs.readOnly) {
-                    out << "<div class='qsetReadOnly' style='page-break-inside: avoid;'>"
-                } else {
-                    out << "<div class='qset' title='"
-                    out << g.message(code: "goodform.click.edit")
-                    out << "' id='${formInstance.id}/${i}'>"
+                if (contentPresent) {
+                    if (attrs.readOnly) {
+                        out << "<div class='qsetReadOnly' style='page-break-inside: avoid;'>"
+                    } else {
+                        out << "<div class='qset' title='"
+                        out << g.message(code: "goodform.click.edit")
+                        out << "' id='${formInstance.id}/${i}'>"
+                        out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
+                    }
+                    output.each { out << it }
+                    out << "</div>"
                 }
-                output.each { out << it }
-                out << "</div>"
+                i--
             }
-            i--
+            log.debug "end display tag"
         }
-        log.debug "end display tag"
     }
 
     /**
-     * 
+     *
      */
     def displayFilteredText = { attrs ->
         log.debug "in display tag $attrs"
