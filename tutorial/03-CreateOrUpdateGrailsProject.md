@@ -28,6 +28,8 @@ grails.project.dependency.resolution = {
 }
 ```
 
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-a...tutorial-step3-b)
+
 We have also included the Simple Suggestions plugin which provides an autocomplete services that can be used by GoodForm.
 
 #Add Form Definition(s) to Bootstrap
@@ -74,7 +76,9 @@ class BootStrap {
 }
 ```
 
-Put a text file with colour names in a folder called suggestions. [See Suggestions Plugin] (http://nerderg.com/Simple+Suggestions+plugin)
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-b...tutorial-step3-c)
+
+Put a text file with colour names in a folder called `suggestions`. [See Suggestions Plugin] (http://nerderg.com/Simple+Suggestions+plugin)
 
 This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).
 However, the form demonstrates some key features of Goodform.
@@ -174,7 +178,7 @@ or you can just stick a text file with colour names on each line in the suggesti
 
 ---
 
-The [goodform example]() source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
+The [goodform example](http://github.com/nerdErg/GoodForm-Tutorial) source code includes two sample form definitions defined in the `BootStrap.groovy` file.  The first
 form is a simple form intended to be displayed on a single page, which only contains three questions.  The second form is
 more complex, and is intended to be displayed over several pages.
 
@@ -202,6 +206,9 @@ class ContactDetailsFormController extends FormController {
 
 }
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-c...tutorial-step3-d)
+
 Forms can be served up without the controller, we just need to reference `/goodform_tutorial/form/createForm?formName='ContactDetails'`
 However, having a specific controller allows you to specify custom behaviour during the form lifecycle operations (eg.
 send an email/generate a PDF), which we will cover later.
@@ -215,6 +222,8 @@ Update the `grails-app\views\layouts\main.gsp` to include the following lines
 ```
 
 This line should be included before the <g:layoutHead/> line.
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-d...tutorial-step3-e)
 
 #Reference OneRing location
 
@@ -234,6 +243,8 @@ environments {
     }
 }
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-e...tutorial-step3-f)
 
 Now that we have setup our Grails project, let's create the ruleset definitions.
 

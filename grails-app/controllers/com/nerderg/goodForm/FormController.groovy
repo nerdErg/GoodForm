@@ -7,8 +7,11 @@ import net.sf.json.JSONObject
 import grails.converters.JSON
 
 /**
- * Controller which manages the display of goodform forms. This class can be subclassed if custom behaviour is required.
+ * Controller which manages the display of <a href="http://nerderg.com/Good+Form">GoodForm</a> forms.
  *
+ * This class can be subclassed if custom behaviour is required.
+ *
+ * @author Peter McNeil
  */
 class FormController {
 
@@ -17,7 +20,7 @@ class FormController {
     def rulesEngineService
 
     /**
-     * default view. By default this allows you to create a new form from the list of form instances available.
+     * Default view. By default this allows you to create a new form from the list of form instances available.
      * @return
      */
     def index() {
@@ -44,6 +47,9 @@ class FormController {
      * <li>Form name must be supplied as an input parameter (eg. http://localhost:8080/your-app/form/createForm?form=jobForm Instance)</li>
      * </ul>
      *
+     * @param formName the name of the form definition.  Must be a reference to an existing form definition, or the request will be redirected back to the index
+     * with an error
+     *
      */
     def createForm(String formName) {
         log.debug "apply: $params"
@@ -67,6 +73,11 @@ class FormController {
         }
     }
 
+    /**
+     * The default behaviour is to return an empty map, but subclasses can override this method to provide a custom
+     * map of applicable rule facts.
+     * @return map of rule faces
+     */
     public Map getRuleFacts() {
         [:]
     }
@@ -170,10 +181,10 @@ class FormController {
      *  Invoked when a user clicks the 'Back' button on a multi-page form. The back button is the form panel you wish to
      *  edit. The javascript for the panel supplies the question set to go back to as an index into the 'state' variable.
      *
-     *  @param id the form instance id
-     *  @param qset the index of the question set in the state array
+     * @param id the form instance id
+     * @param questionSetIndex the index of the question set in the state array
      */
-    def back(Long id, int qset) {
+    def back(Long id, int questionSetIndex) {
         log.debug "back: $params"
         FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
@@ -182,7 +193,7 @@ class FormController {
         }
 
         List<List> state = formInstance.storedState()
-        List currentQ = state.reverse()[qset]
+        List currentQ = state.reverse()[questionSetIndex]
         formInstance.storeCurrentQuestion(currentQ)
         formInstance.storeState(formDataService.truncateState(state, currentQ))
         formInstance.save(flush: true)
@@ -218,9 +229,10 @@ class FormController {
 
     /**
      * Displays a text view of a form. This displays the form in a text readable format. If the form is editable, clicking
-     * on a form pane will take you back to edit that panel. If a name parameter is supplied then a pdf rendered version
-     * of this view will be returned to the browser. The name forms part of the url and so the pdf version will be given
-     * the name by default.
+     * on a form pane will take you back to edit that panel.
+     *
+     * If a name parameter is supplied then a PDF rendered version of this view will be returned to the browser. The name f
+     * orms part of the url and so the pdf version will be given the name by default.
      *
      * @param id form instance id
      * @param name the name given to the PDF rendered file.

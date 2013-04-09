@@ -31,10 +31,10 @@ Good form features a form definition DSL that allows rapid human readable form c
     <compile>
       <plugin group='org.grails.plugins' name='jquery-ui' version='1.8.24' />
       <plugin group='org.grails.plugins' name='rendering' version='0.4.3' />
-      <plugin group='org.grails.plugins' name='hibernate' version='2.1.1' />
-      <plugin group='org.grails.plugins' name='nerderg-form-tags' version='2.1.3' />
-      <plugin group='org.grails.plugins' name='cxf' version='1.0.7' />
       <plugin group='org.grails.plugins' name='jquery' version='1.8.3' />
+      <plugin group='org.grails.plugins' name='cxf' version='1.0.7' />
+      <plugin group='org.grails.plugins' name='nerderg-form-tags' version='2.1.3' />
+      <plugin group='org.grails.plugins' name='hibernate' version='2.1.1' />
     </compile>
   </plugins>
   <runtimePluginRequirements />

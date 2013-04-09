@@ -1,9 +1,9 @@
 package com.nerderg.goodForm
 
 /**
- * User: pmcneil
- * Date: 6/08/12
- * 
+ * Exception that is thrown when invalid or missing fields are detected.
+ *
+ * @author Peter McNeil
  */
 class FieldNotFoundException extends GoodFormException {
     FieldNotFoundException() {

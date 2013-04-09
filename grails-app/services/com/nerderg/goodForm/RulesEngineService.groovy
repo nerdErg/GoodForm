@@ -6,7 +6,9 @@ import org.apache.http.client.ClientProtocolException
 import groovyx.net.http.URIBuilder
 
 /**
- * Handles making REST requests to a One-Ring instance to process rules.
+ * Handles making REST requests to a <a href="">One-Ring</a> instance to process rules.
+ *
+ * @author Peter McNeil
  */
 class RulesEngineService {
 

@@ -17,7 +17,7 @@ class JobApplicationController extends FormController {
     @Override
     def submit(Long id) {
 
-        FormInstance formInstance = formDataService.getInstance(id)
+        FormInstance formInstance = formDataService.getFormInstance(id)
         Map formData = formInstance.storedFormData()
         File location = new File(grailsApplication.config.goodform.uploaded.file.location.toString() + '/form/' + id)
         location.mkdirs()
@@ -29,6 +29,8 @@ class JobApplicationController extends FormController {
     }
 }
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step6-c...tutorial-step7-a)
 
 We also need to define a template that will be used to render the PDF.  Let's create a _view.gsp file in the `grails-app/views/jobApplication`
 directory with the following contents:
@@ -46,10 +48,11 @@ directory with the following contents:
 <div class="goodFormContainer">
   <form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${formInstance.readOnly}"/>
 </div>
-</div>
 </body>
 </html>
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step7-a...tutorial-step7-b)
 
 We also need to update our `grails-app/conf/Config.groovy' to define the location where we want the PDF to be stored, eg:
 
@@ -61,6 +64,8 @@ environments {
     }
 }
 ```
+
+[Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step7-b...tutorial-step7-c)
 
 Now when we click the 'Submit' link, a PDF will be generated in the goodform_tutorial/form
 
