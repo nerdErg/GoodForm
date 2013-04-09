@@ -379,7 +379,7 @@ class FormTagLib {
     }
 
     /**
-     *
+     * Displays a text version of the form and data to view
      */
     def displayText = { attrs ->
         log.debug "in display tag $attrs"

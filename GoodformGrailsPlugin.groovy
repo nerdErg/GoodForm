@@ -18,7 +18,7 @@ Good form features a form definition DSL that allows rapid human readable form c
 '''
 
     // URL to the plugin's documentation
-    def documentation = "http://grails.org/plugin/goodform"
+    def documentation = "http://nerderg.com/Good+Form"
 
     // Extra (optional) plugin metadata
 
