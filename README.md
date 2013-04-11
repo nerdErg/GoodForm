@@ -4,4 +4,4 @@ Good Form is a grails plugin that lets you create easy to use, good looking, eas
 
 Checkout the [documentation] (http://nerderg.com/Good+Form)
 
-And the [Tutorial] (01-Introduction)
+And the [Tutorial] (tutorial/01-Introduction)
