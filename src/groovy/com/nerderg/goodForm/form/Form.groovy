@@ -1,29 +1,23 @@
 package com.nerderg.goodForm.form
 
-
 /**
- *
  * Form contains the set of form questions retrieved from a form definition.
  *
  * User: pmcneil
  * Date: 11/11/11
- * 
  */
 class Form {
 
     def goodFormService
     Long version
     String name
-    def parent = null
+    def parent
     List<Question>  questions = []
     Map<String, Closure> updates = [:]
     Long formDefinitionId
 
     Question getAt(String index) {
-        Question q = questions.find{
-            it.ref == index
-        }
-        return q
+        questions.find { it.ref == index }
     }
 
     /**

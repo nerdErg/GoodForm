@@ -1,7 +1,9 @@
 package com.nerderg.goodForm
 
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.servlet.support.RequestContextUtils
+
 import com.nerderg.goodForm.form.FormElement
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
 
 /**
  * Contains custom validators for form elements. This class should be subclassed to include project-specific validation
@@ -10,8 +12,12 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
  * Projects using Goodforms can add a custom validation service by executing the following as part of the Bootstrap:
  *
  * <pre>
- * def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
- * ctx.formDataService.addValidator({formElement, fieldValue -> ctx.customValidationService.validateSomeField(formElement, fieldValue)})
+ * def customValidationService
+ * def formDataService
+ *
+ * def init = { servletContext ->
+ *    formDataService.addValidator({formElement, fieldValue -> customValidationService.validateSomeField(formElement, fieldValue)})
+ * }
  * </pre>
  *
  * @author Peter McNeil
@@ -19,13 +25,13 @@ import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
  */
 class FormValidationService {
 
-    def g = new ValidationTagLib()
+    static transactional = false
 
-    static transactional = true
+    def messageSource
 
-    def customValidationMap = [:]
+    private customValidationMap = [:]
 
-    def addCustomValidator(String validationName, Closure closure) {
+    void addCustomValidator(String validationName, Closure closure) {
         customValidationMap.put(validationName, closure)
     }
 
@@ -35,24 +41,25 @@ class FormValidationService {
      * @param fieldValue
      * @return
      */
-    def hasError(FormElement formElement, String fieldValue) {
+    boolean hasError(FormElement formElement, String fieldValue) {
         def validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
-        if (validator) {
-            return validator(formElement, fieldValue)
-        } else {
+        if (!validator) {
             throw new FormValidatorMissingException("No validator called $validationName found. Add it using formValidationService.addCustomValidator()")
         }
+        return validator(formElement, fieldValue)
     }
-
 
     /**
      * Invokes the validation method corresponding the the 'validate' attribute.
      */
-    def customValidation = {FormElement formElement, String fieldValue ->
-        def error = false
+    def customValidation = { FormElement formElement, String fieldValue ->
+        boolean error = false
         if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
-            formElement.attr.error += g.message(code: "goodform.validate." + formElement.attr.validate + ".invalid")
+            String code = "goodform.validate." + formElement.attr.validate + ".invalid"
+            def request = RequestContextHolder.requestAttributes?.request
+            def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
+            formElement.attr.error += messageSource.getMessage(code, null, code, locale) ?: code
             error = true
         }
         return error
@@ -64,20 +71,19 @@ class FormValidationService {
  * @author Peter McNeil
  */
 class FormValidatorMissingException extends Exception {
-    def FormValidatorMissingException() {
+    FormValidatorMissingException() {
         super()
     }
 
-    def FormValidatorMissingException(String message) {
+    FormValidatorMissingException(String message) {
         super(message)
     }
 
-    def FormValidatorMissingException(String message, Throwable cause) {
+    FormValidatorMissingException(String message, Throwable cause) {
         super(message, cause)
     }
 
-    def FormValidatorMissingException(Throwable cause) {
+    FormValidatorMissingException(Throwable cause) {
         super(cause)
     }
-
 }

@@ -22,11 +22,11 @@ class FormTagLib {
 
     static namespace = "form"
 
-    def String makeElementName(FormElement e) {
+    String makeElementName(FormElement e) {
         goodFormService.makeElementName(e)
     }
 
-    private def findFieldValue(Map bean, String field, Integer index = null) {
+    private findFieldValue(Map bean, String field, Integer index = null) {
         goodFormService.findField(bean, field, index)
     }
 
@@ -34,7 +34,7 @@ class FormTagLib {
         FormElement e = attrs.element
         Map store = attrs.store
         Integer index = attrs.index
-        boolean disabled = attrs.disabled ? attrs.disabled : false
+        boolean disabled = attrs.disabled ?: false
 
         String type = goodFormService.getElementType(e)
 
@@ -191,7 +191,7 @@ class FormTagLib {
 
     }
 
-    private def listSize(Map store, String listName) {
+    private int listSize(Map store, String listName) {
         def value = findFieldValue(store, listName)
         if (value && value instanceof Map) {
             def l = value.find { entry ->

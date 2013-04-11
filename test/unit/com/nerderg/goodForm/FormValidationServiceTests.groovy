@@ -1,12 +1,12 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.Form
-import com.nerderg.goodForm.form.Question
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.web.ControllerUnitTestMixin
-import org.junit.Before
+
+import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
+import com.nerderg.goodForm.form.Question
 
 /**
  * See the API for {@link grails.test.mixin.services.ServiceUnitTestMixin} for usage instructions
@@ -15,12 +15,7 @@ import com.nerderg.goodForm.form.FormElement
 @TestMixin(ControllerUnitTestMixin)
 class FormValidationServiceTests {
 
-    Form form
-
-    @Before public void setUp() {
-        form = new Form()
-
-    }
+    Form form = new Form()
 
     void testInvalidValue() {
         service.addCustomValidator("newValidator", {FormElement formElement, String fieldValue ->
@@ -45,6 +40,4 @@ class FormValidationServiceTests {
         def error = service.customValidation(question.formElement, 'abc')
         assertFalse("Error was not detected", error)
     }
-
-
 }

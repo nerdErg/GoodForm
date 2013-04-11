@@ -1,25 +1,29 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.Form
-import grails.test.mixin.TestFor
+import static org.junit.Assert.assertEquals
+import static org.junit.Assert.assertTrue
 import net.sf.json.JSONArray
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
+
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
+
+import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 
-@TestFor(FormController)
 class FormControllerIntegrationTests {
 
     def rulesEngineService
 
     def formDataService
 
-    def g = new ValidationTagLib()
+    private FormController controller = new FormController()
 
     @Before
     void setUp() {
+
+        formDataService.forms.clear()
+
         // create form definition
         String sampleForm = """
             form {
@@ -38,10 +42,8 @@ class FormControllerIntegrationTests {
                }
             }"""
 
-        if (!FormDefinition.get(1)) {
-            FormDefinition formDefinition = new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1)
-            formDefinition.save()
-        }
+        new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1).save()
+
         controller.rulesEngineService = [ask: {String ruleSet, Map facts ->
             ['next': JSONArray.fromObject('[\'Q1\']')]
         }]
@@ -62,22 +64,22 @@ class FormControllerIntegrationTests {
         //todo is there an easier way to simulate the form parameters?
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
-                        'Q1.names.lastName': '',
-                        'Q1.names.title': '',
-                        'Q1.names.aliases.aliases.aliasType': '',
-                        'Q1.names.givenNames': '',
-                        'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
-                                'aliases': ['alias': '', 'aliasType': '']]]
+                 'Q1.names.lastName': '',
+                 'Q1.names.title': '',
+                 'Q1.names.aliases.aliases.aliasType': '',
+                 'Q1.names.givenNames': '',
+                 'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
+                                  'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
         Form form = controller.modelAndView.model.form
-        def foundError = false
+        boolean foundError = false
         form.getQuestions().each {
             it.formElement.subElements.each { FormElement sub ->
                 foundError = sub.attr.error || foundError
             }
         }
-        org.junit.Assert.assertTrue("Error was not found", foundError)
+        assertTrue("Error was not found", foundError)
     }
 
     @Test
@@ -87,12 +89,12 @@ class FormControllerIntegrationTests {
         //todo is there an easier way to simulate the form parameters?
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
-                        'Q1.names.lastName': 'Test',
-                        'Q1.names.title': '',
-                        'Q1.names.aliases.aliases.aliasType': '',
-                        'Q1.names.givenNames': 'Test',
-                        'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
-                                'aliases': ['alias': '', 'aliasType': '']]]
+                 'Q1.names.lastName': 'Test',
+                 'Q1.names.title': '',
+                 'Q1.names.aliases.aliases.aliasType': '',
+                 'Q1.names.givenNames': 'Test',
+                 'Q1': ['names': ['lastName': '', 'title': '', 'givenNames': '',
+                                  'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
         controller.endForm(id)
@@ -101,12 +103,12 @@ class FormControllerIntegrationTests {
     @Test
     void testNoFormName() {
         controller.createForm(null)
-        org.junit.Assert.assertEquals g.message(code: "goodform.formName.supplied"), flash.message
+        assertEquals controller.message(code: "goodform.formName.supplied"), controller.flash.message
     }
 
     @Test
     void testInvalidFormName() {
         controller.createForm("Blah")
-        org.junit.Assert.assertEquals g.message(code: "goodform.formName.invalid"), flash.message
+        assertEquals controller.message(code: "goodform.formName.invalid"), controller.flash.message
     }
 }
