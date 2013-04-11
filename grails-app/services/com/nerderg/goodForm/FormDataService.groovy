@@ -1,17 +1,21 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.Form
-import com.nerderg.goodForm.form.FormElement
-import com.nerderg.goodForm.form.Question
-import net.sf.json.JSONObject
-import org.codehaus.groovy.grails.plugins.web.taglib.ValidationTagLib
-import org.codehaus.groovy.grails.web.util.WebUtils
-import org.springframework.web.multipart.MultipartFile
-
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
+
 import javax.annotation.PostConstruct
+
+import net.sf.json.JSONObject
+
+import org.codehaus.groovy.grails.web.util.WebUtils
+import org.springframework.web.context.request.RequestContextHolder
+import org.springframework.web.multipart.MultipartFile
+import org.springframework.web.servlet.support.RequestContextUtils
+
+import com.nerderg.goodForm.form.Form
+import com.nerderg.goodForm.form.FormElement
+import com.nerderg.goodForm.form.Question
 
 /**
  * Handles processing and validating form data.
@@ -20,9 +24,12 @@ import javax.annotation.PostConstruct
  */
 class FormDataService {
 
+    static transactional = false
+
     def goodFormService
     def rulesEngineService
     def grailsApplication
+    def messageSource
 
     def springSecurityService
 
@@ -30,8 +37,6 @@ class FormDataService {
      * Handles custom form validation
      */
     def formValidationService
-
-    def g = new ValidationTagLib()
 
     Map<Long, Form> forms = [:]
 
@@ -42,25 +47,25 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    def validateDate = {FormElement formElement, fieldValue ->
-        def error = false
+    def validateDate = { FormElement formElement, fieldValue ->
+        boolean error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
                 if (!isLegalDate(formElement.attr.date, fieldValue)) {
                     error = true
-                    formElement.attr.error += g.message(code: "goodform.validate.date.invalid")
+                    formElement.attr.error += message("goodform.validate.date.invalid")
                 } else {
                     Date d = Date.parse(formElement.attr.date, fieldValue)
                     if (formElement.attr.max) {
                         if (formElement.attr.max == 'today') {
                             if (d.time > System.currentTimeMillis()) {
-                                formElement.attr.error += g.message(code: "goodform.validate.date.future")
+                                formElement.attr.error += message("goodform.validate.date.future")
                                 error = true
                             }
                         } else {
                             Date max = Date.parse(formElement.attr.date, formElement.attr.max)
                             if (d.time > max.time) {
-                                formElement.attr.error += g.message(code: "goodform.validate.date.greaterThan", args: [formElement.attr.max])
+                                formElement.attr.error += message("goodform.validate.date.greaterThan", [formElement.attr.max])
                                 error = true
                             }
                         }
@@ -68,24 +73,23 @@ class FormDataService {
                     if (formElement.attr.min) {
                         Date min = Date.parse(formElement.attr.date, formElement.attr.min)
                         if (d.time < min.time) {
-                            formElement.attr.error += g.message(code: "goodform.validate.date.lessThan", args: [formElement.attr.min])
+                            formElement.attr.error += message("goodform.validate.date.lessThan", [formElement.attr.min])
                             error = true
                         }
                     }
                 }
             } catch (ParseException e) {
-                formElement.attr.error += g.message(code: "goodform.validate.date.invalid")
+                formElement.attr.error += message("goodform.validate.date.invalid")
                 error = true
-
             }
         }
         return error
     }
 
     boolean isLegalDate(String format, String text) {
-        SimpleDateFormat sdf = new SimpleDateFormat(format);
-        sdf.setLenient(false);
-        return sdf.parse(text, new ParsePosition(0)) != null;
+        SimpleDateFormat sdf = new SimpleDateFormat(format)
+        sdf.setLenient(false)
+        return sdf.parse(text, new ParsePosition(0)) != null
     }
 
     /**
@@ -95,11 +99,11 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    def validatePattern = {FormElement formElement, fieldValue ->
-        def error = false
+    def validatePattern = { FormElement formElement, fieldValue ->
+        boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
-            String message = g.message(code: "goodform.validate.invalid.pattern")
+            String message = message("goodform.validate.invalid.pattern")
             if (formElement.attr.pattern instanceof List) {
                 pattern = formElement.attr.pattern[0]
                 if (formElement.attr.pattern.size() > 1) {
@@ -123,10 +127,10 @@ class FormDataService {
      * @param fieldValue
      * @return
      */
-    def validateMandatoryField = {FormElement formElement, fieldValue ->
-        def error = false
+    def validateMandatoryField = { FormElement formElement, fieldValue ->
+        boolean error = false
         if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
-            formElement.attr.error += g.message(code: "goodform.validate.required.field")
+            formElement.attr.error += message("goodform.validate.required.field")
             error = true
         }
         return error
@@ -156,11 +160,9 @@ class FormDataService {
      * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
     FormDefinition formDefinitionForName(String formName) {
-        List<FormDefinition> formDefinitions = FormDefinition.executeQuery("select f from FormDefinition f where name = ? order by f.formVersion desc", [formName])
-        if (formDefinitions)
-            return formDefinitions.first()
-        else
-            return null
+        FormDefinition.executeQuery(
+            "select f from FormDefinition f where name = :formName order by f.formVersion desc",
+            [formName: formName, max: 1])[0]
     }
 
     Form getFormQuestions(FormDefinition formDefinition) {
@@ -181,7 +183,6 @@ class FormDataService {
         form.name = formDefinition.name
         form.formDefinitionId = formDefinition.id
         return form
-
     }
 
     FormInstance getFormInstance(Long id) {
@@ -230,7 +231,6 @@ class FormDataService {
         formElement.attr.error = ""
 
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
-
 
         if (fieldValue instanceof String[]) {
             fieldValue.each { String fv ->
@@ -355,16 +355,20 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-
-        FormInstance instance = new FormInstance(started: new Date(), userId: getCurrentUser(), instanceDescription: form.name, currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
-        instance.storeFormData(formData)
-        instance.storeState([formData.next])
-        instance.storeCurrentQuestion(formData.next)
-        instance.formVersion = form.version
-        instance.formDefinitionId = form.formDefinitionId
-        instance.readOnly = false
-        instance.save()
-        return instance
+        // ordinarily not a good idea, but this is the only method that writes to the database
+        FormInstance.withTransaction {
+            FormInstance instance = new FormInstance(
+                    started: new Date(), userId: getCurrentUser(), instanceDescription: form.name,
+                    currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
+            instance.storeFormData(formData)
+            instance.storeState([formData.next])
+            instance.storeCurrentQuestion(formData.next)
+            instance.formVersion = form.version
+            instance.formDefinitionId = form.formDefinitionId
+            instance.readOnly = false
+            instance.save()
+            return instance
+        }
     }
 
     /**
@@ -402,7 +406,7 @@ class FormDataService {
      */
     Map processNext(FormInstance instance, Map mergedFormData) {
         String lastQuestion = instance.storedCurrentQuestion().last()
-        FormDefinition definition = FormDefinition.findById(instance.formDefinitionId)
+        FormDefinition definition = FormDefinition.get(instance.formDefinitionId)
         String ruleName = definition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
@@ -464,7 +468,7 @@ class FormDataService {
      */
     def List truncateState(List<List> state, List currentQuestion) {
         List trunkState = []
-        def i = 0
+        int i = 0
         List s = state[i]
         boolean found = false
         while (i < state.size() && !found) {
@@ -506,27 +510,32 @@ class FormDataService {
         return collect
     }
 
+    private String message(String code, List args = null) {
+        def request = RequestContextHolder.requestAttributes?.request
+        def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
+        messageSource.getMessage(code, args ? (args as Object[]) : null, code, locale) ?: code
+    }
 }
+
 /**
  * Custom exception thrown when errors are detected in the processing of form definitions.
  *
  * @author Peter McNeil
  */
 class FormDataException extends Exception {
-    def FormDataException() {
+    FormDataException() {
         super()
     }
 
-    def FormDataException(String message) {
+    FormDataException(String message) {
         super(message)
     }
 
-    def FormDataException(String message, Throwable cause) {
+    FormDataException(String message, Throwable cause) {
         super(message, cause)
     }
 
-    def FormDataException(Throwable cause) {
+    FormDataException(Throwable cause) {
         super(cause)
     }
-
 }

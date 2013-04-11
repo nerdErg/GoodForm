@@ -16,7 +16,7 @@ class FormDefinition {
     /**
      * Incrementing integer that represents the version number of the underlying form.
      */
-    int formVersion
+    Integer formVersion
 
     static mapping = {
         formDefinition column: "formDefinition", sqlType: "text"

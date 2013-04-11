@@ -1,9 +1,10 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.FormElement
-import org.codehaus.groovy.grails.web.json.JSONArray
-import com.nerderg.goodForm.form.Question
+import net.sf.json.JSONArray
+
 import com.nerderg.goodForm.form.Form
+import com.nerderg.goodForm.form.FormElement
+import com.nerderg.goodForm.form.Question
 
 /**
  * Handles the rendering of form elements.
@@ -12,9 +13,9 @@ import com.nerderg.goodForm.form.Form
  */
 class GoodFormService {
 
-    static transactional = true
+    static transactional = false
 
-    static List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading']
+    static final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading']
 
     /**
      * compile a form DSL string and return a form instance
