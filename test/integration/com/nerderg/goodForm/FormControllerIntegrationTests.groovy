@@ -1,8 +1,10 @@
 package com.nerderg.goodForm
 
+import grails.converters.JSON
+import org.codehaus.groovy.grails.web.json.JSONArray
+
 import static org.junit.Assert.assertEquals
 import static org.junit.Assert.assertTrue
-import net.sf.json.JSONArray
 
 import org.junit.After
 import org.junit.Before
@@ -44,11 +46,15 @@ class FormControllerIntegrationTests {
 
         new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1).save()
 
+        JSONArray qset = JSON.parse('[\'Q1\']')
+
         controller.rulesEngineService = [ask: {String ruleSet, Map facts ->
-            ['next': JSONArray.fromObject('[\'Q1\']')]
+            ['next': qset]
         }]
+
+        JSONArray endqset = JSON.parse("['End']")
         formDataService.rulesEngineService = [ask: {String ruleSet, Map facts ->
-            ['next': JSONArray.fromObject('[\'End\']'), 'Q1': JSONArray.fromObject('[\'End\']')]
+            ['next': endqset, 'Q1': '']
         }]
     }
 

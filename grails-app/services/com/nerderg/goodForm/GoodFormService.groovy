@@ -1,10 +1,9 @@
 package com.nerderg.goodForm
 
-import net.sf.json.JSONArray
-
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 import com.nerderg.goodForm.form.Question
+import org.codehaus.groovy.grails.web.json.JSONArray
 
 /**
  * Handles the rendering of form elements.

@@ -2,9 +2,9 @@ package com.nerderg.goodForm
 
 import groovyx.net.http.RESTClient
 import groovyx.net.http.URIBuilder
-import net.sf.json.JSONArray
 
 import org.apache.http.client.ClientProtocolException
+import org.codehaus.groovy.grails.web.json.JSONArray
 
 /**
  * Handles making REST requests to a <a href="">One-Ring</a> instance to process rules.

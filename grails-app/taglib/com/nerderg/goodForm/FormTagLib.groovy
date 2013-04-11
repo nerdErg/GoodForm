@@ -540,7 +540,7 @@ class FormTagLib {
             log.debug "$i -> ${state[i]}"
         }
         i = state.size() - i - 1
-        String href = g.createLink(controller: "form", action: "back") + "/${formInstance.id}/${i}"
+        String href = g.createLink(action: "back") + "/${formInstance.id}/${i}"
         out << "<a href='$href'>"
         out << body()
         out << '</a>'

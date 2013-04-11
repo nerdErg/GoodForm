@@ -65,35 +65,4 @@ class FormDataServiceTests {
         assertFalse("Error was not detected", error)
     }
 
-    void testValidPostcode() {
-        def mockControl = mockFor(AddressWranglingService)
-        mockControl.demand.isValidPostcode('2615') { String someItem -> true; }
-        formValidationService.addressWranglingService = mockControl.createMock()
-
-        form.question("Q1") {
-            "Postcode" text: 50, required: true, validate: 'postcode', map: 'postcode'
-        }
-        Question question = form.getAt("Q1")
-        def error = service.validateAndProcessFields(question.formElement, ['Q1': ['postcode': '2615']], formInstance)
-        assertFalse("Error was not detected", error)
-    }
-
-    void testPhoneNumber() {
-        form.question("Q1") {
-            "Phone Number" phone: 50, required: true, map: 'phone', validate: 'phone'
-        }
-        Question question = form.getAt("Q1")
-        //digit only
-        def error = service.validateAndProcessFields(question.formElement, ['Q1': ['phone': 'abc']], formInstance)
-        assertTrue("Error was not detected", error)
-        //min length
-        error = service.validateAndProcessFields(question.formElement, ['Q1': ['phone': '12345']], formInstance)
-        assertTrue("Error was not detected", error)
-        //number format
-        error = service.validateAndProcessFields(question.formElement, ['Q1': ['phone': '1234567890']], formInstance)
-        assertTrue("Error was not detected", error)
-        //valid phone
-        error = service.validateAndProcessFields(question.formElement, ['Q1': ['phone': '0412345678']], formInstance)
-        assertFalse("Error was detected", error)
-    }
 }

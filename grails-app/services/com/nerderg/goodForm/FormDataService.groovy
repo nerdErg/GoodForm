@@ -1,12 +1,12 @@
 package com.nerderg.goodForm
 
+import org.codehaus.groovy.grails.web.json.JSONObject
+
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
 
 import javax.annotation.PostConstruct
-
-import net.sf.json.JSONObject
 
 import org.codehaus.groovy.grails.web.util.WebUtils
 import org.springframework.web.context.request.RequestContextHolder

@@ -2,7 +2,7 @@ package com.nerderg.goodForm
 
 import grails.converters.JSON
 import grails.test.mixin.TestFor
-import net.sf.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONArray
 
 import com.nerderg.goodForm.form.Form
 

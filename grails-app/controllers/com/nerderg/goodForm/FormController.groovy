@@ -1,10 +1,9 @@
 package com.nerderg.goodForm
 
 import grails.converters.JSON
-import net.sf.json.JSONObject
-
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.Question
+import org.codehaus.groovy.grails.web.json.JSONObject
 
 /**
  * Controller which manages the display of <a href="http://nerderg.com/Good+Form">GoodForm</a> forms.
@@ -192,7 +191,7 @@ class FormController {
      * @param id the form instance id
      * @param questionSetIndex the index of the question set in the state array
      */
-    def back(Long id, int questionSetIndex) {
+    def back(Long id, int qset) {
         log.debug "back: $params"
         FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
@@ -202,7 +201,7 @@ class FormController {
         }
 
         List<List> state = formInstance.storedState()
-        List currentQ = state.reverse()[questionSetIndex]
+        List currentQ = state.reverse()[qset]
         formInstance.storeCurrentQuestion(currentQ)
         formInstance.storeState(formDataService.truncateState(state, currentQ))
         formInstance.save(flush: true)
@@ -231,6 +230,7 @@ class FormController {
             formData = formDataService.cleanUpJSONNullMap(processedJSONFormData)
             formDataService.updateStoredFormInstance(formInstance, formData)
         } catch (RulesEngineException e) {
+            flash.message = e.message
             log.error e.message
         }
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
