@@ -3,7 +3,7 @@ Introduction
 
 This tutorial contains the following steps:
 
-* [Install OneRing](02-InstallOneRing.md)
+* [Install OneRing](02-InstallOneRing.md) rules engine
 * [Create or update a Grails project](03-CreateOrUpdateGrailsProject.md) to reference the Goodform plugin and create a form definition
 * [Create Ruleset files](04-CreateRulesetDefinitions.md) for the first page of question(s) and subsequent question pages
 * [Run OneRing and your Grails project](05-RunApp.md), verifying that form is displayed
