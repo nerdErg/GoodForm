@@ -1,7 +1,7 @@
-package com.nerderg.goodForm;
-
+package com.nerderg.goodForm
 
 import grails.test.mixin.TestFor
+
 import org.junit.Before
 
 /**
@@ -14,15 +14,14 @@ class RulesEngineServiceTests {
         def responseCode = 200
         def result = [:]
 
-        def post(java.util.Map<java.lang.String, ?> args) {
+        def post(Map<String, ?> args) {
             [status: responseCode, data: [result]]
         }
     }
 
-    def restClient
+    def restClient = new MockRESTClient()
 
-    @Before public void setUp() {
-        restClient = new MockRESTClient()
+    @Before void setUp() {
         service.rulesEngine = restClient
     }
 

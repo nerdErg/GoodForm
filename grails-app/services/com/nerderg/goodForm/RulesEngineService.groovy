@@ -1,9 +1,10 @@
 package com.nerderg.goodForm
 
 import groovyx.net.http.RESTClient
-import net.sf.json.JSONArray
-import org.apache.http.client.ClientProtocolException
 import groovyx.net.http.URIBuilder
+import net.sf.json.JSONArray
+
+import org.apache.http.client.ClientProtocolException
 
 /**
  * Handles making REST requests to a <a href="">One-Ring</a> instance to process rules.
@@ -13,6 +14,7 @@ import groovyx.net.http.URIBuilder
 class RulesEngineService {
 
     static transactional = false
+
     def grailsApplication
 
     def rulesEngine
@@ -31,7 +33,7 @@ class RulesEngineService {
      *
      * @param ruleSet the name of the ruleSet to run
      * @param facts a map of facts to pass to the ruleSet
-     * @return a net.sf.JSONObject of results - a map of results
+     * @return a net.sf.json.JSONObject of results - a map of results
      * @see <a href='http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html'>JSONObject</a>
      * @throws RulesEngineException , NullPointerException
      */
@@ -75,7 +77,7 @@ class RulesEngineService {
      * This leaves the processing of errors to the caller.
      * @param ruleSet
      * @param facts
-     * @return HttpResponseDecorator containing a net.sf.JSONObject of results in resp.data - a List of maps in a data property
+     * @return HttpResponseDecorator containing a net.sf.json.JSONObject of results in resp.data - a List of maps in a data property
      * @see groovyx.net.http.HttpResponseDecorator http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html
      * @see groovyx.net.http.RESTClient http://groovy.codehaus.org/modules/http-builder/doc/rest.html
      * @throws java.net.URISyntaxException , org.apache.http.client.ClientProtocolException, java.io.IOException
@@ -89,7 +91,7 @@ class RulesEngineService {
         if (!rulesEngine) {
             rulesEngine = new RESTClient(uri)
         }
-        log.debug "ask json ${uri.toString()} $ruleSet"
+        log.debug "ask json ${uri} $ruleSet"
         return rulesEngine.post(body: [ruleSet: ruleSet, facts: facts],
                 requestContentType: groovyx.net.http.ContentType.JSON)
     }
@@ -97,20 +99,19 @@ class RulesEngineService {
 }
 
 class RulesEngineException extends Throwable {
-    def RulesEngineException() {
+    RulesEngineException() {
         super()
     }
 
-    def RulesEngineException(String message) {
+    RulesEngineException(String message) {
         super(message)
     }
 
-    def RulesEngineException(String message, Throwable cause) {
+    RulesEngineException(String message, Throwable cause) {
         super(message, cause)
     }
 
-    def RulesEngineException(Throwable cause) {
+    RulesEngineException(Throwable cause) {
         super(cause)
     }
-
 }

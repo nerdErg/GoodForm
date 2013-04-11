@@ -1,10 +1,10 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.Form
-
-import com.nerderg.goodForm.form.Question
-import net.sf.json.JSONObject
 import grails.converters.JSON
+import net.sf.json.JSONObject
+
+import com.nerderg.goodForm.form.Form
+import com.nerderg.goodForm.form.Question
 
 /**
  * Controller which manages the display of <a href="http://nerderg.com/Good+Form">GoodForm</a> forms.
@@ -56,12 +56,14 @@ class FormController {
         try {
             if (!formName) {
                 flash.message = message(code: "goodform.formName.supplied")
-                return redirect(action: 'index')
+                redirect(action: 'index')
+                return
             }
             Form form = formDataService.getForm(formName)
             if (!form) {
                 flash.message = message(code: "goodform.formName.invalid")
-                return redirect(action: 'index')
+                redirect(action: 'index')
+                return
             }
             Map formData = rulesEngineService.ask(formName, getRuleFacts()) as Map
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
@@ -69,7 +71,7 @@ class FormController {
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
         } catch (RulesEngineException e) {
             flash.message = message(code: "goodform.rules.error", args: [e.message])
-            return redirect(action: 'index')
+            redirect(action: 'index')
         }
     }
 
@@ -78,7 +80,7 @@ class FormController {
      * map of applicable rule facts.
      * @return map of rule faces
      */
-    public Map getRuleFacts() {
+    protected Map getRuleFacts() {
         [:]
     }
 
@@ -94,19 +96,22 @@ class FormController {
 
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
-            return redirect(action: 'index')
+            redirect(action: 'index')
+            return
         }
 
         if (formInstance.readOnly) {
             flash.message = message(code: "goodform.form.readonly", args: [id])
             redirect(action: 'index')
+            return
         }
 
         Map formData = formInstance.storedFormData()
         Form form = formDataService.getFormQuestions(formInstance.getFormDefinition())
 
         if (formInstance.isAtEnd()) {
-            return redirect(action: 'endForm', id: formInstance.id)
+            redirect(action: 'endForm', id: formInstance.id)
+            return
         }
 
         List<Question> current = formDataService.getSubset(formInstance.storedCurrentQuestion(), form)
@@ -126,11 +131,13 @@ class FormController {
         FormInstance formInstance = formDataService.getFormInstance(instanceId)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [instanceId])
-            return redirect(action: 'index')
+            redirect(action: 'index')
+            return
         }
 
         if (formInstance.isAtEnd()) {
-            return redirect(action: 'view', id: instanceId)
+            redirect(action: 'view', id: instanceId)
+            return
         }
 
         Map currentFormData = formDataService.cleanUpStateParams(params)
@@ -160,7 +167,8 @@ class FormController {
                 log.debug "next processedFormData: ${processedFormData.toString()}"
                 //rules engine returns "End" as the next question at the end
                 if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
-                    return redirect(action: 'endForm', id: formInstance.id)
+                    redirect(action: 'endForm', id: formInstance.id)
+                    return
                 }
                 List<Question> current = formDataService.getSubset(processedFormData.next, form)
                 List answered = formDataService.getAnsweredQuestions(formInstance, form)
@@ -168,7 +176,7 @@ class FormController {
             } catch (RulesEngineException e) {
                 //logged in processNext just set the flash message and redirect
                 flash.message = message(code: "goodform.rules.error", args: [e.message])
-                return redirect(action: 'index')
+                redirect(action: 'index')
             }
         } else {
             //error detected, redisplay form
@@ -189,7 +197,8 @@ class FormController {
         FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
-            return redirect(action: 'index')
+            redirect(action: 'index')
+            return
         }
 
         List<List> state = formInstance.storedState()
@@ -213,7 +222,8 @@ class FormController {
         FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
-            return redirect(action: 'index')
+            redirect(action: 'index')
+            return
         }
         Map formData = formInstance.storedFormData()
         try {
@@ -242,16 +252,17 @@ class FormController {
         FormInstance formInstance = formDataService.getFormInstance(id)
         if (!formInstance) {
             flash.message = message(code: "goodform.form.invalid", args: [id])
-            return redirect(action: 'index')
+            redirect(action: 'index')
+            return
         }
 
         Map formData = formInstance.storedFormData()
         log.debug "view FormData: ${(formData as JSON).toString(true)}"
         if (name) {
             //todo this gets called but it gets a NPE line 38 of PdfRenderingService
-            return renderPdf(template: '/form/formView', model: [formInstance: formInstance, formData: formData])
+            renderPdf(template: '/form/formView', model: [formInstance: formInstance, formData: formData])
         } else {
-            return render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
+            render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
         }
     }
 }

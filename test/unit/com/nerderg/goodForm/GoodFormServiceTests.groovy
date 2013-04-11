@@ -1,9 +1,10 @@
 package com.nerderg.goodForm
 
-import com.nerderg.goodForm.form.Form
 import grails.converters.JSON
 import grails.test.mixin.TestFor
-import org.codehaus.groovy.grails.web.json.JSONArray
+import net.sf.json.JSONArray
+
+import com.nerderg.goodForm.form.Form
 
 /**
  * Validates the behaviour for the {@link GoodFormService} class.
