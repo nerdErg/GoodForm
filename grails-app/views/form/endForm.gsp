@@ -9,6 +9,10 @@
 <body>
 <div class="goodFormContainer">
 
+  <g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+  </g:if>
+
   <h1>Form complete</h1>
   <g:render template="/form/viewCommon" model="[formInstance: formInstance, formData: formData]"/>
   <form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${formInstance.readOnly}"/>

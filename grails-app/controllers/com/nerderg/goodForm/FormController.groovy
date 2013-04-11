@@ -226,7 +226,7 @@ class FormController {
         }
         Map formData = formInstance.storedFormData()
         try {
-            JSONObject processedJSONFormData = rulesEngineService.ask('CheckRequiredDocuments', formData) as JSONObject
+            JSONObject processedJSONFormData = rulesEngineService.ask("${formInstance.formDefinition.name}CheckRequiredDocuments", formData) as JSONObject
             formData = formDataService.cleanUpJSONNullMap(processedJSONFormData)
             formDataService.updateStoredFormInstance(formInstance, formData)
         } catch (RulesEngineException e) {
