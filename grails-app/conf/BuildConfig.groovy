@@ -40,7 +40,6 @@ grails.project.dependency.resolution = {
         // including rendering plugin as a compile dependency seems to cause loading problems
         compile(":rendering:0.4.3",
                 ":cxf:1.0.7",
-                ":hibernate:$grailsVersion",
                 ":jquery:1.8.3",
                 ":jquery-ui:1.8.24",
                 ":nerderg-form-tags:2.1.3",
@@ -48,5 +47,8 @@ grails.project.dependency.resolution = {
             export = true
         }
 
+        runtime ":hibernate:$grailsVersion", {
+            export = false
+        }
     }
 }
