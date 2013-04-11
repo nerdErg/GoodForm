@@ -97,6 +97,32 @@ This ruleset is saying that when Q1 has been submitted, we can end the form proc
 It also sets the description (from the form data) for this form instance which is displayed by default in the list of
 forms in the index of your form controller.
 
+We also need a rule called ContactDetailsCheckRequiredDocuments that looks something like this:
+
+```groovy
+ruleset("ContactDetailsCheckRequiredDocuments") {
+
+    require()  //we need the answers to these questions
+
+    rule('prep') {
+        fact.require = []  //create the set 'require'
+    }
+
+    rule('Is colour indicated') {
+        when {
+            Q2 && !Q2.faveColour
+        }
+        then {
+            require.add([Q: 'Q2', message: 'You must have a fave colour'])
+        }
+    }
+}
+```
+
+This rule is a final check of our form for documents or questions that may have been missed. You can make it so your
+form may have documents you need to attach, however you don't want to prevent people from filling in as much as they
+can. This rule lets you check what is missing and indicate it in the 'require' set.
+
 In later steps of the tutorial, we will update these rulesets to include some more complexity.
 
 Now that we have created our ruleset, we can now run our app to see the form in action.
