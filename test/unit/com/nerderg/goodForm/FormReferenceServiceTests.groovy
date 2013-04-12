@@ -18,12 +18,11 @@ class FormReferenceServiceTests {
     @Before
     void setUp() {
 
-        service.addReferenceService("file", {String fieldValue ->
+        service.addReferenceService("file", { String fieldValue ->
             if (fieldValue == '1234') {
                 //valid file
                 return new File(fieldValue)
-            }
-            else {
+            } else {
                 //invalid file
                 return null
             }
@@ -35,7 +34,7 @@ class FormReferenceServiceTests {
         assertNotNull("Reference was not found", reference)
     }
 
-    void testInvalidCrossReference()  {
+    void testInvalidCrossReference() {
         def reference = service.lookupReference('file', '5678')
         assertNull("Reference was not not null", reference)
     }

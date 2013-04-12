@@ -280,7 +280,7 @@ class FormDataService {
         //handle subElements
         if (formElement.attr.containsKey('each')) {
             //handle each which dynamically adds elements
-            goodFormService.processEachFormElement(formElement, formData) {Map subMap ->
+            goodFormService.processEachFormElement(formElement, formData) { Map subMap ->
                 error = validateAndProcessFields(subMap.element, formData, instance) || error
             }
         } else {

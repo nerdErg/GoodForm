@@ -21,25 +21,27 @@ package com.nerderg.goodForm
  */
 class FormReferenceService {
 
-    static transactional = true
+    static transactional = false
 
-    private customReferenceServiceMap = [:]
+    private static customReferenceServiceMap = [:]
 
-    void addReferenceService(String validationName, Closure closure) {
-        customReferenceServiceMap.put(validationName, closure)
+    void addReferenceService(String referenceName, Closure closure) {
+        customReferenceServiceMap.put(referenceName, closure)
     }
 
     def lookupReference(String referenceName, String fieldValue) {
 
-        Closure referenceService = customReferenceServiceMap[referenceName]
+        Closure referenceService = customReferenceServiceMap[referenceName] as Closure
         if (!referenceService) {
             throw new FormReferenceServiceMissingException("No reference lookup service called $referenceName found. Add it using formReferenceService.addReferenceService()")
         }
         return referenceService(fieldValue)
     }
 }
+
 /**
- * Custom exception class that is thrown when a reference is defined in the form definition, but not included in the {@link FormReferenceService#customReferenceServiceMap}
+ * Custom exception class that is thrown when a reference is defined in the form definition, but not included in the
+ * {@link FormReferenceService#customReferenceServiceMap}
  *
  * @author Ross Rowe
  */
