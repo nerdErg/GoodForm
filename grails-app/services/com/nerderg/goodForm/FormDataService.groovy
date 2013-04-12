@@ -30,6 +30,7 @@ class FormDataService {
     def rulesEngineService
     def grailsApplication
     def messageSource
+    def formReferenceService
 
     def springSecurityService
 
@@ -161,8 +162,8 @@ class FormDataService {
      */
     FormDefinition formDefinitionForName(String formName) {
         FormDefinition.executeQuery(
-            "select f from FormDefinition f where name = :formName order by f.formVersion desc",
-            [formName: formName, max: 1])[0]
+                "select f from FormDefinition f where name = :formName order by f.formVersion desc",
+                [formName: formName, max: 1])[0]
     }
 
     Form getFormQuestions(FormDefinition formDefinition) {
@@ -241,6 +242,16 @@ class FormDataService {
         } else if (fieldValue == null || fieldValue instanceof String) {
             error = validateField(formElement, fieldValue, error)
         }
+
+        //get references and store in the formData
+        if (formElement.attr.containsKey('ref')) {
+            //references are stored at the question level under the reference name so there is a limitation there
+            def ref = formReferenceService.lookupReference(formElement.attr.ref, fieldValue)
+            if (ref) {
+                formData[formElement.attr.name.split(/\./)[0]]."${formElement.attr.ref}" = ref
+            }
+        }
+
         //get attached file and store it, save the reference to it in the formData
         if (formElement.attr.containsKey('attachment')) {
             //get the uploaded file and store somewhere
@@ -344,11 +355,11 @@ class FormDataService {
 
     String getCurrentUser() {
         if (springSecurityService) {
-           if (springSecurityService.principal instanceof String) {
-               springSecurityService.principal
-           } else {
-               springSecurityService.principal.username
-           }
+            if (springSecurityService.principal instanceof String) {
+                springSecurityService.principal
+            } else {
+                springSecurityService.principal.username
+            }
         } else {
             'unknown'
         }
