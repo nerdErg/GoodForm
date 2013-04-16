@@ -1,21 +1,18 @@
 package com.nerderg.goodForm
 
+import com.nerderg.goodForm.form.Form
+import com.nerderg.goodForm.form.FormElement
+import com.nerderg.goodForm.form.Question
 import org.codehaus.groovy.grails.web.json.JSONObject
-
-import java.text.ParseException
-import java.text.ParsePosition
-import java.text.SimpleDateFormat
-
-import javax.annotation.PostConstruct
-
 import org.codehaus.groovy.grails.web.util.WebUtils
 import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.support.RequestContextUtils
 
-import com.nerderg.goodForm.form.Form
-import com.nerderg.goodForm.form.FormElement
-import com.nerderg.goodForm.form.Question
+import java.text.ParseException
+import java.text.ParsePosition
+import java.text.SimpleDateFormat
+import javax.annotation.PostConstruct
 
 /**
  * Handles processing and validating form data.
@@ -27,10 +24,10 @@ class FormDataService {
     static transactional = false
 
     def goodFormService
+    def formReferenceService
     def rulesEngineService
     def grailsApplication
     def messageSource
-    def formReferenceService
 
     def springSecurityService
 
@@ -280,7 +277,7 @@ class FormDataService {
         //handle subElements
         if (formElement.attr.containsKey('each')) {
             //handle each which dynamically adds elements
-            goodFormService.processEachFormElement(formElement, formData) { Map subMap ->
+            goodFormService.processEachFormElement(formElement, formData) {Map subMap ->
                 error = validateAndProcessFields(subMap.element, formData, instance) || error
             }
         } else {
@@ -525,6 +522,57 @@ class FormDataService {
         def request = RequestContextHolder.requestAttributes?.request
         def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
         messageSource.getMessage(code, args ? (args as Object[]) : null, code, locale) ?: code
+    }
+
+    /**
+     * Retrieves the list of {@link FormInstance} records stored for a specific {@link FormDefinition}.
+     *
+     * @param formDefinitionId the form definition id
+     * @return list of matching {@link FormInstance}s
+     */
+    List<FormInstance> getSubmittedForms(Long formDefinitionId) {
+        FormInstance.executeQuery("select f from FormInstance f where formDefinitionId = ?", [formDefinitionId])
+    }
+
+    /**
+     * Retrieves a {@link FormDefinition} instance for the given id.
+     * @param id
+     * @return
+     */
+    FormDefinition getFormDefinition(Long id) {
+        FormDefinition.findById(id)
+    }
+
+    /**
+     * Retrieves a {@link FormInstance} instance for the given id.
+     * @param id
+     * @return
+     */
+    FormInstance getSubmittedForm(Long id) {
+        FormInstance.findById(id)
+    }
+
+    /**
+     * Retrieves the latest version of each unique form definition.
+     * @return
+     */
+    List<FormDefinition> getLatestFormDefinitions() {
+        return FormDefinition.executeQuery("select f from FormDefinition f where f.formVersion = (select max(g.formVersion) from FormDefinition g where g.name = f.name)")
+    }
+
+    def createFormDefinition(Long id, String formDefinition) {
+        FormInstance.withTransaction {
+            //find FormDefinition for id
+            FormDefinition existingFormDefinition = FormDefinition.findById(id)
+            //Create new FormDefinition
+            FormDefinition newFormDefinition = new FormDefinition()
+            newFormDefinition.setName(existingFormDefinition.name)
+            newFormDefinition.setFormDefinition(formDefinition)
+            //increment version
+            newFormDefinition.setFormVersion(existingFormDefinition.formVersion + 1)
+            //save new
+            newFormDefinition.save()
+        }
     }
 }
 
