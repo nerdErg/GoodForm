@@ -6,12 +6,15 @@
 </head>
 
 <body>
+<g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+</g:if>
 <div class="goodFormContainer">
     <g:if test="${forms}">
         <table>
             <tr>
                 <th>Id</th>
-                <th>
+                <th colspan="2">
                     Date Started
                 </th>
             </tr>
@@ -25,7 +28,7 @@
                         ${form.started}
                     </td>
                     <td>
-                        <a href="${g.createLink(action: 'viewSubmittedForm', id: form.id)}"></a>
+                        <a href="${g.createLink(action: 'viewSubmittedForm', id: form.id)}">View</a>
                     </td>
                 </tr>
             </g:each>

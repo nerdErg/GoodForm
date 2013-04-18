@@ -6,7 +6,9 @@
 </head>
 
 <body>
-<g:message code="${flash.message}"/>
+<g:if test="${flash.message}">
+    <div class="message">${flash.message}</div>
+</g:if>
 <div class="goodFormContainer">
     <g:form action="updateFormDefinition" enctype="multipart/form-data">
         <input type="hidden" name="id" value="${formDefinition.id}"/>
