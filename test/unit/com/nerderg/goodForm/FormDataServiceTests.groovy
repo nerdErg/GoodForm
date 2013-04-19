@@ -65,4 +65,28 @@ class FormDataServiceTests {
         assertFalse("Error was not detected", error)
     }
 
+    void testNumberToBigDecimal() {
+        form.question("Q1") {
+            "Age" number: 5, map: 'age'
+        }
+        Question question = form.getAt("Q1")
+        Map formData = ['Q1': ['age': '23']]
+
+        boolean error = service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assertFalse("Error was detected", error)
+        assert formData.Q1.age instanceof BigDecimal
+        assert formData.Q1.age == 23
+
+        formData.Q1.age = '45.6'
+        assert formData.Q1.age instanceof String
+        error = service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assertFalse("Error was detected", error)
+        assert formData.Q1.age instanceof BigDecimal
+        assert formData.Q1.age == (45.6 as BigDecimal)
+
+        formData.Q1.age = 'norman'
+        assert formData.Q1.age instanceof String
+        error = service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assertTrue("Error was not detected", error)
+    }
 }

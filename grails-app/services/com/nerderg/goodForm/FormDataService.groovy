@@ -45,7 +45,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    def validateDate = { FormElement formElement, fieldValue ->
+    Closure validateDate = { FormElement formElement, fieldValue ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
@@ -97,7 +97,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    def validatePattern = { FormElement formElement, fieldValue ->
+    Closure validatePattern = { FormElement formElement, fieldValue ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
@@ -125,7 +125,7 @@ class FormDataService {
      * @param fieldValue
      * @return
      */
-    def validateMandatoryField = { FormElement formElement, fieldValue ->
+    Closure validateMandatoryField = { FormElement formElement, fieldValue ->
         boolean error = false
         if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
             formElement.attr.error += message("goodform.validate.required.field")
@@ -141,11 +141,11 @@ class FormDataService {
     List<Closure> validators = [validateMandatoryField, validateDate, validatePattern]
 
     @PostConstruct
-    def initializeValidators() {
+    void initializeValidators() {
         addValidator(formValidationService.customValidation)
     }
 
-    def addValidator(Closure closure) {
+    void addValidator(Closure closure) {
         validators.add(closure)
     }
 
@@ -241,6 +241,21 @@ class FormDataService {
         }
 
         //get references and store in the formData
+        handleReferences(formElement, fieldValue, formData)
+
+        //get attached file and store it, save the reference to it in the formData
+        handleAttachment(formElement, instance, formData)
+
+        //handle subElements
+        error = handleSubElements(formElement, formData, instance, error)
+
+        //convert numeric fields to bigdecimal
+        error = checkAndConvertFieldToBigDecimal(fieldValue, formElement, formData, error)
+
+        return error
+    }
+
+    private void handleReferences(FormElement formElement, fieldValue, Map formData) {
         if (formElement.attr.containsKey('ref')) {
             //references are stored at the question level under the reference name so there is a limitation there
             def ref = formReferenceService.lookupReference(formElement.attr.ref, fieldValue)
@@ -248,8 +263,9 @@ class FormDataService {
                 formData[formElement.attr.name.split(/\./)[0]]."${formElement.attr.ref}" = ref
             }
         }
+    }
 
-        //get attached file and store it, save the reference to it in the formData
+    private void handleAttachment(FormElement formElement, FormInstance instance, Map formData) {
         if (formElement.attr.containsKey('attachment')) {
             //get the uploaded file and store somewhere
             def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
@@ -273,10 +289,11 @@ class FormDataService {
                 }
             }
         }
+    }
 
-        //handle subElements
+    private boolean handleSubElements(FormElement formElement, Map formData, FormInstance instance, boolean error) {
         if (formElement.attr.containsKey('each')) {
-            //handle each which dynamically adds elements
+            //handle 'each' which dynamically adds elements
             goodFormService.processEachFormElement(formElement, formData) { Map subMap ->
                 error = validateAndProcessFields(subMap.element, formData, instance) || error
             }
@@ -285,8 +302,10 @@ class FormDataService {
                 error = validateAndProcessFields(sub, formData, instance) || error
             }
         }
+        return error
+    }
 
-        //convert numeric fields to bigdecimal
+    private boolean checkAndConvertFieldToBigDecimal(fieldValue, FormElement formElement, Map formData, boolean error) {
         try {
             if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
                 log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
@@ -306,7 +325,6 @@ class FormDataService {
             formElement.attr.error += "$fieldValue isn't a number."
             error = true
         }
-
         return error
     }
 

@@ -181,7 +181,7 @@ class GoodFormService {
     }
 
     /**
-     * Travers the map of maps to the desired field and return the value.
+     * Traverse the map of maps to the desired field and return the value.
      *
      * @param map the map (of maps) to traverse to get the field
      * @param field a String specifying the field in the map of maps, e.g G2.name.firstName

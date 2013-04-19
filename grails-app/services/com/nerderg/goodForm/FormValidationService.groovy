@@ -42,7 +42,7 @@ class FormValidationService {
      * @return
      */
     boolean hasError(FormElement formElement, String fieldValue) {
-        def validationName = formElement.attr.validate
+        String validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
         if (!validator) {
             throw new FormValidatorMissingException("No validator called $validationName found. Add it using formValidationService.addCustomValidator()")
@@ -53,7 +53,7 @@ class FormValidationService {
     /**
      * Invokes the validation method corresponding the the 'validate' attribute.
      */
-    def customValidation = { FormElement formElement, String fieldValue ->
+    Closure customValidation = { FormElement formElement, String fieldValue ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
             String code = "goodform.validate." + formElement.attr.validate + ".invalid"
