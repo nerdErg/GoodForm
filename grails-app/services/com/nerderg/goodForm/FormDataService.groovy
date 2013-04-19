@@ -150,14 +150,14 @@ class FormDataService {
     }
 
     Form getForm(String formName) {
-        return getFormQuestions(formDefinitionForName(formName))
+        return getFormQuestions(formCurrentDefinitionForName(formName))
     }
 
     /**
      *
      * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
      */
-    FormDefinition formDefinitionForName(String formName) {
+    FormDefinition formCurrentDefinitionForName(String formName) {
         FormDefinition.executeQuery(
                 "select f from FormDefinition f where name = :formName order by f.formVersion desc",
                 [formName: formName, max: 1])[0]
@@ -277,7 +277,7 @@ class FormDataService {
         //handle subElements
         if (formElement.attr.containsKey('each')) {
             //handle each which dynamically adds elements
-            goodFormService.processEachFormElement(formElement, formData) {Map subMap ->
+            goodFormService.processEachFormElement(formElement, formData) { Map subMap ->
                 error = validateAndProcessFields(subMap.element, formData, instance) || error
             }
         } else {
@@ -530,8 +530,8 @@ class FormDataService {
      * @param formDefinitionId the form definition id
      * @return list of matching {@link FormInstance}s
      */
-    List<FormInstance> getSubmittedForms(Long formDefinitionId) {
-        FormInstance.executeQuery("select f from FormInstance f where formDefinitionId = ?", [formDefinitionId])
+    List<FormInstance> getForms(Long formDefinitionId) {
+        FormInstance.findAllByFormDefinitionId(formDefinitionId)
     }
 
     /**
@@ -540,7 +540,7 @@ class FormDataService {
      * @return
      */
     FormDefinition getFormDefinition(Long id) {
-        FormDefinition.findById(id)
+        FormDefinition.get(id)
     }
 
     /**
@@ -548,8 +548,8 @@ class FormDataService {
      * @param id
      * @return
      */
-    FormInstance getSubmittedForm(Long id) {
-        FormInstance.findById(id)
+    FormInstance getForm(Long id) {
+        FormInstance.get(id)
     }
 
     /**
@@ -560,18 +560,26 @@ class FormDataService {
         return FormDefinition.executeQuery("select f from FormDefinition f where f.formVersion = (select max(g.formVersion) from FormDefinition g where g.name = f.name)")
     }
 
-    def createFormDefinition(Long id, String formDefinition) {
+    FormDefinition createFormDefinition(Long id, String formDefinition) {
         FormInstance.withTransaction {
             //find FormDefinition for id
-            FormDefinition existingFormDefinition = FormDefinition.findById(id)
+            FormDefinition existingFormDefinition = FormDefinition.get(id)
             //Create new FormDefinition
-            FormDefinition newFormDefinition = new FormDefinition()
-            newFormDefinition.setName(existingFormDefinition.name)
-            newFormDefinition.setFormDefinition(formDefinition)
-            //increment version
-            newFormDefinition.setFormVersion(existingFormDefinition.formVersion + 1)
-            //save new
-            newFormDefinition.save()
+            FormDefinition newFormDefinition = new FormDefinition(
+                    name: existingFormDefinition.name,
+                    formDefinition: formDefinition,
+                    formVersion: existingFormDefinition.formVersion + 1
+            )
+
+            if (newFormDefinition.validate()) {
+                newFormDefinition.save()
+            } else {
+                //todo throw a nicer exception and more meaningful message since most apps will have the default don't fail on save :-/
+                newFormDefinition.errors.each {
+                    println it
+                }
+                throw new Exception("failed to save new form definition")
+            }
         }
     }
 }

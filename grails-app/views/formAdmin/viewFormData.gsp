@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page import="grails.converters.JSON" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -11,8 +11,8 @@
 </g:if>
 <div class="goodFormContainer">
 
-    <g:textArea name="formContents" value="${form.formData}" rows="40" cols="200"
-                style="height: 350px; width: 850px"/>
+    <pre><code>"${(form.storedFormData() as JSON).toString(true)}"</code></pre>
+
     <a href="${g.createLink(action: 'listFormDefinitions')}">Back</a>
 </div>
 </body>

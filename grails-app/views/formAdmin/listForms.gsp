@@ -28,7 +28,7 @@
                         ${form.started}
                     </td>
                     <td>
-                        <a href="${g.createLink(action: 'viewSubmittedForm', id: form.id)}">View</a>
+                        <a href="${g.createLink(action: 'viewFormData', id: form.id)}">View</a>
                     </td>
                 </tr>
             </g:each>
@@ -36,7 +36,7 @@
     </g:if>
     <g:else>
         <div>
-            No submitted forms for ${formDefinition.name}
+            No ${formDefinition.name} version ${formDefinition.formVersion} forms found.
         </div>
 
         <div>

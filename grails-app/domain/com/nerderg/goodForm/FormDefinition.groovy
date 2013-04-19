@@ -23,6 +23,6 @@ class FormDefinition {
     }
 
     static constraints = {
-       name unique: true
+       name unique: 'formVersion'
     }
 }

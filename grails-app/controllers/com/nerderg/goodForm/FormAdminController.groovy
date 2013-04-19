@@ -16,6 +16,10 @@ class FormAdminController {
      */
     def formDataService
 
+    def index() {
+        redirect(action: 'listFormDefinitions')
+    }
+
     /**
      * Lists all the active {@link FormDefinition} records.
      */
@@ -47,14 +51,14 @@ class FormAdminController {
     /**
      * Lists the submitted forms for a specific {@link FormDefinition}.
      */
-    def listSubmittedForms(Long id) {
-        [ forms: formDataService.getSubmittedForms(id), formDefinition: formDataService.getFormDefinition(id)]
+    def listForms(Long id) {
+        [ forms: formDataService.getForms(id), formDefinition: formDataService.getFormDefinition(id)]
     }
 
     /**
      * Renders the form details.
      */
-    def viewSubmittedForm(Long id) {
-        [form : formDataService.getSubmittedForm(id)]
+    def viewFormData(Long id) {
+        [form : formDataService.getForm(id)]
     }
 }
