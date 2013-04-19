@@ -22,7 +22,8 @@ class FormDataServiceTests {
 
     //TODO processNext
 
-    @Before public void setUp() {
+    @Before
+    public void setUp() {
         service.goodFormService = new GoodFormService()
         formInstance = new FormInstance()
         form = new Form()
@@ -88,5 +89,27 @@ class FormDataServiceTests {
         assert formData.Q1.age instanceof String
         error = service.validateAndProcessFields(question.formElement, formData, formInstance)
         assertTrue("Error was not detected", error)
+    }
+
+    void testEach() {
+        form.question("Q1") {
+            "Rate these lollies" each: 'lolly', {
+                "rate {lolly} out of ten" number: [0..10], map: 'rating'
+            }
+        }
+        Question question = form.getAt("Q1")
+        Map formData = [
+                'lolly' : ['sherbet', 'gum', 'chocolate', 'carrot stick'],
+                'Q1': [lolly: [sherbet: [rating: '4'], gum: [rating: '2'], chocolate: [rating: '9'], carrot_stick: [rating: '10']]]
+        ]
+        boolean error = service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assertFalse("Error was detected", error)
+        assert formData.Q1.lolly.sherbet.rating instanceof BigDecimal
+        assert formData.Q1.lolly.carrot_stick.rating instanceof BigDecimal
+
+        formData.Q1.lolly.gum.rating = 'yucky'
+        error = service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assertTrue("Error was not detected", error)
+
     }
 }

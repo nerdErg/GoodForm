@@ -321,7 +321,7 @@ class FormDataService {
             }
         } catch (NumberFormatException e) {
             log.error "${e.message} converting $fieldValue to number"
-            //TODO i18n
+            //todo i18n
             formElement.attr.error += "$fieldValue isn't a number."
             error = true
         }
