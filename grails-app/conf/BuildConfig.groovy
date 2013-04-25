@@ -36,9 +36,12 @@ grails.project.dependency.resolution = {
                   ":jquery-ui:1.8.24",
                   ":nerderg-form-tags:2.1.3"
 
+        test ':code-coverage=1.2.5'
+
         build ':release:2.2.1', ':rest-client-builder:1.0.3', {
             export = false
         }
+
 
         runtime ":hibernate:$grailsVersion", {
             export = false

@@ -48,10 +48,33 @@ class FormDataServiceTests {
             "Date Of Birth" date: "d/M/yyyy", map: 'dob'
         }
         Question question = form.getAt("Q1")
-        def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '2012/01/01']], formInstance)
-        assertTrue("Error was not detected", error)
-        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2012']], formInstance)
-        assertFalse("Error was detected", error)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '2012/01/01']], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/-23']], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': 'fred']], formInstance)
+
+        //dates shouldn't roll over, so test for it (java date trap)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '34/2/2012']], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '30/13/2012']], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '0/10/2012']], formInstance)
+
+        //test for some valid dates
+
+        //this is a valid date for the year 12
+        /* @see http://docs.oracle.com/javase/1.4.2/docs/api/java/text/SimpleDateFormat.html.
+        For parsing, if the number of pattern letters is more than 2, the year is interpreted literally, regardless of
+        the number of digits. So using the pattern "MM/dd/yyyy", "01/11/12" parses to Jan 11, 12 A.D. */
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/12']], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/12345']], formInstance)
+
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2012']], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '1/1/2012']], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1865']], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/1/3999']], formInstance)
+
+        //leap years
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '29/02/2000']], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '29/02/2001']], formInstance)
+
     }
 
     void testMaxDateField() {
@@ -63,6 +86,8 @@ class FormDataServiceTests {
         assertTrue("Error was not detected", error)
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1999']], formInstance)
         assertFalse("Error was detected", error)
+        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2000']], formInstance)
+        assertFalse("Error was detected", error)
     }
 
     void testMinDateField() {
@@ -73,6 +98,8 @@ class FormDataServiceTests {
         def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1999']], formInstance)
         assertTrue("Error was not detected", error)
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '02/01/2000']], formInstance)
+        assertFalse("Error was detected", error)
+        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2000']], formInstance)
         assertFalse("Error was detected", error)
 
     }

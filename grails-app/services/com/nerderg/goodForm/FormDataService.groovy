@@ -206,6 +206,7 @@ class FormDataService {
         return intermediate
     }
 
+    //todo break this into validate fields and process fields
     /**
      * Process the returned field values by first validating the field then getting references, saving attachments
      * and finally converting to typed fields from string (mainly numeric fields)
