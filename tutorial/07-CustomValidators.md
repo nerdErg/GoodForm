@@ -38,6 +38,7 @@ class BootStrap {
 
     def init = { servletContext ->
         ...
+        def ctx = servletContext.getAttribute(ApplicationAttributes.APPLICATION_CONTEXT)
         formValidationService.addCustomValidator("pdf_only", {formElement, fieldValue -> ctx.jobApplicationValidatorService.pdf_only(formElement, fieldValue)})
         ...
     }
