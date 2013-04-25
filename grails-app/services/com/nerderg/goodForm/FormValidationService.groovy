@@ -41,7 +41,7 @@ class FormValidationService {
      * @param fieldValue
      * @return
      */
-    boolean hasError(FormElement formElement, String fieldValue) {
+    boolean hasError(FormElement formElement, fieldValue) {
         String validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
         if (!validator) {
@@ -53,17 +53,31 @@ class FormValidationService {
     /**
      * Invokes the validation method corresponding the the 'validate' attribute.
      */
-    Closure customValidation = { FormElement formElement, String fieldValue ->
+    Closure customValidation = { FormElement formElement, fieldValue ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
             String code = "goodform.validate." + formElement.attr.validate + ".invalid"
-            def request = RequestContextHolder.requestAttributes?.request
-            def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
-            formElement.attr.error += messageSource.getMessage(code, null, code, locale) ?: code
+            appendError(formElement, code, [fieldValue])
             error = true
         }
         return error
     }
+
+    void appendError(FormElement formElement, String code, List args = null) {
+        String message = message(code, args)
+        if(formElement.attr.error) {
+            formElement.attr.error += " \n$message"
+        } else {
+            formElement.attr.error = message
+        }
+    }
+
+    private String message(String code, List args = null) {
+        def request = RequestContextHolder.requestAttributes?.request
+        def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
+        messageSource.getMessage(code, args ? (args as Object[]) : null, code, locale) ?: code
+    }
+
 }
 
 /**

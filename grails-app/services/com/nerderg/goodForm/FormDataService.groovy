@@ -51,19 +51,19 @@ class FormDataService {
             try {
                 if (!isLegalDate(formElement.attr.date, fieldValue)) {
                     error = true
-                    formElement.attr.error += message("goodform.validate.date.invalid")
+                    formValidationService.appendError(formElement, "goodform.validate.date.invalid")
                 } else {
                     Date d = Date.parse(formElement.attr.date, fieldValue)
                     if (formElement.attr.max) {
                         if (formElement.attr.max == 'today') {
                             if (d.time > System.currentTimeMillis()) {
-                                formElement.attr.error += message("goodform.validate.date.future")
+                                formValidationService.appendError(formElement, "goodform.validate.date.future")
                                 error = true
                             }
                         } else {
                             Date max = Date.parse(formElement.attr.date, formElement.attr.max)
                             if (d.time > max.time) {
-                                formElement.attr.error += message("goodform.validate.date.greaterThan", [formElement.attr.max])
+                                formValidationService.appendError(formElement, "goodform.validate.date.greaterThan", [formElement.attr.max])
                                 error = true
                             }
                         }
@@ -71,13 +71,13 @@ class FormDataService {
                     if (formElement.attr.min) {
                         Date min = Date.parse(formElement.attr.date, formElement.attr.min)
                         if (d.time < min.time) {
-                            formElement.attr.error += message("goodform.validate.date.lessThan", [formElement.attr.min])
+                            formValidationService.appendError(formElement, "goodform.validate.date.lessThan", [formElement.attr.min])
                             error = true
                         }
                     }
                 }
             } catch (ParseException e) {
-                formElement.attr.error += message("goodform.validate.date.invalid")
+                formValidationService.appendError(formElement, "goodform.validate.date.invalid")
                 error = true
             }
         }
@@ -92,53 +92,27 @@ class FormDataService {
 
     Closure validateNumber = { FormElement formElement, fieldValue ->
         boolean error = false
-        if (fieldValue && formElement.attr.containsKey('number')) {
-            if (fieldValue instanceof String[] || fieldValue instanceof List) {
-                fieldValue.each { val ->
-                    error |= validateNumberField(formElement, val)
-                }
-            } else {
-                error = validateNumberField(formElement, fieldValue)
+        if (fieldValue && fieldValue instanceof BigDecimal && formElement.attr.containsKey('number')) {
+            Map<String, BigDecimal> minMax = getNumberMinMax(formElement)
+
+            if (minMax.max != null && fieldValue > minMax.max) {
+                error = true
+                formValidationService.appendError(formElement, "goodform.validate.number.tobig", [fieldValue, minMax.max])
+            }
+
+            if (minMax.min != null && fieldValue < minMax.min) {
+                error = true
+                formValidationService.appendError(formElement, "goodform.validate.number.tosmall", [fieldValue, minMax.min])
             }
         }
         return error
     }
 
-    private boolean validateNumberField(FormElement formElement, String value) {
-        boolean error = false
-
-        if(value == null){
-            return error
-        }
-
-        Map<String,BigDecimal> minMax = getNumberMinMax(formElement)
-
-        try {
-            BigDecimal decimalValue = value as BigDecimal
-
-            if(minMax.max != null && decimalValue > minMax.max) {
-                error = true
-                formElement.attr.error += message("goodform.validate.number.tobig", [decimalValue, minMax.max])
-            }
-
-            if(minMax.min != null && decimalValue < minMax.min) {
-                error = true
-                formElement.attr.error += message("goodform.validate.number.tosmall", [decimalValue, minMax.min])
-            }
-
-        } catch (NumberFormatException e) {
-            log.error "${e.message} converting $value to number"
-            formElement.attr.error += message("goodform.validate.number.isnt", [value])
-            error = true
-        }
-        return error
-    }
-
-    Map<String,BigDecimal> getNumberMinMax(FormElement formElement) {
+    Map<String, BigDecimal> getNumberMinMax(FormElement formElement) {
         BigDecimal max
         BigDecimal min
 
-        if(formElement.attr.number instanceof Range){
+        if (formElement.attr.number instanceof Range) {
             max = formElement.attr.number.to
             min = formElement.attr.number.from
         } else {
@@ -170,7 +144,7 @@ class FormDataService {
                 pattern = formElement.attr.pattern
             }
             if (fieldValue && !(fieldValue ==~ pattern)) {
-                formElement.attr.error += message
+                formValidationService.appendError(formElement, message)
                 error = true
             }
         }
@@ -187,7 +161,7 @@ class FormDataService {
     Closure validateMandatoryField = { FormElement formElement, fieldValue ->
         boolean error = false
         if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
-            formElement.attr.error += message("goodform.validate.required.field")
+            formValidationService.appendError(formElement, "goodform.validate.required.field")
             error = true
         }
         return error
@@ -289,14 +263,22 @@ class FormDataService {
         formElement.attr.error = ""
 
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
+        try {
+            fieldValue = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
+        } catch (NumberFormatException e) {
+            formElement.attr.error = message("goodform.validate.number.isnt", [fieldValue])
+            error = true
+            //we can't just return here because we want to display errors on all subfields
+        }
 
-        if (fieldValue instanceof String[]) {
-            fieldValue.each { String fv ->
+        //because strings are a collection in groovy we need to check it's not a string before assuming an array, list etc.
+        if (!(fieldValue instanceof String) && fieldValue instanceof Collection) {
+            fieldValue.each { fv ->
                 error = validateField(formElement, fv, error)
             }
         } else if (fieldValue instanceof MultipartFile) {
             error = validateField(formElement, fieldValue.getName(), error)
-        } else if (fieldValue == null || fieldValue instanceof String) {
+        } else {
             error = validateField(formElement, fieldValue, error)
         }
 
@@ -308,9 +290,6 @@ class FormDataService {
 
         //handle subElements
         error = handleSubElements(formElement, formData, instance, error)
-
-        //convert numeric fields to bigdecimal
-        error = checkAndConvertFieldToBigDecimal(fieldValue, formElement, formData, error)
 
         return error
     }
@@ -365,28 +344,30 @@ class FormDataService {
         return error
     }
 
-    //todo look at cleaning this up wrt to validation doubling up code
-    private boolean checkAndConvertFieldToBigDecimal(fieldValue, FormElement formElement, Map formData, boolean error) {
-        try {
-            if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
-                log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
-                if (fieldValue instanceof String[] || fieldValue instanceof List) {
-                    goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue.collect {
-                        if (it) {
-                            it as BigDecimal
-                        }
-                    })
-                } else {
-                    goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue as BigDecimal)
+    /**
+     * Converts number and money fields to BigDecimal for standard processing. This helps the rules engine and removes
+     * float vagaries.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @param formData
+     * @return new field value
+     */
+    private convertNumberFieldToBigDecimal(fieldValue, FormElement formElement, Map formData) {
+        if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
+            log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
+            if (fieldValue instanceof String[] || fieldValue instanceof List) {
+                fieldValue = fieldValue.collect {
+                    if (it) {
+                        it as BigDecimal
+                    }
                 }
+            } else {
+                fieldValue = fieldValue as BigDecimal
             }
-        } catch (NumberFormatException e) {
-            log.error "${e.message} converting $fieldValue to number"
-            //todo i18n
-            formElement.attr.error += "$fieldValue isn't a number."
-            error = true
+            goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue)
         }
-        return error
+        return fieldValue
     }
 
     /**
