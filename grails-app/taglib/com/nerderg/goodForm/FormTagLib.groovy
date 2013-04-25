@@ -569,4 +569,24 @@ class FormTagLib {
         out << '</a>'
     }
 
+    def showMessages = {attrs ->
+        if(flash.message) {
+            out << '<div class="message">'
+            if(isCollectionNotString(flash.message)) {
+                out << '<ul>'
+                flash.message.each { item ->
+                    out << '<li>' + item.toString().encodeAsHTML() + '</li>'
+                }
+
+            } else {
+                out << flash.message.toString().encodeAsHTML()
+            }
+            out << '</div>'
+        }
+    }
+
+    private boolean isCollectionNotString(obj) {
+        !(obj instanceof String) && obj instanceof Collection
+    }
+
 }

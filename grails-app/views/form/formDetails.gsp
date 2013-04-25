@@ -11,6 +11,8 @@
 <body>
 <div class="goodFormContainer">
 
+  <form:showMessages/>
+
   <g:message code="goodform.form.version" args="${[form.version]}"/>
 
   <div class="roundbox">

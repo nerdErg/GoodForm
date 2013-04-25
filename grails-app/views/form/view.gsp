@@ -8,6 +8,8 @@
 <body>
 <div class="goodFormContainer">
 
+  <form:showMessages/>
+
   <h1><g:message code="goodform.view.form"/></h1>
   <g:render template="/form/viewCommon" model="[formInstance: formInstance, formData: formData]"/>
   <form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${formInstance.readOnly}"/>

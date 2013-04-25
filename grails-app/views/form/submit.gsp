@@ -7,6 +7,9 @@
 
 <body>
 <div class="goodFormContainer">
+
+  <form:showMessages/>
+
   <h1><g:message code="goodform.submit.form"/></h1>
 
   <p>You tried to submit form ${params.id}</p>
