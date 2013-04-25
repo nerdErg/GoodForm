@@ -8,6 +8,7 @@ import org.junit.Before
 
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.Question
+import org.springframework.context.MessageSource
 
 /**
  * @author Ross Rowe
@@ -26,11 +27,17 @@ class FormDataServiceTests {
     public void setUp() {
         service.goodFormService = new GoodFormService()
         formValidationService = new FormValidationService()
-        formValidationService.messageSource = service.messageSource //so circular
         service.formValidationService = formValidationService
         service.addValidator(formValidationService.customValidation)
         formInstance = new FormInstance()
         form = new Form()
+
+        def msgSrc = mockFor(MessageSource.class, true)
+        //not sure I care how many times this gets called
+        msgSrc.demand.getMessage(0..7) {String code, Object[] args, String defaultMessage, Locale locale ->
+            return defaultMessage
+        }
+        formValidationService.messageSource = msgSrc.createMock()
     }
 
     void testMandatoryFieldValidation() {

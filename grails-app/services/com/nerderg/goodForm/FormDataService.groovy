@@ -134,7 +134,7 @@ class FormDataService {
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
-            String message = message("goodform.validate.invalid.pattern")
+            String message = "goodform.validate.invalid.pattern"
             if (formElement.attr.pattern instanceof List) {
                 pattern = formElement.attr.pattern[0]
                 if (formElement.attr.pattern.size() > 1) {
@@ -266,7 +266,7 @@ class FormDataService {
         try {
             fieldValue = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
         } catch (NumberFormatException e) {
-            formElement.attr.error = message("goodform.validate.number.isnt", [fieldValue])
+            formValidationService.appendError(formElement, "goodform.validate.number.isnt", [fieldValue])
             error = true
             //we can't just return here because we want to display errors on all subfields
         }
@@ -482,8 +482,7 @@ class FormDataService {
             def processedFormData = cleanUpJSONNullMap(processedJSONFormData)
 
             if (processedFormData[lastQuestion].message) {
-                //TODO how to handle adding message into flash?
-                //flash.message = processedFormData[lastQuestion].message
+                appendMessage(processedFormData, processedFormData[lastQuestion].message)
             }
 
             updateStoredFormInstance(instance, processedFormData)
@@ -510,7 +509,14 @@ class FormDataService {
         }
     }
 
-    def updateStoredFormInstance(FormInstance instance, Map processedFormData) {
+    private appendMessage(Map formData, String message) {
+        if(!formData.messages) {
+            formData.messages = []
+        }
+        formData.messages.add(message)
+    }
+
+    void updateStoredFormInstance(FormInstance instance, Map processedFormData) {
 
         List state = instance.storedState()
         def nextInState = state.find { s ->
@@ -576,12 +582,6 @@ class FormDataService {
             }
         }
         return collect
-    }
-
-    private String message(String code, List args = null) {
-        def request = RequestContextHolder.requestAttributes?.request
-        def locale = request ? RequestContextUtils.getLocale(request) : Locale.default
-        messageSource.getMessage(code, args ? (args as Object[]) : null, code, locale) ?: code
     }
 
     /**

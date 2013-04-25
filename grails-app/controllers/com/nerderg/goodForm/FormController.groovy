@@ -162,7 +162,11 @@ class FormController {
 
         if (!error) {
             try {
+                mergedFormData.messages = [] //clear messages for processing
                 Map processedFormData = formDataService.processNext(formInstance, mergedFormData)
+                if (processedFormData.messages) {
+                    flash.message = processedFormData.messages
+                }
                 log.debug "next processedFormData: ${processedFormData.toString()}"
                 //rules engine returns "End" as the next question at the end
                 if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
