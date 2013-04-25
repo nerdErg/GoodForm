@@ -49,10 +49,7 @@ class FormDataService {
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
-                if (!isLegalDate(formElement.attr.date, fieldValue)) {
-                    error = true
-                    formValidationService.appendError(formElement, "goodform.validate.date.invalid")
-                } else {
+                if (fieldValue instanceof String && isLegalDate(formElement.attr.date, fieldValue)) {
                     Date d = Date.parse(formElement.attr.date, fieldValue)
                     if (formElement.attr.max) {
                         if (formElement.attr.max == 'today') {
@@ -75,6 +72,9 @@ class FormDataService {
                             error = true
                         }
                     }
+                } else {
+                    error = true
+                    formValidationService.appendError(formElement, "goodform.validate.date.invalid")
                 }
             } catch (ParseException e) {
                 formValidationService.appendError(formElement, "goodform.validate.date.invalid")
@@ -90,6 +90,15 @@ class FormDataService {
         return sdf.parse(text, new ParsePosition(0)) != null
     }
 
+    /**
+     * Check the Number formElement Max and Min limits set explicitly or implicitly via Range
+     * We ignore the field (even if a number field) if the fieldValue isn't a BigDecimal because the pre-processing that
+     * converts numbers to BigDecimals will mark non-number number fields as errors.
+     *
+     * @param fieldValue
+     * @param formElement
+     * @return
+     */
     Closure validateNumber = { FormElement formElement, fieldValue ->
         boolean error = false
         if (fieldValue && fieldValue instanceof BigDecimal && formElement.attr.containsKey('number')) {
@@ -510,7 +519,7 @@ class FormDataService {
     }
 
     private appendMessage(Map formData, String message) {
-        if(!formData.messages) {
+        if (!formData.messages) {
             formData.messages = []
         }
         formData.messages.add(message)

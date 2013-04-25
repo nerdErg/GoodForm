@@ -34,7 +34,7 @@ class FormDataServiceTests {
 
         def msgSrc = mockFor(MessageSource.class, true)
         //not sure I care how many times this gets called
-        msgSrc.demand.getMessage(0..7) {String code, Object[] args, String defaultMessage, Locale locale ->
+        msgSrc.demand.getMessage(0..8) {String code, Object[] args, String defaultMessage, Locale locale ->
             return defaultMessage
         }
         formValidationService.messageSource = msgSrc.createMock()
@@ -83,6 +83,8 @@ class FormDataServiceTests {
         //leap years
         assert !service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '29/02/2000']], formInstance)
         assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '29/02/2001']], formInstance)
+
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['dob': 23]], formInstance)
 
     }
 
