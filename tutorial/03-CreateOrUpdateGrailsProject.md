@@ -78,7 +78,7 @@ class BootStrap {
 
 [Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step3-b...tutorial-step3-c)
 
-Put a text file with colour names in a folder called `suggestions`. [See Suggestions Plugin] (http://nerderg.com/Simple+Suggestions+plugin)
+Put a 'colour.txt' text file with colour names in a folder called `suggestions` within your grails project. [See Suggestions Plugin] (http://nerderg.com/Simple+Suggestions+plugin)
 
 This is a very simple form with just two questions ('What is your name?' and 'What is your favorite colour?' ).
 However, the form demonstrates some key features of Goodform.
