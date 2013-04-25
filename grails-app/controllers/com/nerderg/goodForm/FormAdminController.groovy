@@ -40,10 +40,10 @@ class FormAdminController {
     def updateFormDefinition(Long id) {
         FormDefinition newFormDefinition = formDataService.createFormDefinition(id, params.formDefinition)
         if (newFormDefinition) {
-            flash.message = 'Update successful'
+            flash.message = message(code: "goodform.update.successful")
             redirect action: 'showFormDefinition', params: [id: newFormDefinition.id]
         } else {
-            flash.message = 'An error occurred'
+            flash.message = message(code: "goodform.update.failed")
             redirect action: 'showFormDefinition', params: [id: id]
         }
     }

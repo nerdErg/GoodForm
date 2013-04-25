@@ -54,6 +54,29 @@ class FormDataServiceTests {
         assertFalse("Error was detected", error)
     }
 
+    void testMaxDateField() {
+        form.question("Q1") {
+            "Date Of Birth" date: "d/M/yyyy", map: 'dob', max: '01/01/2000'
+        }
+        Question question = form.getAt("Q1")
+        def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '02/01/2000']], formInstance)
+        assertTrue("Error was not detected", error)
+        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1999']], formInstance)
+        assertFalse("Error was detected", error)
+    }
+
+    void testMinDateField() {
+        form.question("Q1") {
+            "Date Of Birth" date: "d/M/yyyy", map: 'dob', min: '1/1/2000'
+        }
+        Question question = form.getAt("Q1")
+        def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1999']], formInstance)
+        assertTrue("Error was not detected", error)
+        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '02/01/2000']], formInstance)
+        assertFalse("Error was detected", error)
+
+    }
+
     void testInvalidPatternField() {
         form.question("Q1") {
             "Given Name" text: 50, pattern: /[A-Za-z]+/, map: 'givenName'
@@ -99,7 +122,7 @@ class FormDataServiceTests {
         }
         Question question = form.getAt("Q1")
         Map formData = [
-                'lolly' : ['sherbet', 'gum', 'chocolate', 'carrot stick'],
+                'lolly': ['sherbet', 'gum', 'chocolate', 'carrot stick'],
                 'Q1': [lolly: [sherbet: [rating: '4'], gum: [rating: '2'], chocolate: [rating: '9'], carrot_stick: [rating: '10']]]
         ]
         boolean error = service.validateAndProcessFields(question.formElement, formData, formInstance)
