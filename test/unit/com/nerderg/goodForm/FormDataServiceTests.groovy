@@ -123,22 +123,77 @@ class FormDataServiceTests {
         Question question = form.getAt("Q1")
         Map formData = ['Q1': ['age': '23']]
 
-        boolean error = service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assertFalse("Error was detected", error)
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert formData.Q1.age instanceof BigDecimal
         assert formData.Q1.age == 23
 
         formData.Q1.age = '45.6'
         assert formData.Q1.age instanceof String
-        error = service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assertFalse("Error was detected", error)
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert formData.Q1.age instanceof BigDecimal
         assert formData.Q1.age == (45.6 as BigDecimal)
 
         formData.Q1.age = 'norman'
         assert formData.Q1.age instanceof String
-        error = service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assertTrue("Error was not detected", error)
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+    }
+
+    void testNumberMaxMin(){
+        form.question("Q1") {
+            "Age" number: 5, map: 'age', max: 23, min: 0
+        }
+        Question question = form.getAt("Q1")
+        Map formData = ['Q1': ['age': '23']]
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert formData.Q1.age instanceof BigDecimal
+        assert formData.Q1.age == 23
+
+        formData.Q1.age = '0'
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+
+        formData.Q1.age = '10'
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+
+        formData.Q1.age = '45.6'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tobig'
+
+        formData.Q1.age = '23.0000001'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tobig'
+
+        formData.Q1.age = '-0.6'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tosmall'
+    }
+
+    void testNumberRange(){
+        form.question("Q1") {
+            "Age" number: 0..23, map: 'age'
+        }
+        Question question = form.getAt("Q1")
+        Map formData = ['Q1': ['age': '23']]
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert formData.Q1.age instanceof BigDecimal
+        assert formData.Q1.age == 23
+
+        formData.Q1.age = '0'
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+
+        formData.Q1.age = '10'
+        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+
+        formData.Q1.age = '45.6'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tobig'
+
+        formData.Q1.age = '23.0000001'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tobig'
+
+        formData.Q1.age = '-0.6'
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert question.formElement.attr.error == 'goodform.validate.number.tosmall'
     }
 
     void testEach() {

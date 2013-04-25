@@ -71,19 +71,13 @@ class FormTagLib {
         e.attr.name = makeElementName(e)
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
 
-        String size
-        String max
-        String min
+        Map<String,BigDecimal> minMax = formDataService.getNumberMinMax(e)
 
+        String size
         if(e.attr.number instanceof Range){
             size = e.attr.number.to.toString().size().toString()
-            max = e.attr.number.to.toString()
-            min = e.attr.number.from.toString()
         } else {
             size = e.attr.number.toString()
-            //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
-            max = e.attr.max == null ? null : e.attr.max.toString()
-            min = e.attr.min == null ? null : e.attr.max.toString()
         }
 
         out << nerderg.inputfield(
@@ -93,12 +87,16 @@ class FormTagLib {
                 field: e.attr.name,
                 size: size,
                 maxlength: size,
-                max: max,
-                min: min,
+                max: toStringIfNotNull(minMax.max),
+                min: toStringIfNotNull(minMax.min),
                 error: e.attr.error,
                 disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
+    }
+
+    private String toStringIfNotNull(value) {
+        value != null ? value.toString() : null
     }
 
     def phone = { FormElement e, Map store, Integer index, boolean disabled ->
