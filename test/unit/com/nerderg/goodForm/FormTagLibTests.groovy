@@ -17,6 +17,7 @@ class FormTagLibTests {
     void setUp() {
         formElement = new FormElement()
         tagLib.goodFormService = new GoodFormService()
+        tagLib.formDataService = new FormDataService()
         mockTagLib(NerdergFormtagsTagLib.class)
     }
 

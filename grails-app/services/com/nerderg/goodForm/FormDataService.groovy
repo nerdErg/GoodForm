@@ -90,6 +90,65 @@ class FormDataService {
         return sdf.parse(text, new ParsePosition(0)) != null
     }
 
+    Closure validateNumber = { FormElement formElement, fieldValue ->
+        boolean error = false
+        if (fieldValue && formElement.attr.containsKey('number')) {
+            if (fieldValue instanceof String[] || fieldValue instanceof List) {
+                fieldValue.each { val ->
+                    error |= validateNumberField(formElement, val)
+                }
+            } else {
+                error = validateNumberField(formElement, fieldValue)
+            }
+        }
+        return error
+    }
+
+    private boolean validateNumberField(FormElement formElement, String value) {
+        boolean error = false
+
+        if(value == null){
+            return error
+        }
+
+        Map<String,BigDecimal> minMax = getNumberMinMax(formElement)
+
+        try {
+            BigDecimal decimalValue = value as BigDecimal
+
+            if(minMax.max != null && decimalValue > minMax.max) {
+                error = true
+                formElement.attr.error += message("goodform.validate.number.tobig", [decimalValue, minMax.max])
+            }
+
+            if(minMax.min != null && decimalValue < minMax.min) {
+                error = true
+                formElement.attr.error += message("goodform.validate.number.tosmall", [decimalValue, minMax.min])
+            }
+
+        } catch (NumberFormatException e) {
+            log.error "${e.message} converting $value to number"
+            formElement.attr.error += message("goodform.validate.number.isnt", [value])
+            error = true
+        }
+        return error
+    }
+
+    Map<String,BigDecimal> getNumberMinMax(FormElement formElement) {
+        BigDecimal max
+        BigDecimal min
+
+        if(formElement.attr.number instanceof Range){
+            max = formElement.attr.number.to
+            min = formElement.attr.number.from
+        } else {
+            //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
+            max = formElement.attr.max == null ? null : formElement.attr.max
+            min = formElement.attr.min == null ? null : formElement.attr.min
+        }
+        return [max: max, min: min]
+    }
+
     /**
      * Validates that a field value matches a defined regex pattern.
      *
@@ -138,7 +197,7 @@ class FormDataService {
      * Adds the mandatory field, date, pattern and generic custom validators to the initial list of validators
      * that process field data.  Validators can be explicitly added by invoking the {@link #addValidator} method.
      */
-    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern]
+    List<Closure> validators = [validateMandatoryField, validateDate, validatePattern, validateNumber]
 
     @PostConstruct
     void initializeValidators() {
@@ -306,6 +365,7 @@ class FormDataService {
         return error
     }
 
+    //todo look at cleaning this up wrt to validation doubling up code
     private boolean checkAndConvertFieldToBigDecimal(fieldValue, FormElement formElement, Map formData, boolean error) {
         try {
             if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
