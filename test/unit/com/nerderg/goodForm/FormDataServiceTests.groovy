@@ -84,6 +84,8 @@ class FormDataServiceTests {
         Question question = form.getAt("Q1")
         def error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '02/01/2000']], formInstance)
         assertTrue("Error was not detected", error)
+        error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2000']], formInstance)
+        assertFalse("Error was detected", error)
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '31/12/1999']], formInstance)
         assertFalse("Error was detected", error)
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['dob': '01/01/2000']], formInstance)
@@ -135,7 +137,7 @@ class FormDataServiceTests {
 
         formData.Q1.age = 'norman'
         assert formData.Q1.age instanceof String
-        assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
+        assert service.validateAndProcessFields(question.formElement, formData, formInstance)
     }
 
     void testNumberMaxMin(){
