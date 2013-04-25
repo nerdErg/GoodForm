@@ -39,11 +39,22 @@ class FormTagLibTests {
     }
 
     void testNumber() {
-        formElement.form("This is a test", [number: 5, map: 'test'], null) {
-            "12345"
-        }
+        formElement.form("This is a test", [number: 5, map: 'test'], null) { }
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [:]]).trim()
-        assert result.contains('input type=\'number\'')
+        assert result == """<div class='prop'>
+<span class='name'><label for='.test'>This is a test:</label></span>
+<span class='value' title='This is a test'><input type='number' name='.test' value='' id='.test' size='5' maxlength='5'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
+</div>"""
+    }
+
+    void testNumberRange() {
+        formElement.form("This is a test", [number: 0..21, map: 'test'], null) { }
+        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [:]]).trim()
+        println result
+        assert result == """<div class='prop'>
+<span class='name'><label for='.test'>This is a test:</label></span>
+<span class='value' title='This is a test'><input type='number' name='.test' value='' id='.test' size='2' maxlength='2' max='21' min='0'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
+</div>"""
     }
 
     void testPhone() {
