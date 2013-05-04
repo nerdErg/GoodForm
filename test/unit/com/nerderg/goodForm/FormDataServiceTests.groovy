@@ -2,7 +2,7 @@ package com.nerderg.goodForm
 
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
-import grails.test.mixin.web.ControllerUnitTestMixin
+import grails.test.mixin.domain.DomainClassUnitTestMixin
 
 import org.junit.Before
 
@@ -12,9 +12,10 @@ import org.springframework.context.MessageSource
 
 /**
  * @author Ross Rowe
+ * @author Peter McNeil
  */
 @TestFor(FormDataService)
-@TestMixin(ControllerUnitTestMixin)
+@TestMixin(DomainClassUnitTestMixin)
 class FormDataServiceTests {
 
     FormInstance formInstance
@@ -34,7 +35,7 @@ class FormDataServiceTests {
 
         def msgSrc = mockFor(MessageSource.class, true)
         //not sure I care how many times this gets called
-        msgSrc.demand.getMessage(0..8) {String code, Object[] args, String defaultMessage, Locale locale ->
+        msgSrc.demand.getMessage(0..8) { String code, Object[] args, String defaultMessage, Locale locale ->
             return defaultMessage
         }
         formValidationService.messageSource = msgSrc.createMock()
@@ -149,14 +150,14 @@ class FormDataServiceTests {
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert question.formElement.attr.error == 'goodform.validate.number.isnt'
 
-        formData.Q1.age = ['23','norman'] as String[]
+        formData.Q1.age = ['23', 'norman'] as String[]
         assert formData.Q1.age instanceof String[]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert question.formElement.attr.error == 'goodform.validate.number.isnt'
 
     }
 
-    private void numberMaxMinCommon(question, formData){
+    private void numberMaxMinCommon(question, formData) {
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert formData.Q1.age instanceof BigDecimal
         assert formData.Q1.age == 23
@@ -167,7 +168,7 @@ class FormDataServiceTests {
         formData.Q1.age = '10'
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
 
-        formData.Q1.age = ['10','22'] as String[]
+        formData.Q1.age = ['10', '22'] as String[]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
 
         formData.Q1.age = '45.6'
@@ -182,13 +183,13 @@ class FormDataServiceTests {
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert question.formElement.attr.error == 'goodform.validate.number.tosmall'
 
-        formData.Q1.age = ['10','24'] as String[]
+        formData.Q1.age = ['10', '24'] as String[]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
         assert question.formElement.attr.error == 'goodform.validate.number.tobig'
 
     }
 
-    void testNumberMaxMin(){
+    void testNumberMaxMin() {
         form.question("Q1") {
             "Age" number: 5, map: 'age', max: 23, min: 0
         }
@@ -197,13 +198,13 @@ class FormDataServiceTests {
         numberMaxMinCommon(question, formData)
     }
 
-    void testNumberRange(){
+    void testNumberRange() {
         form.question("Q1") {
             "Age" number: 0..23, map: 'age'
         }
         Question question = form.getAt("Q1")
         Map formData = ['Q1': ['age': '23']]
-        numberMaxMinCommon(question,formData)
+        numberMaxMinCommon(question, formData)
     }
 
     void testEach() {
@@ -225,6 +226,52 @@ class FormDataServiceTests {
         formData.Q1.lolly.gum.rating = 'yucky'
         error = service.validateAndProcessFields(question.formElement, formData, formInstance)
         assertTrue("Error was not detected", error)
+
+    }
+
+    void testCreateNewFormVersion() {
+        String sampleForm = """ form {  //start with a 'form' element
+                   question("Q1") {   //include a 'question' element with an identifier
+                           "What is your name?" group: "names", {
+                           "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: 'title'
+                           "Given Names" text: 50, required: true, map: 'givenNames'
+                           "Last or Family Name" text: 50, required: true, map: 'lastName'
+                           "Date of life" date: "dd/MM/yyyy", required: true, map: 'dol'
+                           "Have you been or are you known by any other names?" hint: "e.g. maiden name, previous married name, alias, name at birth", map: 'hasAlias', {
+                               "List your other names" listOf: "aliases", {
+                                   "Other name" text: 50, map: 'alias'
+                                   "Type of name" text: 40, hint: "e.g maiden name", suggest: "nameType", map: 'aliasType'
+                               }
+                           }
+
+                       }
+                   }
+                   question("Q2") {
+                       "What is your favorite colour?" text: 20, map: 'faveColour', suggest: 'colour'
+                   }
+
+            }"""
+        mockDomain(FormDefinition)
+        mockDomain(FormVersion)
+        FormVersion formVersion = service.createNewFormVersion('ContactDetails', sampleForm)
+        assert formVersion.formVersionNumber == 1
+        assert formVersion.formDefinitionDSL == sampleForm
+        assert formVersion.formDefinition != null
+        assert formVersion.formDefinition instanceof FormDefinition
+        assert formVersion.formDefinition.name == 'ContactDetails'
+        assert formVersion.formDefinition.formVersions.size() == 1
+        assert formVersion.formDefinition.formVersions.contains(formVersion)
+
+        FormVersion formVersion2 = service.createNewFormVersion('ContactDetails', sampleForm)
+        assert formVersion.formVersionNumber == 1
+        assert formVersion.formDefinitionDSL == sampleForm
+        assert formVersion.formDefinition != null
+        assert formVersion2.formVersionNumber == 2
+        assert formVersion.formDefinitionDSL == sampleForm
+        assert formVersion2.formDefinition == formVersion.formDefinition
+        assert formVersion.formDefinition.formVersions.size() == 2
+        assert formVersion.formDefinition.formVersions.contains(formVersion)
+        assert formVersion.formDefinition.formVersions.contains(formVersion2)
 
     }
 }

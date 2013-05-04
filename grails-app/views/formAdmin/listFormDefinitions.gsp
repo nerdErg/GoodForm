@@ -20,7 +20,7 @@
     <g:each in="${formDefinitions}" var="formDefinition">
       <tr>
         <td>${formDefinition.name}</td>
-        <td>${formDefinition.formVersions.max{ FormVersion f -> f.formVersionNumber }}</td>
+        <td>${formDefinition.currentVersion()}</td>
         <td><a href="${g.createLink(action: 'showFormDefinition', id: formDefinition.id)}">
           Definition
         </a></td>

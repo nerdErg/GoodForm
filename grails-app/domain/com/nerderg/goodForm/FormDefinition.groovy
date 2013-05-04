@@ -17,4 +17,8 @@ class FormDefinition {
     static constraints = {
        name unique: true
     }
+
+    public FormVersion currentVersion() {
+        formVersions?.max{ FormVersion fv -> fv.formVersionNumber }
+    }
 }
