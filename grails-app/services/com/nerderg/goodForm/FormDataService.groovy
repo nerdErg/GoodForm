@@ -670,7 +670,7 @@ class FormDataService {
             throw new GoodFormException("Form definition must be provided.")
         }
 
-        Integer nextVersion = formDefinition.formVersions ? formDefinition.formVersions.max { FormVersion fv -> fv.formVersionNumber } as Integer : 1
+        Integer nextVersion = formDefinition.formVersions ? (formDefinition.formVersions.max { FormVersion fv -> fv.formVersionNumber } as Integer) + 1 : 1
 
         FormVersion formVersion = new FormVersion(formVersionNumber: nextVersion, formDefinitionDSL: formDefinitionDSL)
 
