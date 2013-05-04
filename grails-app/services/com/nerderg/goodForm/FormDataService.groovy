@@ -191,16 +191,8 @@ class FormDataService {
     }
 
     Form getForm(String formName) {
-        return getFormQuestions(formCurrentDefinitionForName(formName))
-    }
-
-    /**
-     *
-     * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersionNumber value
-     */
-    FormVersion formCurrentDefinitionForName(String formName) {
-        FormVersion.executeQuery("select f from FormVersion f where f.formDefinition.name = :formName  order by f.formVersionNumber desc",
-                [formName: formName, max: 1])[0]
+        FormDefinition formDefinition = FormDefinition.findByName(formName)
+        return formDefinition ? getFormQuestions(formDefinition.currentVersion()) : null
     }
 
     Form getFormQuestions(FormVersion formVersion) {
@@ -222,7 +214,7 @@ class FormDataService {
         form.formDefinitionId = formVersion.id
         return form
     }
-    //todo do we need this? remove
+
     FormInstance getFormInstance(Long id) {
         return FormInstance.get(id)
     }
