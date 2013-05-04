@@ -357,7 +357,7 @@ class FormTagLib {
     def answered = { attrs ->
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(formInstance.getFormDefinition())
+        Form questions = formDataService.getFormQuestions(formInstance.formVersion)
 
         List state = formInstance.storedState().reverse()
         List currentQuestions = formInstance.storedCurrentQuestion()
@@ -384,7 +384,7 @@ class FormTagLib {
         log.debug "in display tag $attrs"
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(formInstance.getFormDefinition())
+        Form questions = formDataService.getFormQuestions(formInstance.formVersion)
 
         List state = formInstance.storedState()
         def i = state.size() - 1
@@ -409,7 +409,7 @@ class FormTagLib {
         log.debug "in display tag $attrs"
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(formInstance.getFormDefinition())
+        Form questions = formDataService.getFormQuestions(formInstance.formVersion)
 
         List state = formInstance.storedState()
         def i = state.size() - 1
@@ -483,7 +483,7 @@ class FormTagLib {
         log.debug "in display tag $attrs"
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
-        Form questions = formDataService.getFormQuestions(formInstance.getFormDefinition())
+        Form questions = formDataService.getFormQuestions(formInstance.formVersion)
         Boolean compress = attrs.compress || attrs.readOnly
 
         List refs = attrs.refs as List

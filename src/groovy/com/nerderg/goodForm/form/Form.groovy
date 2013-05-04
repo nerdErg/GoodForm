@@ -1,5 +1,7 @@
 package com.nerderg.goodForm.form
 
+import com.nerderg.goodForm.FormVersion
+
 /**
  * Form contains the set of form questions retrieved from a form definition.
  *
@@ -9,7 +11,7 @@ package com.nerderg.goodForm.form
 class Form {
 
     def goodFormService
-    Long version
+    FormVersion version
     String name
     def parent
     List<Question>  questions = []

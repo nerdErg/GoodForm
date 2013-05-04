@@ -30,6 +30,6 @@ abstract class AbstractIntegrationTest {
                       }
                    }"""
 
-        new FormDefinition(name: 'SampleForm', formDefinition: sampleForm, formVersion: 1).save()
+        formDataService.createNewFormVersion('SampleForm', sampleForm)
     }
 }

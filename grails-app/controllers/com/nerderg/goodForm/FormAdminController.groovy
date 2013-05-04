@@ -24,24 +24,24 @@ class FormAdminController {
      * Lists all the active {@link FormDefinition} records.
      */
     def listFormDefinitions() {
-       [ formDefinitions: formDataService.getLatestFormDefinitions()]
+       [ formDefinitions: FormDefinition.list()]
     }
 
     /**
      * Renders the form definition.
      */
     def showFormDefinition(Long id) {
-        [formDefinition:  formDataService.getFormDefinition(id)]
+        [formDefinition:  FormVersion.get(id)]
     }
 
     /**
      * Creates a new FormDefinition (incrementing the version number) with the entered form definition text).
      */
-    def updateFormDefinition(Long id) {
-        FormDefinition newFormDefinition = formDataService.createFormDefinition(id, params.formDefinition)
-        if (newFormDefinition) {
+    def updateFormDefinition(Long id, String formDefinition) {
+        FormVersion newFormVersion = formDataService.createNewFormVersion(id, formDefinition)
+        if (newFormVersion) {
             flash.message = message(code: "goodform.update.successful")
-            redirect action: 'showFormDefinition', params: [id: newFormDefinition.id]
+            redirect action: 'showFormDefinition', params: [id: newFormVersion.id]
         } else {
             flash.message = message(code: "goodform.update.failed")
             redirect action: 'showFormDefinition', params: [id: id]
@@ -52,7 +52,7 @@ class FormAdminController {
      * Lists the submitted forms for a specific {@link FormDefinition}.
      */
     def listForms(Long id) {
-        [ forms: formDataService.getForms(id), formDefinition: formDataService.getFormDefinition(id)]
+        [ forms: formDataService.getForms(id), formDefinition: FormDefinition.get(id)]
     }
 
     /**

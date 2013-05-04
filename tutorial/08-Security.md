@@ -76,9 +76,8 @@ and groups:
                 }
         }"""
 
-        if (!FormDefinition.get(3)) {
-            FormDefinition formDefinition = new FormDefinition(name: 'LoanApplication', formDefinition: loadApplicationDefinition, formVersion: 1)
-            formDefinition.save()
+        if(!FormDefinition.findByName('LoanApplication')) {
+            formDataService.createNewFormVersion('LoanApplication', loadApplicationDefinition)
         }
 
         if (!SecRole.findByAuthority('ROLE_APPROVER')) {

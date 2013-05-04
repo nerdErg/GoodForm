@@ -7,22 +7,14 @@ package com.nerderg.goodForm
  */
 class FormDefinition {
 
-    String formDefinition
     /**
      * The name of the form.  Must be unique.
      */
     String name
 
-    /**
-     * Incrementing integer that represents the version number of the underlying form.
-     */
-    Integer formVersion
-
-    static mapping = {
-        formDefinition column: "formDefinition", sqlType: "text"
-    }
+    static hasMany = [formVersions: FormVersion]
 
     static constraints = {
-       name unique: 'formVersion'
+       name unique: true
     }
 }

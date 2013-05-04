@@ -15,8 +15,7 @@ class FormInstance {
     String state //JSON list of the question sets that have been answered in the form
     String userId //an identifier of the user that filled in this form
     String currentQuestion //JSON list of question references that are to be displayed
-    Long formVersion //the form definitions version number so we can map the definition to the data
-    Long formDefinitionId //The id of the form definition domain object related to this form
+    FormVersion formVersion //The id of the form definition domain object related to this form
     Date lastUpdated
     Boolean readOnly //if this is true the form is read only and can't be edited.
 
@@ -75,15 +74,6 @@ class FormInstance {
     boolean isAtEnd() {
         List current = storedCurrentQuestion()
         return current.size() == 1 && current.first() == 'End'
-    }
-
-    /**
-     * Convenience method to get the form definition associated with this form instance
-     * @return
-     */
-    FormDefinition getFormDefinition() {
-        //find FormDefinition for id
-        FormDefinition.get(formDefinitionId)
     }
 
     static mapping = {

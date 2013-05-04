@@ -68,9 +68,9 @@ Let's now create a new form that will span several pages.  Add the following to 
                 }
            }
     }"""
-    if (!FormDefinition.get(2)) {
-        FormDefinition formDefinition = new FormDefinition(name: 'JobApplication', formDefinition: jobApplicationDefinition, formVersion: 1)
-        formDefinition.save()
+
+    if(!FormDefinition.findByName('JobApplication')) {
+        formDataService.createNewFormVersion('JobApplication', jobApplicationDefinition)
     }
 
 ```

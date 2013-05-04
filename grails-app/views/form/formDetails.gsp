@@ -13,7 +13,7 @@
 
   <form:showMessages/>
 
-  <g:message code="goodform.form.version" args="${[form.version]}"/>
+  <g:message code="goodform.form.version" args="${[form.version.formVersionNumber]}"/>
 
   <div class="roundbox">
     <g:form action="next" enctype="multipart/form-data">

@@ -44,6 +44,7 @@ visibility of the questions through the rulesets, which will be covered later.
 import com.nerderg.goodForm.FormDefinition
 
 class BootStrap {
+        def formDataService
 
         def init = { servletContext ->
 
@@ -67,10 +68,9 @@ class BootStrap {
                    }
             }"""
 
-
-            if (!FormDefinition.get(1)) {
-                FormDefinition formDefinition = new FormDefinition(name: 'ContactDetails', formDefinition: sampleForm, formVersion: 1)
-                formDefinition.save()
+            //note we check we haven't already defined this form before creating another version
+            if(!FormDefinition.findByName('ContactDetails')) {
+                formDataService.createNewFormVersion('ContactDetails', sampleForm)
             }
 
 }

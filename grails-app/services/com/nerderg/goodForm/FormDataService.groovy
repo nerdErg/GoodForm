@@ -3,11 +3,10 @@ package com.nerderg.goodForm
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 import com.nerderg.goodForm.form.Question
+import grails.validation.ValidationException
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.util.WebUtils
-import org.springframework.web.context.request.RequestContextHolder
 import org.springframework.web.multipart.MultipartFile
-import org.springframework.web.servlet.support.RequestContextUtils
 
 import java.text.ParseException
 import java.text.ParsePosition
@@ -21,7 +20,7 @@ import javax.annotation.PostConstruct
  */
 class FormDataService {
 
-    static transactional = false
+    static transactional = true
 
     def goodFormService
     def formReferenceService
@@ -197,34 +196,33 @@ class FormDataService {
 
     /**
      *
-     * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersion value
+     * @return the FormDefinition with a name equal to <code>formName</code> that has the max formVersionNumber value
      */
-    FormDefinition formCurrentDefinitionForName(String formName) {
-        FormDefinition.executeQuery(
-                "select f from FormDefinition f where name = :formName order by f.formVersion desc",
+    FormVersion formCurrentDefinitionForName(String formName) {
+        FormVersion.executeQuery("select f from FormVersion f where f.formDefinition.name = :formName  order by f.formVersionNumber desc",
                 [formName: formName, max: 1])[0]
     }
 
-    Form getFormQuestions(FormDefinition formDefinition) {
-        if (!formDefinition) {
+    Form getFormQuestions(FormVersion formVersion) {
+        if (!formVersion) {
             return null
         }
-        String key = formDefinition.name + formDefinition.formVersion
+        String key = formVersion.formDefinition.name + formVersion.formVersionNumber
         if (!forms[key]) {
-            Form form = createForm(formDefinition)
+            Form form = createForm(formVersion)
             forms[key] = form
         }
         return forms[key]
     }
 
-    Form createForm(FormDefinition formDefinition) {
-        Form form = goodFormService.compileForm(formDefinition.formDefinition)
-        form.version = formDefinition.formVersion
-        form.name = formDefinition.name
-        form.formDefinitionId = formDefinition.id
+    Form createForm(FormVersion formVersion) {
+        Form form = goodFormService.compileForm(formVersion.formDefinitionDSL)
+        form.version = formVersion
+        form.name = formVersion.formDefinition.name
+        form.formDefinitionId = formVersion.id
         return form
     }
-
+    //todo do we need this? remove
     FormInstance getFormInstance(Long id) {
         return FormInstance.get(id)
     }
@@ -435,14 +433,16 @@ class FormDataService {
         // ordinarily not a good idea, but this is the only method that writes to the database
         FormInstance.withTransaction {
             FormInstance instance = new FormInstance(
-                    started: new Date(), userId: getCurrentUser(), instanceDescription: form.name,
-                    currentQuestion: formData.next.last(), formDefinitionId: form.formDefinitionId)
+                    started: new Date(),
+                    userId: getCurrentUser(),
+                    instanceDescription: form.name,
+                    currentQuestion: formData.next.last(),
+                    formVersion: form.version,
+                    readOnly: false
+            )
             instance.storeFormData(formData)
             instance.storeState([formData.next])
             instance.storeCurrentQuestion(formData.next)
-            instance.formVersion = form.version
-            instance.formDefinitionId = form.formDefinitionId
-            instance.readOnly = false
             instance.save()
             return instance
         }
@@ -483,8 +483,7 @@ class FormDataService {
      */
     Map processNext(FormInstance instance, Map mergedFormData) {
         String lastQuestion = instance.storedCurrentQuestion().last()
-        FormDefinition definition = FormDefinition.get(instance.formDefinitionId)
-        String ruleName = definition.name + lastQuestion
+        String ruleName = instance.formVersion.formDefinition.name + lastQuestion
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
             JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData) as JSONObject
@@ -600,7 +599,7 @@ class FormDataService {
      * @return list of matching {@link FormInstance}s
      */
     List<FormInstance> getForms(Long formDefinitionId) {
-        FormInstance.findAllByFormDefinitionId(formDefinitionId)
+        FormInstance.findAllByFormVersion(formDefinitionId)
     }
 
     /**
@@ -622,33 +621,75 @@ class FormDataService {
     }
 
     /**
-     * Retrieves the latest version of each unique form definition.
-     * @return
+     * Creates a new {@link FormVersion} form a {@link FormDefinition} named name. If the formDefinition isn't found one
+     * is created.
+     *
+     * @param name
+     * @param formDefinitionDSL
+     * @return FormVersion instance
      */
-    List<FormDefinition> getLatestFormDefinitions() {
-        return FormDefinition.executeQuery("select f from FormDefinition f where f.formVersion = (select max(g.formVersion) from FormDefinition g where g.name = f.name)")
+    FormVersion createNewFormVersion(String name, String formDefinitionDSL) {
+        FormDefinition formDefinition = FormDefinition.findByName(name)
+        if (!formDefinition) {
+            formDefinition = new FormDefinition(
+                    name: name
+            )
+            save(formDefinition, "Failed to save new Form Definition")
+        }
+        createNewFormVersion(formDefinition, formDefinitionDSL)
     }
 
-    FormDefinition createFormDefinition(Long id, String formDefinition) {
-        FormInstance.withTransaction {
-            //find FormDefinition for id
-            FormDefinition existingFormDefinition = FormDefinition.get(id)
-            //Create new FormDefinition
-            FormDefinition newFormDefinition = new FormDefinition(
-                    name: existingFormDefinition.name,
-                    formDefinition: formDefinition,
-                    formVersion: existingFormDefinition.formVersion + 1
-            )
+    /**
+     * Creates a new {@link FormVersion} instance for the {@link FormDefinition} defined by the id. If the formDefinition is not found
+     * a {@link GoodFormException} is thrown.
+     *
+     * @param id
+     * @param formDefinitionDSL
+     * @return FormVersion instance
+     */
+    FormVersion createNewFormVersion(Long id, String formDefinitionDSL) {
+        FormDefinition formDefinition = FormDefinition.get(id)
+        if (formDefinition) {
+            createNewFormVersion(formDefinition, formDefinitionDSL)
+        } else {
+            throw new GoodFormException("Form definition with id $id not found.")
+        }
+    }
 
-            if (newFormDefinition.validate()) {
-                newFormDefinition.save()
-            } else {
-                //todo throw a nicer exception and more meaningful message since most apps will have the default don't fail on save :-/
-                newFormDefinition.errors.each {
-                    println it
-                }
-                throw new Exception("failed to save new form definition")
-            }
+    /**
+     * Creates a new {@link FormVersion} for a {@link FormDefinition}. If the formDefinition doesn't exist it throws an
+     * {@link GoodFormException}
+     *
+     * @param formDefinition
+     * @param formDefinitionDSL
+     * @return form version instance
+     */
+    FormVersion createNewFormVersion(FormDefinition formDefinition, String formDefinitionDSL) {
+
+        if (!formDefinition) {
+            throw new GoodFormException("Form definition must be provided.")
+        }
+
+        Integer nextVersion = formDefinition.formVersions ? formDefinition.formVersions.max { FormVersion fv -> fv.formVersionNumber } as Integer : 1
+
+        FormVersion formVersion = new FormVersion(formVersionNumber: nextVersion, formDefinitionDSL: formDefinitionDSL)
+
+        formDefinition.addToFormVersions(formVersion)
+
+        save(formDefinition, "Failed to save new Form Definition")
+        return formVersion
+    }
+
+    /**
+     * By default Grails applications don't throw exceptions on save/validation exceptions when you save.
+     * This makes it very easy to miss a serious bug, so validate the object before saving and throw a
+     * ValidationException if it fails.
+     * @param thing the object to save
+     * @param failMessage
+     */
+    private void save(thing, String failMessage = "Failed to save") {
+        if (!(thing.validate() && thing.save())) {
+            throw new ValidationException(failMessage, thing.errors)
         }
     }
 }

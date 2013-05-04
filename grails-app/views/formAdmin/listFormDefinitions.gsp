@@ -1,4 +1,4 @@
-<%@ page import="com.nerderg.goodForm.FormDefinition" contentType="text/html;charset=UTF-8" %>
+<%@ page import="com.nerderg.goodForm.FormVersion; com.nerderg.goodForm.FormDefinition" contentType="text/html;charset=UTF-8" %>
 <html>
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
@@ -20,7 +20,7 @@
     <g:each in="${formDefinitions}" var="formDefinition">
       <tr>
         <td>${formDefinition.name}</td>
-        <td>${formDefinition.formVersion}</td>
+        <td>${formDefinition.formVersions.max{ FormVersion f -> f.formVersionNumber }}</td>
         <td><a href="${g.createLink(action: 'showFormDefinition', id: formDefinition.id)}">
           Definition
         </a></td>
