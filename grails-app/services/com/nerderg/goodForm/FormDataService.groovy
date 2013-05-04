@@ -422,22 +422,18 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        // ordinarily not a good idea, but this is the only method that writes to the database
-        FormInstance.withTransaction {
-            FormInstance instance = new FormInstance(
-                    started: new Date(),
-                    userId: getCurrentUser(),
-                    instanceDescription: form.name,
-                    currentQuestion: formData.next.last(),
-                    formVersion: form.version,
-                    readOnly: false
-            )
-            instance.storeFormData(formData)
-            instance.storeState([formData.next])
-            instance.storeCurrentQuestion(formData.next)
-            instance.save()
-            return instance
-        }
+        FormInstance instance = new FormInstance(
+                started: new Date(),
+                userId: getCurrentUser(),
+                instanceDescription: form.name,
+                formVersion: form.version,
+                readOnly: false
+        )
+        instance.storeFormData(formData)
+        instance.storeState([formData.next])
+        instance.storeCurrentQuestion(formData.next)
+        save(instance)
+        return instance
     }
 
     /**
