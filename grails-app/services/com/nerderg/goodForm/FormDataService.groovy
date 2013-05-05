@@ -600,15 +600,6 @@ class FormDataService {
     }
 
     /**
-     * Retrieves a {@link FormInstance} instance for the given id.
-     * @param id
-     * @return
-     */
-    FormInstance getForm(Long id) {
-        FormInstance.get(id)
-    }
-
-    /**
      * Creates a new {@link FormVersion} form a {@link FormDefinition} named name. If the formDefinition isn't found one
      * is created.
      *
