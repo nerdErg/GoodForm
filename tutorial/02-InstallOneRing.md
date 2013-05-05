@@ -9,17 +9,16 @@ OneRing is a standalone Open Source Grails application, so it can either be run 
 purposes) or deployed to a web container.
 
 To install, see [The One Ring install doc] (http://nerderg.com/One+Ring+install) and either download the
-[OneRing source](https://github.com/pmcneil/One-Ring) and run it locally by executing
+[OneRing source](https://github.com/nerderg/One-Ring) and run it locally by executing
 
     grails run-app
 
 or
 
-download the [OneRing Rules Engine WAR](http://nerderg.com/media/show/1295?file=rulesEngine-0.7.war) distribution and install it
-into an existing Java EE Web Container (like Tomcat)
+download the OneRing Rules Engine WAR at (http://nerderg.com/One+Ring+install) and install it into an existing Java EE Web Container (like Tomcat)
 
 or
 
-download the [OneRing + Tomcat package] (http://nerderg.com/media/show/1356?file=one-ring-0.9.2-apache-tomcat-7.0.22.zip)
+download the OneRing + Tomcat package at (http://nerderg.com/One+Ring+install)
 
 * _Next_: [Create or Update a Grails Project](03-CreateOrUpdateGrailsProject.md)
