@@ -27,10 +27,12 @@ value
 div.goodFormContainer {
     padding: 2em;
 }
+
 div.goodFormContainer p {
     margin-bottom: 1em;
     line-height: 1.5;
 }
+
 div.goodFormContainer .addAnotherForm,
 div.goodFormContainer .removeForm {
     margin-left: 3em;
@@ -85,7 +87,6 @@ div.goodFormContainer .questionPick > .prop > .value {
 div.goodFormContainer .value {
     font-weight: bold;
 }
-
 
 div.goodFormContainer .hiddenForm {
     display: none;
@@ -157,10 +158,12 @@ div.goodFormContainer .qset:hover {
 div.goodFormContainer .qsetReadOnly {
     background: #FEFCF2;
 }
+
 div.goodFormContainer div.clickToEdit {
     color: #999999;
     float: right;
 }
+
 div.goodFormContainer .qset:hover div.clickToEdit {
     color: #333333;
     float: right;
@@ -179,6 +182,7 @@ div.goodFormContainer .prop .name {
     margin-top: 0.5em;
     font-weight: normal;
 }
+
 div.goodFormContainer .prop .value {
     display: block;
     text-align: left; /*width: 85%;*/
@@ -205,6 +209,17 @@ div.goodFormContainer div.textNote {
     white-space: pre-line;
 }
 
+div.goodFormContainer div.message ul {
+    list-style: none;
+}
+
+div.goodFormContainer div.formContainer {
+    display: inline-block;
+}
+
+div.goodFormContainer .formSubmit {
+    text-align: right;
+}
 
 /* Completed form view related CSS */
 div.goodFormContainer div.goodformView {
@@ -220,4 +235,67 @@ div.goodFormContainer div.goodformView .label {
 div.goodFormContainer div.goodformView .value {
     font-weight: normal;
 }
+
 /* End - Completed form view related CSS */
+
+/* Form Admin view */
+div.goodFormContainer div.formCodeDisplay,
+div.goodFormContainer div.formCodeEdit {
+    border: 1px solid #000000;
+    border-radius: 5px;
+    overflow: auto;
+    font-family: monospace;
+    font-size: 1em;
+}
+
+div.goodFormContainer div.formCodeDisplay {
+    white-space: pre;
+}
+
+div.goodFormContainer div.formCodeEdit {
+    padding: 1em;
+}
+
+div.goodFormContainer .formDefinitionContainer .title,
+div.goodFormContainer .listOfForms .title {
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+div.goodFormContainer div.listOfForms,
+div.goodFormContainer div.formDefinitionContainer {
+    display: inline-block;
+    vertical-align: top;
+    margin-left: 1em;
+}
+
+div.goodFormContainer .listOfForms {
+    width: 15%;
+}
+
+div.goodFormContainer .formDefinitionContainer {
+    width: 80%;
+}
+
+div.goodFormContainer .formDefinitionContainer .buttonBar {
+    line-height: 2em;
+}
+
+div.goodFormContainer .listOfForms .buttonBar {
+    border-top: 1px solid #000000;
+    margin-top: 2em;
+    line-height: 2em;
+}
+
+div.goodFormContainer .formDefinitionContainer .versionNav {
+    margin-right: 3em;
+    margin-left: 3em;
+}
+
+div.goodFormContainer .formDefinitionContainer textarea {
+    width: 98%;
+    height: auto;
+    overflow: auto;
+    white-space: nowrap;
+    font-size: 1em;
+}

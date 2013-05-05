@@ -8,6 +8,7 @@ package com.nerderg.goodForm
  * </ul>
  *
  * @author Ross Rowe
+ * @author Peter McNeil
  */
 class FormAdminController {
 
@@ -16,49 +17,81 @@ class FormAdminController {
      */
     def formDataService
 
-    def index() {
-        redirect(action: 'listFormDefinitions')
+    def index(Long id, Integer version) {
+        List forms = FormDefinition.list()
+        FormVersion formVersion = getFormVersion(id, forms, version)
+
+        [forms: forms, formVersion: formVersion]
     }
 
-    /**
-     * Lists all the active {@link FormDefinition} records.
-     */
-    def listFormDefinitions() {
-       [ formDefinitions: FormDefinition.list()]
+    def edit(Long id, Integer version) {
+        List forms = FormDefinition.list()
+        FormVersion formVersion = getFormVersion(id, forms, version)
+        if (formVersion) {
+            [forms: forms, formVersion: formVersion]
+        } else {
+            redirect(action: 'index')
+        }
     }
 
-    /**
-     * Renders the form definition.
-     */
-    def showFormDefinition(Long id) {
-        [formDefinition:  FormVersion.get(id)]
+    private FormVersion getFormVersion(Long id, List<FormDefinition> forms, Integer version) {
+        FormDefinition formDefinition
+        FormVersion formVersion
+        if (id) {
+            formDefinition = FormDefinition.get(id)
+        } else {
+            formDefinition = forms.first()
+        }
+        if (version) {
+            formVersion = formDefinition.formVersions.find { it.formVersionNumber == version }
+        } else {
+            formVersion = formDefinition.currentVersion()
+        }
+        return formVersion
     }
 
     /**
      * Creates a new FormDefinition (incrementing the version number) with the entered form definition text).
      */
     def updateFormDefinition(Long id, String formDefinition) {
-        FormVersion newFormVersion = formDataService.createNewFormVersion(id, formDefinition)
-        if (newFormVersion) {
-            flash.message = message(code: "goodform.update.successful")
-            redirect action: 'showFormDefinition', params: [id: newFormVersion.id]
+        FormVersion from = FormVersion.get(id)
+        if (from) {
+            FormVersion newFormVersion = formDataService.createNewFormVersion(from.formDefinition, formDefinition)
+            if (newFormVersion) {
+                flash.message = message(code: "goodform.update.successful")
+                redirect(action: 'index', id: newFormVersion.formDefinition.id)
+            } else {
+                flash.message = message(code: "goodform.update.failed")
+                redirect(action: 'edit', id: from.formDefinition.id, params: [version: from.formVersionNumber])
+            }
         } else {
-            flash.message = message(code: "goodform.update.failed")
-            redirect action: 'showFormDefinition', params: [id: id]
+            flash.message = message(code: "goodform.update.notfound")
+            redirect(action: 'index')
         }
     }
 
-    /**
-     * Lists the submitted forms for a specific {@link FormDefinition}.
-     */
-    def listForms(Long id) {
-        [ forms: formDataService.getForms(id), formDefinition: FormDefinition.get(id)]
+    def create(String formName) {
+        if (!formName) {
+            flash.message = message(code: "goodform.create.noname")
+            redirect(action: 'index')
+            return
+        }
+        if (FormDefinition.findByName(formName)) {
+            flash.message = message(code: "goodform.create.exists")
+            redirect(action: 'index')
+            return
+        }
+        [forms: FormDefinition.list(), formName: formName]
     }
 
-    /**
-     * Renders the form details.
-     */
-    def viewFormData(Long id) {
-        [form : formDataService.getForm(id)]
+    def saveNewFormDefinition(String formName, String formDefinition) {
+        FormVersion newFormVersion = formDataService.createNewFormVersion(formName, formDefinition)
+        if (newFormVersion) {
+            flash.message = message(code: "goodform.update.successful")
+            redirect(action: 'index', id: newFormVersion.formDefinition.id)
+        } else {
+            flash.message = message(code: "goodform.update.failed")
+            redirect(action: 'index')
+        }
     }
 }
