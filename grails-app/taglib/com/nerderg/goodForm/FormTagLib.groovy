@@ -367,7 +367,7 @@ class FormTagLib {
             if (found) {
                 out << "<div class='qset' title='"
                 out << g.message(code: "goodform.click.edit")
-                out << "' id='${formInstance.id}/${i}'>"
+                out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
                 out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
                 out << qSet.toString()
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
@@ -391,7 +391,7 @@ class FormTagLib {
         state.each() { List qSet ->
             out << "<div class='qset' title='"
             out << g.message(code: "goodform.click.edit")
-            out << "' id='${formInstance.id}/${i}'>"
+            out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
             out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
             goodFormService.withQuestions(qSet, questions) { q, qRef ->
                 out << element([element: q.formElement, store: formData, disabled: true])
@@ -464,7 +464,7 @@ class FormTagLib {
                     } else {
                         out << "<div class='qset' title='"
                         out << g.message(code: "goodform.click.edit")
-                        out << "' id='${formInstance.id}/${i}'>"
+                        out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
                         out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
                     }
                     output.each { out << it }

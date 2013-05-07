@@ -163,8 +163,7 @@ $(function () {
     });
 
     $('div.qset').click(function (event) {
-        //todo GSParse
-        var url = "../back/" + $(this).attr('id');
+        var url = $(this).data('backurl');
         window.location = url;
     });
 
