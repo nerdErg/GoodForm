@@ -1,13 +1,12 @@
 package com.nerderg.goodForm
 
+import com.nerderg.goodForm.form.Form
+import com.nerderg.goodForm.form.Question
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.domain.DomainClassUnitTestMixin
-
 import org.junit.Before
-
-import com.nerderg.goodForm.form.Form
-import com.nerderg.goodForm.form.Question
+import org.junit.Test
 import org.springframework.context.MessageSource
 
 /**
@@ -52,6 +51,21 @@ class FormDataServiceTests {
         error = service.validateAndProcessFields(question.formElement, ['Q1': ['givenName': 'Joe']], formInstance)
         assertFalse("Error was detected", error)
     }
+
+    @Test
+    void listDateValidation() {
+        form.question("Q1") {
+            "What is your birthday?" listOf: "birthdays", {
+                "Birthday" date: 'dd/MM/yyyy', map: 'dob'
+            }
+        }
+        Question question = form.getAt("Q1")
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['birthdays': ['dob': ['2012/01/01', '01/01/2012']]]], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['birthdays': ['dob': ['01/01/2012', '01/01/2012']]]], formInstance)
+        assert service.validateAndProcessFields(question.formElement, ['Q1': ['birthdays': ['dob': (String[])['2012/01/01', '01/01/2012']]]], formInstance)
+        assert !service.validateAndProcessFields(question.formElement, ['Q1': ['birthdays': ['dob': (String[])['01/01/2012', '01/01/2012']]]], formInstance)
+    }
+
 
     void testInvalidDateField() {
         form.question("Q1") {
