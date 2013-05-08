@@ -271,7 +271,7 @@ class FormDataService {
         }
 
         //because strings are a collection in groovy we need to check it's not a string before assuming an array, list etc.
-        if (!(fieldValue instanceof String) && fieldValue instanceof Collection) {
+        if (!(fieldValue instanceof String) && (fieldValue instanceof Collection || fieldValue instanceof Object[])) {
             fieldValue.each { fv ->
                 error = validateField(formElement, fv, error)
             }
