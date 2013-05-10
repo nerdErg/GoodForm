@@ -146,6 +146,28 @@ ruleset("JobApplicationJob6") {
 }
 ```
 
+#JobApplicationCheckRequiredDocuments.ruleset
+
+```groovy
+ruleset("JobApplicationCheckRequiredDocuments") {
+
+    require()  //we need the answers to these questions
+
+    rule('prep') {
+        fact.require = []  //create the set 'require'
+    }
+
+    rule('Is colour indicated') {
+        when {
+            Job5 && !Job5.resume
+        }
+        otherwise {
+            require.add([Q: 'Job5', message: 'You must supply a resume'])
+        }
+    }
+}
+```
+
 [Click here to see the change](https://github.com/rossrowe/GoodForm-Tutorial/compare/tutorial-step6-a...tutorial-step6-b)
 
 Let's go back to our goodform_tutorial Grails application, and create a new controller for this form.  We do this by running
