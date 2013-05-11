@@ -2,9 +2,12 @@ package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.Question
+import grails.converters.JSON
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.domain.DomainClassUnitTestMixin
+import org.codehaus.groovy.grails.web.json.JSONArray
+import org.codehaus.groovy.grails.web.json.JSONElement
 import org.junit.Before
 import org.junit.Test
 import org.springframework.context.MessageSource
@@ -286,6 +289,68 @@ class FormDataServiceTests {
         assert formVersion.formDefinition.formVersions.size() == 2
         assert formVersion.formDefinition.formVersions.contains(formVersion)
         assert formVersion.formDefinition.formVersions.contains(formVersion2)
+
+    }
+
+    void testIsCollectionOrArray(){
+
+        String subst = 'boo'
+        assert !("this is a ${subst} gstring" instanceof Object[])
+        assert !("this is a ${subst} gstring" instanceof Collection)
+        assert !("this is a ${subst} gstring" instanceof List)
+        assert !('this is a string' instanceof Object[])
+        assert !('this is a string' instanceof Collection)
+        assert !('this is a string' instanceof List)
+
+        assert !service.isCollectionOrArray('this is a string')
+        assert !service.isCollectionOrArray("this is a ${['list in a string','blah']} gstring")
+        ArrayList<String> listOfString = ['this is a string in a list']
+        assert listOfString instanceof ArrayList
+        assert service.isCollectionOrArray(listOfString)
+        String[] stringArray = ['this is a string in an Array','another string']
+        assert stringArray instanceof String[]
+        assert service.isCollectionOrArray(stringArray)
+
+        Set set = ['string in a set','another string']
+        assert set instanceof HashSet
+        assert service.isCollectionOrArray(set)
+
+        //maps should not match
+        LinkedHashMap aHashMap = [fred: 'smith']
+        assert aHashMap instanceof LinkedHashMap
+        assert !service.isCollectionOrArray(aHashMap)
+
+        String jsonString = """{
+   "Job1": {
+      "order": "0",
+      "names": {
+         "lastName": "McNeil",
+         "givenNames": "Peter",
+         "hasAlias": {
+            "yes": "on",
+            "aliases": {
+               "alias": [
+                  "John Smith",
+                  "wally donucker"
+               ],
+               "aliasType": [
+                  "pseudonym",
+                  "pseudonym"
+               ]
+            }
+         },
+         "Title": "Mr"
+      }
+   }
+}
+"""
+
+        def formData = JSON.parse(jsonString)
+        assert formData instanceof JSONElement
+        assert formData.Job1.names.hasAlias.aliases.alias instanceof JSONArray
+        assert service.isCollectionOrArray(formData.Job1.names.hasAlias.aliases.alias)
+        assert formData.Job1.names.lastName instanceof String
+        assert !service.isCollectionOrArray(formData.Job1.names.lastName)
 
     }
 }

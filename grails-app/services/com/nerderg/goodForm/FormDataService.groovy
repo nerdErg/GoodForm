@@ -143,7 +143,7 @@ class FormDataService {
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
             String message = "goodform.validate.invalid.pattern"
-            if (formElement.attr.pattern instanceof List) {
+            if (isCollectionOrArray(formElement.attr.pattern)) {
                 pattern = formElement.attr.pattern[0]
                 if (formElement.attr.pattern.size() > 1) {
                     message = formElement.attr.pattern[1]
@@ -271,7 +271,7 @@ class FormDataService {
         }
 
         //because strings are a collection in groovy we need to check it's not a string before assuming an array, list etc.
-        if (!(fieldValue instanceof String) && (fieldValue instanceof Collection || fieldValue instanceof Object[])) {
+        if (isCollectionOrArray(fieldValue)) {
             fieldValue.each { fv ->
                 error = validateField(formElement, fv, error)
             }
@@ -355,7 +355,7 @@ class FormDataService {
     private convertNumberFieldToBigDecimal(fieldValue, FormElement formElement, Map formData) {
         if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
             log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
-            if (fieldValue instanceof String[] || fieldValue instanceof List) {
+            if (isCollectionOrArray(fieldValue)) {
                 fieldValue = fieldValue.collect {
                     if (it) {
                         it as BigDecimal
@@ -672,6 +672,17 @@ class FormDataService {
             throw new ValidationException(failMessage, thing.errors)
         }
     }
+
+    /**
+     * Checks that the object is a List or Array or Set.
+     * This will return false for a Map
+     * @param obj
+     * @return true if this is not a string but a collection
+     */
+    boolean isCollectionOrArray(obj) {
+        (obj instanceof Collection || obj instanceof Object[])
+    }
+
 }
 
 /**

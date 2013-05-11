@@ -572,7 +572,7 @@ class FormTagLib {
     def showMessages = {attrs ->
         if(flash.message) {
             out << '<div class="message">'
-            if(isCollectionNotString(flash.message)) {
+            if(formDataService.isCollectionOrArray(flash.message)) {
                 out << '<ul>'
                 flash.message.each { item ->
                     out << '<li>' + item.toString().encodeAsHTML() + '</li>'
@@ -583,10 +583,6 @@ class FormTagLib {
             }
             out << '</div>'
         }
-    }
-
-    private boolean isCollectionNotString(obj) {
-        !(obj instanceof String) && obj instanceof Collection
     }
 
 }
