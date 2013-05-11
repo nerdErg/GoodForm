@@ -22,8 +22,8 @@ class FormTagLib {
 
     static namespace = "form"
 
-    String makeElementName(FormElement e) {
-        goodFormService.makeElementName(e)
+    private static getFieldErrors(Map formData, String field, Integer index){
+        return formData.fieldErrors[field + (index == null ? '' : index)]
     }
 
     private findFieldValue(Map bean, String field, Integer index = null) {
@@ -48,18 +48,19 @@ class FormTagLib {
     }
 
     def text = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String error = getFieldErrors(store, e.attr.name, index)
         int size = e.attr.text.toInteger()
         if (size < 100) {
             String suggest = e.attr.suggest ? "suggest ${e.attr.suggest}" : ""
-            out << nerderg.inputfield(label: e.text, value: value, field: e.attr.name, size: e.attr.text, maxlength: e.attr.text, error: e.attr.error, disabled: disabled, class: suggest) {
+            out << nerderg.inputfield(label: e.text, value: value, field: e.attr.name, size: e.attr.text, maxlength: e.attr.text, error: error, disabled: disabled, class: suggest) {
                 "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
             }
         } else {
             def disabledAttr = disabled ? "disabled='disabled'" : ""
             int rows = size / 80 + 1
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, error: e.attr.error) {
+            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, error: error) {
                 """<textarea name='${e.attr.name}' id='${e.attr.name}' ${disabledAttr} cols='80' rows='${rows}'>${value ?: ''}</textarea>
                 <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
                 """
@@ -68,8 +69,9 @@ class FormTagLib {
     }
 
     def number = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String error = getFieldErrors(store, e.attr.name, index)
 
         Map<String,BigDecimal> minMax = formDataService.getNumberMinMax(e)
 
@@ -89,7 +91,7 @@ class FormTagLib {
                 maxlength: size,
                 max: toStringIfNotNull(minMax.max),
                 min: toStringIfNotNull(minMax.min),
-                error: e.attr.error,
+                error: error,
                 disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
@@ -100,42 +102,51 @@ class FormTagLib {
     }
 
     def phone = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
-        out << nerderg.inputfield(type: 'tel', label: e.text, value: value, field: e.attr.name, size: e.attr.number, maxlength: e.attr.number, error: e.attr.error, disabled: disabled) {
+        String error = getFieldErrors(store, e.attr.name, index)
+
+        out << nerderg.inputfield(type: 'tel', label: e.text, value: value, field: e.attr.name, size: e.attr.number, maxlength: e.attr.number, error: error, disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def money = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
-        def defaultValue = e.attr.containsKey("default") ? e.attr.default : ''
-        def value = findFieldValue(store, e.attr.name, index) ?: defaultValue
-        out << nerderg.inputfield(class: 'money', label: e.text, pre: '$&nbsp;', value: value, field: e.attr.name, size: e.attr.money, maxlength: e.attr.money, error: e.attr.error, disabled: disabled) {
+        
+        def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String error = getFieldErrors(store, e.attr.name, index)
+
+        out << nerderg.inputfield(class: 'money', label: e.text, pre: '$&nbsp;', value: value, field: e.attr.name, size: e.attr.money, maxlength: e.attr.money, error: error, disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
         }
     }
 
     def date = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
-        out << nerderg.datefield(label: e.text, value: value, format: e.attr.date, field: e.attr.name, error: e.attr.error, disabled: disabled) {
+        String error = getFieldErrors(store, e.attr.name, index)
+
+        out << nerderg.datefield(label: e.text, value: value, format: e.attr.date, field: e.attr.name, error: error, disabled: disabled) {
             "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def datetime = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def value = findFieldValue(store, e.attr.name, index)
+        String error = getFieldErrors(store, e.attr.name, index)
+
         String datetime = (value && value instanceof Map) ? "$value.date $value.time" : ''
-        out << nerderg.datetimefield(label: e.text, value: datetime, format: e.attr.date, field: e.attr.name, error: e.attr.error, disabled: disabled) {
+        out << nerderg.datetimefield(label: e.text, value: datetime, format: e.attr.date, field: e.attr.name, error: error, disabled: disabled) {
             "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def attachment = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         String value = findFieldValue(store, e.attr.name, index) as String
+        String error = getFieldErrors(store, e.attr.name, index)
+
         String filename = value?.split('-')?.last() ?: ""
 
         String body = "&nbsp;$filename <span class='required'>${e.attr.required ? '*' : ''}</span>"
@@ -144,7 +155,7 @@ class FormTagLib {
         }
         body += "<span class='hint'>${e.attr.hint ?: ''}</span>"
 
-        out << nerderg.inputfield(type: 'file', label: e.text, value: value, field: e.attr.name, error: e.attr.error, disabled: disabled) {
+        out << nerderg.inputfield(type: 'file', label: e.text, value: value, field: e.attr.name, error: error, disabled: disabled) {
             body
         }
     }
@@ -152,7 +163,7 @@ class FormTagLib {
     def pick = { FormElement e, Map store, Integer index, boolean disabled ->
         out << "<div class='prop'><span class='name'>$e.text<span class='required'>${e.attr.required ? '*' : ''}</span></span>"
         out << "<div class='questionPick'>"
-        e.attr.name = makeElementName(e)
+        
         List subs = new ArrayList(e.subElements)
         subs.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
@@ -161,10 +172,10 @@ class FormTagLib {
     }
 
     def group = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
         out << "<div class='questionGroup'>"
-        e.attr.name = makeElementName(e)
+        
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
@@ -172,7 +183,7 @@ class FormTagLib {
     }
 
     def each = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         out << "<div>"
         goodFormService.processEachFormElement(e, store) { Map subMap ->
             subMap.disabled = disabled
@@ -185,8 +196,7 @@ class FormTagLib {
      *
      */
     def listOf = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
-
+        
         out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
         out << "<div class='listContainer'>"
 
@@ -227,7 +237,7 @@ class FormTagLib {
     }
 
     def bool = { FormElement e, Map store, Integer index, boolean disabled ->
-        e.attr.name = makeElementName(e)
+        
         def disabledAttr = disabled ? "disabled='disabled'" : ""
         def pick = e.parent?.attr?.pick?.toString()
         if (e.subElements.size() > 0) {
@@ -313,7 +323,7 @@ class FormTagLib {
         }
 
         out << "<div class='dependantQuestions'>"
-        e.attr.name = makeElementName(e)
+        
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
@@ -343,7 +353,7 @@ class FormTagLib {
         }
 
         out << "<div class='dependantQuestions'>"
-        e.attr.name = makeElementName(e)
+        
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }

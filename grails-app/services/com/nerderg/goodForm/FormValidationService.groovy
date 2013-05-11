@@ -29,7 +29,7 @@ class FormValidationService {
 
     def messageSource
 
-    private customValidationMap = [:]
+    private Map<String,Closure> customValidationMap = [:]
 
     void addCustomValidator(String validationName, Closure closure) {
         customValidationMap.put(validationName, closure)
@@ -41,34 +41,36 @@ class FormValidationService {
      * @param fieldValue
      * @return
      */
-    boolean hasError(FormElement formElement, fieldValue) {
+    boolean hasError(FormElement formElement, Map formData, fieldValue, Integer index) {
         String validationName = formElement.attr.validate
         Closure validator = customValidationMap[validationName]
         if (!validator) {
             throw new FormValidatorMissingException("No validator called $validationName found. Add it using formValidationService.addCustomValidator()")
         }
-        return validator(formElement, fieldValue)
+        return validator(formElement, formData, fieldValue, index)
     }
 
     /**
      * Invokes the validation method corresponding the the 'validate' attribute.
      */
-    Closure customValidation = { FormElement formElement, fieldValue ->
+    Closure customValidation = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
-        if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, fieldValue)) {
+        if (fieldValue && formElement.attr.containsKey('validate') && hasError(formElement, formData, fieldValue, index)) {
             String code = "goodform.validate." + formElement.attr.validate + ".invalid"
-            appendError(formElement, code, [fieldValue])
+            appendError(formElement, formData, code, index, [fieldValue])
             error = true
         }
         return error
     }
 
-    void appendError(FormElement formElement, String code, List args = null) {
+    void appendError(FormElement formElement, Map formData, String code, Integer index, List args = null) {
         String message = message(code, args)
-        if(formElement.attr.error) {
-            formElement.attr.error += " \n$message"
+        String name = formElement.attr.name + (index == null ? '' : index)
+        formData.fieldErrors[name]
+        if(formData.fieldErrors[name]) {
+            formData.fieldErrors[name] += " \n$message"
         } else {
-            formElement.attr.error = message
+            formData.fieldErrors[name] = message
         }
     }
 

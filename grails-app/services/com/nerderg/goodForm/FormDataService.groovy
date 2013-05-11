@@ -44,7 +44,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    Closure validateDate = { FormElement formElement, fieldValue ->
+    Closure validateDate = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
             try {
@@ -53,13 +53,13 @@ class FormDataService {
                     if (formElement.attr.max) {
                         if (formElement.attr.max == 'today') {
                             if (d.time > System.currentTimeMillis()) {
-                                formValidationService.appendError(formElement, "goodform.validate.date.future")
+                                formValidationService.appendError(formElement, formData, "goodform.validate.date.future", index)
                                 error = true
                             }
                         } else {
                             Date max = Date.parse(formElement.attr.date, formElement.attr.max)
                             if (d.time > max.time) {
-                                formValidationService.appendError(formElement, "goodform.validate.date.greaterThan", [formElement.attr.max])
+                                formValidationService.appendError(formElement, formData, "goodform.validate.date.greaterThan", index, [formElement.attr.max])
                                 error = true
                             }
                         }
@@ -67,16 +67,16 @@ class FormDataService {
                     if (formElement.attr.min) {
                         Date min = Date.parse(formElement.attr.date, formElement.attr.min)
                         if (d.time < min.time) {
-                            formValidationService.appendError(formElement, "goodform.validate.date.lessThan", [formElement.attr.min])
+                            formValidationService.appendError(formElement, formData, "goodform.validate.date.lessThan", index, [formElement.attr.min])
                             error = true
                         }
                     }
                 } else {
                     error = true
-                    formValidationService.appendError(formElement, "goodform.validate.date.invalid")
+                    formValidationService.appendError(formElement, formData, "goodform.validate.date.invalid", index)
                 }
             } catch (ParseException e) {
-                formValidationService.appendError(formElement, "goodform.validate.date.invalid")
+                formValidationService.appendError(formElement, formData, "goodform.validate.date.invalid", index)
                 error = true
             }
         }
@@ -98,24 +98,29 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    Closure validateNumber = { FormElement formElement, fieldValue ->
+    Closure validateNumber = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && fieldValue instanceof BigDecimal && formElement.attr.containsKey('number')) {
             Map<String, BigDecimal> minMax = getNumberMinMax(formElement)
 
             if (minMax.max != null && fieldValue > minMax.max) {
                 error = true
-                formValidationService.appendError(formElement, "goodform.validate.number.tobig", [fieldValue, minMax.max])
+                formValidationService.appendError(formElement, formData, "goodform.validate.number.tobig", index, [fieldValue, minMax.max])
             }
 
             if (minMax.min != null && fieldValue < minMax.min) {
                 error = true
-                formValidationService.appendError(formElement, "goodform.validate.number.tosmall", [fieldValue, minMax.min])
+                formValidationService.appendError(formElement, formData, "goodform.validate.number.tosmall", index, [fieldValue, minMax.min])
             }
         }
         return error
     }
 
+    /**
+     * Get the minimum and maximum value attributes from a number formElement
+     * @param formElement
+     * @return map [max: max, min: min]
+     */
     Map<String, BigDecimal> getNumberMinMax(FormElement formElement) {
         BigDecimal max
         BigDecimal min
@@ -138,7 +143,7 @@ class FormDataService {
      * @param formElement
      * @return
      */
-    Closure validatePattern = { FormElement formElement, fieldValue ->
+    Closure validatePattern = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
             String pattern
@@ -152,7 +157,7 @@ class FormDataService {
                 pattern = formElement.attr.pattern
             }
             if (fieldValue && !(fieldValue ==~ pattern)) {
-                formValidationService.appendError(formElement, message)
+                formValidationService.appendError(formElement, formData, message, index)
                 error = true
             }
         }
@@ -166,10 +171,10 @@ class FormDataService {
      * @param fieldValue
      * @return
      */
-    Closure validateMandatoryField = { FormElement formElement, fieldValue ->
+    Closure validateMandatoryField = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
-            formValidationService.appendError(formElement, "goodform.validate.required.field")
+            formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
             error = true
         }
         return error
@@ -192,7 +197,14 @@ class FormDataService {
 
     Form getForm(String formName) {
         FormDefinition formDefinition = FormDefinition.findByName(formName)
-        return formDefinition ? getFormQuestions(formDefinition.currentVersion()) : null
+        if (formDefinition) {
+            Long start = System.currentTimeMillis()
+            Form f = getFormQuestions(formDefinition.currentVersion())
+            println "getFromQuestions took ${(System.currentTimeMillis() - start)} ms"
+            return f
+        } else {
+            return null
+        }
     }
 
     Form getFormQuestions(FormVersion formVersion) {
@@ -258,27 +270,18 @@ class FormDataService {
             return error // ignore headings
         }
 
-        formElement.attr.name = goodFormService.makeElementName(formElement)
-        formElement.attr.error = ""
-
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
-        try {
-            fieldValue = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
-        } catch (NumberFormatException e) {
-            formValidationService.appendError(formElement, "goodform.validate.number.isnt", [fieldValue])
-            error = true
-            //we can't just return here because we want to display errors on all subfields
-        }
+        (fieldValue, error) = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
 
         //because strings are a collection in groovy we need to check it's not a string before assuming an array, list etc.
         if (isCollectionOrArray(fieldValue)) {
-            fieldValue.each { fv ->
-                error = validateField(formElement, fv, error)
+            fieldValue.eachWithIndex { fv, index ->
+                error = validateField(formElement, formData, fv, index, error)
             }
         } else if (fieldValue instanceof MultipartFile) {
-            error = validateField(formElement, fieldValue.getName(), error)
+            error = validateField(formElement, formData, fieldValue.getName(), null, error)
         } else {
-            error = validateField(formElement, fieldValue, error)
+            error = validateField(formElement, formData, fieldValue, null, error)
         }
 
         //get references and store in the formData
@@ -347,26 +350,49 @@ class FormDataService {
      * Converts number and money fields to BigDecimal for standard processing. This helps the rules engine and removes
      * float vagaries.
      *
+     * This also adds fieldErrors to formData if errors occur
+     *
      * @param fieldValue
      * @param formElement
      * @param formData
-     * @return new field value
+     * @return [new field value, error]
      */
-    private convertNumberFieldToBigDecimal(fieldValue, FormElement formElement, Map formData) {
+    private List convertNumberFieldToBigDecimal(fieldValue, FormElement formElement, Map formData) {
+        boolean error = false
         if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
             log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
             if (isCollectionOrArray(fieldValue)) {
+                Integer idx = 0
                 fieldValue = fieldValue.collect {
-                    if (it) {
-                        it as BigDecimal
+                    if (it != null) {
+                        BigDecimal r = convertToBigDecimal(it, formElement, formData, idx++)
+                        if(r == null) {
+                            error = true
+                        }
+                        return r
+                    } else {
+                        idx++
+                        return null
                     }
                 }
             } else {
-                fieldValue = fieldValue as BigDecimal
+                fieldValue = convertToBigDecimal(fieldValue, formElement, formData, null)
+                if(fieldValue == null) {
+                    error = true
+                }
             }
             goodFormService.setField(formData, formElement.attr.name.toString(), fieldValue)
         }
-        return fieldValue
+        return [fieldValue, error]
+    }
+
+    private BigDecimal convertToBigDecimal(value, FormElement formElement, Map formData, Integer index) {
+        try {
+            value as BigDecimal
+        } catch (NumberFormatException e) {
+            formValidationService.appendError(formElement, formData, "goodform.validate.number.isnt", index, [value])
+            return null
+        }
     }
 
     /**
@@ -377,11 +403,11 @@ class FormDataService {
      * @param error
      * @return true if the field contains errors, false if not
      */
-    boolean validateField(FormElement formElement, fieldValue, boolean error) {
+    boolean validateField(FormElement formElement, Map formData, fieldValue, Integer index, boolean error) {
 
         //iterate over validators
         validators.each { Closure validator ->
-            error = validator(formElement, fieldValue) || error
+            error = validator(formElement, formData, fieldValue, index) || error
         }
         return error
     }

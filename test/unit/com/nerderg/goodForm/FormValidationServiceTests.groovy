@@ -18,26 +18,28 @@ class FormValidationServiceTests {
     Form form = new Form()
 
     void testInvalidValue() {
-        service.addCustomValidator("newValidator", {FormElement formElement, String fieldValue ->
+        service.addCustomValidator("newValidator", {FormElement formElement, Map formData, String fieldValue, Integer index ->
             return true
         })
         form.question("Q1") {
             "New Validator" text: 50, required: true, validate: 'newValidator'
         }
         Question question = form["Q1"]
-        def error = service.customValidation(question.formElement, 'abc')
+        question.formElement.attr.name = 'fred'
+        def error = service.customValidation(question.formElement, [fieldErrors: [:]], 'abc', 0)
         assertTrue("Error was not detected", error)
     }
 
     void testValidValue() {
-        service.addCustomValidator("newValidator", {FormElement formElement, String fieldValue ->
+        service.addCustomValidator("newValidator", {FormElement formElement, Map formData, String fieldValue, Integer index ->
             return false
         })
         form.question("Q1") {
             "New Validator" text: 50, required: true, validate: 'newValidator'
         }
         Question question = form["Q1"]
-        def error = service.customValidation(question.formElement, 'abc')
+        question.formElement.attr.name = 'fred'
+        def error = service.customValidation(question.formElement, [fieldErrors: [:]], 'abc', 0)
         assertFalse("Error was not detected", error)
     }
 }

@@ -4,14 +4,10 @@ import grails.converters.JSON
 import org.codehaus.groovy.grails.web.json.JSONArray
 
 import static org.junit.Assert.assertEquals
-import static org.junit.Assert.assertTrue
 
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
-
-import com.nerderg.goodForm.form.Form
-import com.nerderg.goodForm.form.FormElement
 
 class FormControllerIntegrationTests extends AbstractIntegrationTest {
 
@@ -43,7 +39,6 @@ class FormControllerIntegrationTests extends AbstractIntegrationTest {
     void testMandatoryField() {
         controller.createForm("SampleForm")
         def id = controller.modelAndView.model.formInstance.id
-        //todo is there an easier way to simulate the form parameters?
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
                  'Q1.names.lastName': '',
@@ -54,21 +49,17 @@ class FormControllerIntegrationTests extends AbstractIntegrationTest {
                                   'aliases': ['alias': '', 'aliasType': '']]]
                 ])
         controller.next(id)
-        Form form = controller.modelAndView.model.form
-        boolean foundError = false
-        form.getQuestions().each {
-            it.formElement.subElements.each { FormElement sub ->
-                foundError = sub.attr.error || foundError
-            }
-        }
-        assertTrue("Error was not found", foundError)
+        Map formData = controller.modelAndView.model.formData
+        assert !formData.fieldErrors.isEmpty()
+        assert formData.fieldErrors['Q1.names.givenNames'] == 'Required field. Please fill in this field.'
+        assert formData.fieldErrors['Q1.names.lastName'] == 'Required field. Please fill in this field.'
+
     }
 
     @Test
     void testFormSubmission() {
         controller.createForm("SampleForm")
         def id = controller.modelAndView.model.formInstance.id
-        //todo is there an easier way to simulate the form parameters?
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
                  'Q1.names.lastName': 'Test',

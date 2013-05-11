@@ -65,6 +65,7 @@ class FormController {
                 return
             }
             Map formData = rulesEngineService.ask(formName, getRuleFacts()) as Map
+            formData.fieldErrors = [:]
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
             List ask = formDataService.getSubset(formData.next, form)
             render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
@@ -154,6 +155,7 @@ class FormController {
         }
 
         boolean error = false
+        mergedFormData.fieldErrors = [:]
         asked.each { Question question ->
             //note the or error here makes sure error isn't reset whilst checking all form elements (so don't move it in front :-)
             error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, formInstance) || error

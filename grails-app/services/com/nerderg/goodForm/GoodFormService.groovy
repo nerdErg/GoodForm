@@ -31,13 +31,13 @@ class GoodFormService {
     }
 
     Closure unify = { Closure doit ->
-      try {
-         doit()
-      } catch (GoodFormException e) {
-        throw e
-      } catch (Exception e) {
-        throw new InvalidFormDefinitionException(e)
-      }
+        try {
+            doit()
+        } catch (GoodFormException e) {
+            throw e
+        } catch (Exception e) {
+            throw new InvalidFormDefinitionException(e)
+        }
     }
 
     /**
@@ -53,11 +53,11 @@ class GoodFormService {
 
         dslScript.metaClass = createEMC(dslScript.class) {
             ExpandoMetaClass emc ->
-            emc.form = { Closure formDef ->
-                formDef.delegate = formInstance
-                formDef.resolveStrategy = Closure.DELEGATE_FIRST
-                formDef()
-            }
+                emc.form = { Closure formDef ->
+                    formDef.delegate = formInstance
+                    formDef.resolveStrategy = Closure.DELEGATE_FIRST
+                    formDef()
+                }
         }
         unify {
             dslScript.run()
@@ -85,11 +85,27 @@ class GoodFormService {
         if (!form.questions) {
             throw new InvalidFormDefinitionException("Form must have at least one question")
         }
-        form.questions.each {Question q ->
-            if (!q.formElement) {
-                throw new FieldNotFoundException("Question must define a form element")
+        form.questions.each { Question q ->
+            visitAllFormElements(q.formElement) { FormElement formElement ->
+                formElement.attr.name = makeElementName(formElement)
             }
-            makeElementName(q.formElement)
+        }
+    }
+
+    /**
+     * Do the closure work on the passed in formElement and all it's subElements.
+     * The closure is passed in the individual formElement.
+     * @param formElement the form element to start at.
+     * @param work the closure for the work to be done.
+     * @throws FieldNotFoundException thrown if question does not contain any fields
+     */
+    void visitAllFormElements(FormElement formElement, Closure work) {
+        if (!formElement) {
+            throw new FieldNotFoundException("Question must define a form element")
+        }
+        work(formElement)
+        formElement.subElements.each { FormElement subElement ->
+            visitAllFormElements(subElement, work)
         }
     }
 
@@ -295,21 +311,37 @@ class GoodFormService {
             //because of JSON.Null item may well be null
             if (item) {
                 e.subElements.each { FormElement sub ->
-                    String subText = sub.text
-                    String subMap = sub.attr.map
-                    sub.text = sub.text.replaceAll(pattern, item)
-                    if (subMap) {
-                        sub.attr.map = "${filterName(item)}.${subMap}"
+                    FormElement clone = copyElement(sub)
+                    clone.text = sub.text.replaceAll(pattern, item)
+                    String map = clone.attr.map
+                    if (map) {
+                        clone.attr.map = "${filterName(item)}.${map}"
                     } else {
-                        sub.attr.map = "${filterName(item)}"
+                        clone.attr.map = "${filterName(item)}"
                     }
-                    work([element: sub, store: store, index: i])
-                    sub.text = subText
-                    sub.attr.map = subMap
+                    clone.attr.name = makeElementName(clone)
+                    work([element: clone, store: store, index: i])
                 }
             }
         }
 
+    }
+
+    /**
+     * This makes a shallow copy of the FormElement. It shallow copies the attributes map and just copies the reference
+     * to the subElements.
+     *
+     * @param orig
+     * @return
+     */
+    private FormElement copyElement(FormElement orig) {
+        FormElement clone = new FormElement(orig.qref)
+        clone.text = orig.text
+        clone.parent = orig.parent
+        clone.qref = orig.qref
+        clone.subElements = orig.subElements
+        clone.attr = new LinkedHashMap(orig.attr)
+        return clone
     }
 
     /**
@@ -561,7 +593,7 @@ class GoodFormService {
     }
 
     def withQuestions(List<String> qSet, questions, Closure c) {
-        qSet.each {qRef ->
+        qSet.each { qRef ->
             if (qRef != 'End') {
                 Question q = questions[qRef]
                 if (q) {
