@@ -37,6 +37,9 @@ class FormAdminController {
     private FormVersion getFormVersion(Long id, List<FormDefinition> forms, Integer version) {
         FormDefinition formDefinition
         FormVersion formVersion
+        if (forms?.isEmpty()) {
+            return null
+        }
         if (id) {
             formDefinition = FormDefinition.get(id)
         } else {
