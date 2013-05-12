@@ -34,7 +34,7 @@ class FormTagLibTests {
         subElement.attr.name = 'test.test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='questionGroup'><div class='prop'>
+        assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='preamble'></div><div class='questionGroup'><div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test.test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test.test' value='' id='test.test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
 </div>
@@ -54,7 +54,7 @@ class FormTagLibTests {
         subElement.attr.name = 'test.test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='listContainer'><div class='questionListOfItem'><div class='prop'>
+        assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='preamble'></div><div class='listContainer'><div class='questionListOfItem'><div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test.test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test.test' value='' id='test.test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
 </div>
@@ -68,7 +68,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test' value='' id='test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -81,7 +81,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><textarea name='test' id='test'  cols='80' rows='3'></textarea>
                 <span class='required'></span><span class='hint'></span>
@@ -98,7 +98,7 @@ class FormTagLibTests {
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
 
         assert result.contains('input type=\'radio\'')
-        assert result == """<div class='prop'><span class='name'>Dummy element<span class='required'></span></span><div class='questionPick'><div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'><span class='name'>Dummy element<span class='required'></span></span><div class='questionPick'><div class='prop'>
 <span class='name'><label>are you male?:</label></span>
 <span class='value' title='are you male?'><input type='radio' name='test' id='null' value='are you male?' />
                     <span class='required'></span><span class='hint'></span>
@@ -122,7 +122,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='number' name='test' value='' id='test' size='5' maxlength='5'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -133,7 +133,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='number' name='test' value='' id='test' size='2' maxlength='2' max='21' min='0'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -147,9 +147,9 @@ class FormTagLibTests {
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('input type=\'tel\'')
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
-<span class='value' title='This is a test'><input type='tel' name='test' value='' id='test'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
+<span class='value' title='This is a test'><input type='tel' name='test' value='' id='test' size='15' maxlength='15'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
 </div>"""
     }
 
@@ -161,7 +161,7 @@ class FormTagLibTests {
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'money\'')
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'>\$&nbsp;<input type='text' name='test' value='' id='test' class='money' size='5' maxlength='5'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -175,7 +175,7 @@ class FormTagLibTests {
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'date\'')
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='text' name='test' value='' class='date' size='10' id='test'/><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -189,7 +189,7 @@ class FormTagLibTests {
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'date\'')
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='text' name='test.date' value='' class='date' size='10' id='test.date'/>&nbsp;<input type='text' name='test.time' value='' class='time' size='7' title='type or use mouse wheel to change' id='test.time'/><span class='required'></span><span class='hint'></span></span>
 </div>"""
@@ -200,7 +200,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test.document'
 
         String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-        assert result == """<div class='prop'>
+        assert result == """<div class='preamble'></div><div class='prop'>
 <span class='name'><label for='test.document'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='file' name='test.document' value='null' id='test.document'/>&nbsp; <span class='required'></span><span class='hint'></span></span>
 </div>"""

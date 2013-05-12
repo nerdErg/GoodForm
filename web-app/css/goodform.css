@@ -236,6 +236,25 @@ div.goodFormContainer div.goodformView .value {
     font-weight: normal;
 }
 
+div.goodFormContainer textarea {
+    width: auto;
+    max-width: 60%;
+    height: auto;
+    overflow: auto;
+    white-space: nowrap;
+    font-size: 1em;
+}
+
+div.goodFormContainer h2 {
+    margin-top: 0.5em;
+    margin-bottom: 0.5em;
+    font-size: 1.2em;
+}
+
+div.goodFormContainer h2 > .hint {
+    font-size: 0.8em;
+}
+
 /* End - Completed form view related CSS */
 
 /* Form Admin view */

@@ -173,9 +173,19 @@ class FormDataService {
      */
     Closure validateMandatoryField = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
-        if (formElement.attr.containsKey('required') && (fieldValue == null || fieldValue == '')) {
-            formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
-            error = true
+        if (formElement.attr.containsKey('required')) {
+            if (fieldValue == null || fieldValue == '') {
+                formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
+                error = true
+            }
+            if(formElement.attr.datetime && !(fieldValue.date && fieldValue.time)) {
+                formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
+                error = true
+            }
+            if(formElement.attr.attachment && fieldValue == 'none') {
+                formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
+                error = true
+            }
         }
         return error
     }
@@ -270,6 +280,10 @@ class FormDataService {
             return error // ignore headings
         }
 
+        //get attached file and store it, save the reference to it in the formData
+        //we do this before validation because we need to check if required attachments are there
+        handleAttachment(formElement, instance, formData)
+
         def fieldValue = goodFormService.findField(formData, formElement.attr.name)
         (fieldValue, error) = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
 
@@ -286,9 +300,6 @@ class FormDataService {
 
         //get references and store in the formData
         handleReferences(formElement, fieldValue, formData)
-
-        //get attached file and store it, save the reference to it in the formData
-        handleAttachment(formElement, instance, formData)
 
         //handle subElements
         error = handleSubElements(formElement, formData, instance, error)
@@ -366,7 +377,7 @@ class FormDataService {
                 fieldValue = fieldValue.collect {
                     if (it != null) {
                         BigDecimal r = convertToBigDecimal(it, formElement, formData, idx++)
-                        if(r == null) {
+                        if (r == null) {
                             error = true
                         }
                         return r
@@ -377,7 +388,7 @@ class FormDataService {
                 }
             } else {
                 fieldValue = convertToBigDecimal(fieldValue, formElement, formData, null)
-                if(fieldValue == null) {
+                if (fieldValue == null) {
                     error = true
                 }
             }
