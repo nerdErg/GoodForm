@@ -23,7 +23,7 @@ class FormTagLib {
     static namespace = "form"
 
     private static getFieldErrors(Map formData, String field, Integer index){
-        return formData.fieldErrors[field + (index == null ? '' : index)]
+        return formData.fieldErrors[field + (index == null ? '0' : index)]
     }
 
     private findFieldValue(Map bean, String field, Integer index = null) {
