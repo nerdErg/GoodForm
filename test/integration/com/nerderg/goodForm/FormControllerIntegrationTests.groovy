@@ -51,8 +51,8 @@ class FormControllerIntegrationTests extends AbstractIntegrationTest {
         controller.next(id)
         Map formData = controller.modelAndView.model.formData
         assert !formData.fieldErrors.isEmpty()
-        assert formData.fieldErrors['Q1.names.givenNames'] == 'Required field. Please fill in this field.'
-        assert formData.fieldErrors['Q1.names.lastName'] == 'Required field. Please fill in this field.'
+        assert formData.fieldErrors['Q1.names.givenNames0'] == 'Required field. Please fill in this field.'
+        assert formData.fieldErrors['Q1.names.lastName0'] == 'Required field. Please fill in this field.'
 
     }
 
