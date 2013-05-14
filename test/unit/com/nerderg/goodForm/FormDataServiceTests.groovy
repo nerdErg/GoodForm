@@ -118,15 +118,15 @@ class FormDataServiceTests {
 
         Map formData = ['Q1': ['dob': '02/01/2000'], fieldErrors: [:]]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == 'goodform.validate.date.greaterThan'
+        assert formData.fieldErrors['Q1.dob0'] == 'goodform.validate.date.greaterThan'
 
         formData = ['Q1': ['dob': '31/12/1999'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == null
+        assert formData.fieldErrors['Q1.dob0'] == null
 
         formData = ['Q1': ['dob': '01/01/2000'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == null
+        assert formData.fieldErrors['Q1.dob0'] == null
     }
 
     void testMinDateField() {
@@ -138,15 +138,15 @@ class FormDataServiceTests {
 
         Map formData = ['Q1': ['dob': '31/12/1999'], fieldErrors: [:]]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == 'goodform.validate.date.lessThan'
+        assert formData.fieldErrors['Q1.dob0'] == 'goodform.validate.date.lessThan'
 
         formData = ['Q1': ['dob': '02/01/2000'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == null
+        assert formData.fieldErrors['Q1.dob0'] == null
 
         formData = ['Q1': ['dob': '01/01/2000'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.dob'] == null
+        assert formData.fieldErrors['Q1.dob0'] == null
     }
 
     void testInvalidPatternField() {
@@ -158,11 +158,11 @@ class FormDataServiceTests {
 
         Map formData = ['Q1': ['givenName': '1234'], fieldErrors: [:]]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.givenName'] == 'goodform.validate.invalid.pattern'
+        assert formData.fieldErrors['Q1.givenName0'] == 'goodform.validate.invalid.pattern'
 
         formData = ['Q1': ['givenName': 'Joe'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.givenName'] == null
+        assert formData.fieldErrors['Q1.givenName0'] == null
     }
 
     void testInvalidPatternFieldWithMessage() {
@@ -174,11 +174,11 @@ class FormDataServiceTests {
 
         Map formData = ['Q1': ['givenName': '1234'], fieldErrors: [:]]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.givenName'] == 'name can only have chars'
+        assert formData.fieldErrors['Q1.givenName0'] == 'name can only have chars'
 
         formData = ['Q1': ['givenName': 'Joe'], fieldErrors: [:]]
         assert !service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.givenName'] == null
+        assert formData.fieldErrors['Q1.givenName0'] == null
     }
 
     void testNumberToBigDecimal() {
@@ -202,7 +202,7 @@ class FormDataServiceTests {
         formData.Q1.age = 'norman'
         assert formData.Q1.age instanceof String
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.age'] == 'goodform.validate.number.isnt'
+        assert formData.fieldErrors['Q1.age0'] == 'goodform.validate.number.isnt'
 
         formData.Q1.age = ['23', 'norman'] as String[]
         assert formData.Q1.age instanceof String[]
@@ -228,17 +228,17 @@ class FormDataServiceTests {
         formData.Q1.age = '45.6'
         formData.fieldErrors = [:]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.age'] == 'goodform.validate.number.tobig'
+        assert formData.fieldErrors['Q1.age0'] == 'goodform.validate.number.tobig'
 
         formData.Q1.age = '23.0000001'
         formData.fieldErrors = [:]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.age'] == 'goodform.validate.number.tobig'
+        assert formData.fieldErrors['Q1.age0'] == 'goodform.validate.number.tobig'
 
         formData.Q1.age = '-0.6'
         formData.fieldErrors = [:]
         assert service.validateAndProcessFields(question.formElement, formData, formInstance)
-        assert formData.fieldErrors['Q1.age'] == 'goodform.validate.number.tosmall'
+        assert formData.fieldErrors['Q1.age0'] == 'goodform.validate.number.tosmall'
 
         formData.Q1.age = ['10', '24'] as String[]
         formData.fieldErrors = [:]
