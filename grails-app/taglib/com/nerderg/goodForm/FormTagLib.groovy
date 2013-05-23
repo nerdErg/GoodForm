@@ -390,7 +390,7 @@ class FormTagLib {
                 out << g.message(code: "goodform.click.edit")
                 out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
                 out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
-                out << qSet.toString()
+                out << "<div class='qsetDisplay'>${qSet.toString()}</div>"
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
                     out << element([element: q.formElement, store: formData, disabled: true])
                 }
@@ -591,6 +591,12 @@ class FormTagLib {
     }
 
     def showMessages = {attrs ->
+
+        if(attrs.fieldErrors) {
+            out << '<div class="errors">'
+            out << g.message(code: 'goodform.field.errors', args: [attrs.fieldErrors.size().toString()])
+            out << '</div>'
+        }
         if(flash.message) {
             out << '<div class="message">'
             if(formDataService.isCollectionOrArray(flash.message)) {
@@ -602,7 +608,7 @@ class FormTagLib {
             } else {
                 out << flash.message.toString().encodeAsHTML()
             }
-            out << '</div>'
+            out << '</ul></div>'
         }
     }
 

@@ -255,6 +255,14 @@ div.goodFormContainer h2 > .hint {
     font-size: 0.8em;
 }
 
+div.goodFormContainer .qsetDisplay {
+    display: none;
+}
+
+div.goodFormContainer .formVersion {
+    color: #666666;
+}
+
 /* End - Completed form view related CSS */
 
 /* Form Admin view */

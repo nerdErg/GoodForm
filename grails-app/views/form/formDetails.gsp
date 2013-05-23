@@ -11,9 +11,11 @@
 <body>
 <div class="goodFormContainer">
 
-  <form:showMessages/>
+  <form:showMessages fieldErrors="${formData?.fieldErrors}"/>
 
-  <g:message code="goodform.form.version" args="${[form.version.formVersionNumber]}"/>
+  <div class="formVersion">
+    <g:message code="goodform.form.version" args="${[form.version.formVersionNumber]}"/>
+  </div>
 
   <div class="roundbox">
     <div class="formContainer">
