@@ -239,7 +239,7 @@ class FormTagLib {
         def value = findFieldValue(store, listName)
         if (value && value instanceof Map) {
             def l = value.find { entry ->
-                entry.value instanceof List
+                formDataService.isCollectionOrArray(entry.value)
             }
             return l ? l.value.size() : 0
         } else {

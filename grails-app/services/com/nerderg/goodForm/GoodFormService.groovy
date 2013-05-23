@@ -320,7 +320,7 @@ class GoodFormService {
                         clone.attr.map = "${filterName(item)}"
                     }
                     clone.attr.name = makeElementName(clone)
-                    work([element: clone, store: store, index: i])
+                    work([element: clone, store: store, index: 0])
                 }
             }
         }
@@ -379,7 +379,6 @@ class GoodFormService {
     }
 
     private String commonText(FormElement e, Map answers, Integer index, String indent, Closure out, String type) {
-        e.attr.name = makeElementName(e)
         def value = findField(answers, e.attr.name, index) ?: ''
         out(e.text, value, e.attr.units, indent, type)
 
@@ -406,19 +405,16 @@ class GoodFormService {
     }
 
     private String datetime(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         def value = findField(answers, e.attr.name, index) ?: [date: '', time: '']
         out(e.text, "$value.date $value.time", null, indent, 'dateTime')
     }
 
     private String money(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         def value = findField(answers, e.attr.name, index)
         out(e.text, value ? "\$$value" : '', e.attr.units, indent, 'money')
     }
 
     private String bool(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         def pick = e.parent?.attr?.pick?.toString()
         if (e.subElements.size() > 0) {
             if (pick && pick == "1") {
@@ -442,7 +438,6 @@ class GoodFormService {
     private String radioHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
         if (value == e.text.replaceAll(/'/, '\u2019')) {
             String result = out('', e.text, null, indent, 'radio')
-            e.attr.name = makeElementName(e)
             indent += '  '
             e.subElements.each { sub ->
                 result += printFormElementAnswer(sub, answers, index, indent, out)
@@ -457,7 +452,6 @@ class GoodFormService {
         String result = ''
         if (value == 'on') {
             result = out(e.text, 'Yes', null, indent, 'checkbox')
-            e.attr.name = makeElementName(e)
             indent += '  '
             e.subElements.each { sub ->
                 result += printFormElementAnswer(sub, answers, index, indent, out)
@@ -487,7 +481,6 @@ class GoodFormService {
     }
 
     private String pick(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         String result = out(e.text, ' ', null, indent, 'pick')
         indent += '  '
         e.subElements.each { sub ->
@@ -500,7 +493,6 @@ class GoodFormService {
     }
 
     private String group(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         String result = out(e.text, ' ', null, indent, 'group')
         indent += '  '
         e.subElements.each { sub ->
@@ -511,7 +503,6 @@ class GoodFormService {
 
     private String each(FormElement e, Map answers, Integer index, String indent, Closure out) {
         String result = ''
-        e.attr.name = makeElementName(e)
         processEachFormElement(e, answers) { Map subMap -> //[element: sub, store: store, index: i]
             result += printFormElementAnswer(subMap.element, subMap.store, subMap.index, indent, out)
             result += '\n'
@@ -520,7 +511,6 @@ class GoodFormService {
     }
 
     private String listOf(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        e.attr.name = makeElementName(e)
         int currentListSize = listSize(answers, e.attr.name)
         String result = out(e.text, currentListSize, null, indent, 'listOf')
         indent += '  '

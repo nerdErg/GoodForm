@@ -66,7 +66,6 @@ class FormValidationService {
     void appendError(FormElement formElement, Map formData, String code, Integer index, List args = null) {
         String message = message(code, args)
         String name = formElement.attr.name + (index == null ? '0' : index)
-        formData.fieldErrors[name]
         if(formData.fieldErrors[name]) {
             formData.fieldErrors[name] += " \n$message"
         } else {
