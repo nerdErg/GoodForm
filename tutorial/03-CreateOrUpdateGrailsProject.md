@@ -22,7 +22,7 @@ grails.project.dependency.resolution = {
         //snip
 
         compile ':rendering:0.4.3'
-        compile ':goodform:1.0'
+        compile ':goodform:1.0.3'
         compile ':simple-suggestions:0.1'
     }
 }
