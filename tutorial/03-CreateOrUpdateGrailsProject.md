@@ -21,7 +21,7 @@ grails.project.dependency.resolution = {
     plugins {
         //snip
 
-        compile ':rendering:0.4.3'
+        compile ':rendering:0.4.4' //you need to use the latest version of this
         compile ':goodform:1.0.3'
         compile ':simple-suggestions:0.1'
     }
