@@ -4,10 +4,10 @@ Create Ruleset Definitions
 Once the master rule definition has been created, you can then create your ruleset files, which will be installed and made available
 from the OneRing instance we setup previously.
 
-There needs to be at least one ruleset file, whose name is 'your-form_FirstQuestion.ruleset', where 'your-form' is the
+There needs to be at least one ruleset file, whose name is 'your-form-name.ruleset', where 'your-form-name' is the
 name of the form definition.
 
-For our example, let's create a `ContactDetails_firstQuestion.ruleset` file in the ~/OneRing/rules/application directory.
+For our example, let's create a `ContactDetails.ruleset` file in the ~/OneRing/rules/application directory.
 The contents of a sample ruleset is listed below:
 
 ```groovy
