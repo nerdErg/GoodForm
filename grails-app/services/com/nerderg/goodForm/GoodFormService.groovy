@@ -381,7 +381,6 @@ class GoodFormService {
     private String commonText(FormElement e, Map answers, Integer index, String indent, Closure out, String type) {
         def value = findField(answers, e.attr.name, index) ?: ''
         out(e.text, value, e.attr.units, indent, type)
-
     }
 
     private String text(FormElement e, Map answers, Integer index, String indent, Closure out) {
@@ -402,6 +401,10 @@ class GoodFormService {
 
     private String attachment(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'attachment')
+    }
+
+    private String select(FormElement e, Map answers, Integer index, String indent, Closure out) {
+        commonText(e, answers, index, indent, out, 'select')
     }
 
     private String datetime(FormElement e, Map answers, Integer index, String indent, Closure out) {

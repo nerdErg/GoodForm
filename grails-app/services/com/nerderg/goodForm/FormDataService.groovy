@@ -323,10 +323,12 @@ class FormDataService {
             def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
             def f = grailsWebRequest.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
-
-                String basedir = grailsApplication.config.uploaded.file.location ?: ''
-                File location = new java.io.File(basedir, instance.formVersion.formDefinition.name + '/' + instance.id)
+                String basedir = grailsApplication.config.uploaded.file.location ?: './'
+                File location = new File(basedir, instance.formVersion.formDefinition.name + '/' + instance.id)
                 location.mkdirs()
+                if(!location.exists()) {
+                    throw new FileNotFoundException("Base directory couldn't be found or created ${location.absolutePath}")
+                }
                 List<String> fieldSplit = formElement.attr.name.split(/\./)
                 String filename = "${fieldSplit[0]}.${fieldSplit.last()}-${f.getOriginalFilename()}"
                 File upload = new File(location, filename)
