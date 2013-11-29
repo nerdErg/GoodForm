@@ -3,6 +3,7 @@ package com.nerderg.goodForm
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.Question
 import grails.converters.JSON
+import grails.test.mixin.Mock
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.domain.DomainClassUnitTestMixin
@@ -18,6 +19,7 @@ import org.springframework.context.MessageSource
  */
 @TestFor(FormDataService)
 @TestMixin(DomainClassUnitTestMixin)
+@Mock([FormDefinition, FormVersion])
 class FormDataServiceTests {
 
     FormInstance formInstance
@@ -315,8 +317,6 @@ class FormDataServiceTests {
                    }
 
             }"""
-        mockDomain(FormDefinition)
-        mockDomain(FormVersion)
         FormVersion formVersion = service.createNewFormVersion('ContactDetails', sampleForm)
         assert formVersion.formVersionNumber == 1
         assert formVersion.formDefinitionDSL == sampleForm

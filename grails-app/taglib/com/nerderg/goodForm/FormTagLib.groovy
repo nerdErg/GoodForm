@@ -2,6 +2,7 @@ package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
+import groovy.xml.MarkupBuilder
 
 /**
  * Provides GoodForm-specific tag elements. The main tag elements used by views are:
@@ -22,7 +23,7 @@ class FormTagLib {
 
     static namespace = "form"
 
-    private static getFieldErrors(Map formData, String field, Integer index){
+    private static getFieldErrors(Map formData, String field, Integer index) {
         return formData.fieldErrors[field + (index == null ? '0' : index)]
     }
 
@@ -41,18 +42,53 @@ class FormTagLib {
         "$type"(e, store, index, disabled)
     }
 
+    private preamble(out, text) {
+        if (text) {
+            out << "<div class='preamble'>${text.encodeAsHTML()}</div>"
+        }
+    }
+
+    def select = { FormElement e, Map store, Integer index, boolean disabled ->
+
+        def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String error = getFieldErrors(store, e.attr.name, index)
+        List<String> options = e.attr.select as List
+        preamble(out, e.attr.preamble)
+
+        StringWriter sw = new StringWriter()
+        MarkupBuilder builder = new MarkupBuilder(new PrintWriter(sw))
+        Map attrs = [name: e.attr.name, id: e.attr.name]
+        if(disabled) {
+            attrs << [disabled: 'disabled']
+        }
+        builder.select(attrs) {
+            for(String opt in options) {
+                if(opt == value) {
+                    option selected: 'selected', opt
+                } else {
+                    option opt
+                }
+            }
+        }
+        String select = sw.toString()
+        out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, error: error) {
+            "$select <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
+        }
+    }
+
     def heading = { FormElement e, Map store, Integer index, boolean disabled ->
         def value = e.attr.heading
+
         String tag = "<h$value>${e.text.encodeAsHTML()}</h$value>"
         out << tag
     }
 
     def text = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
         int size = e.attr.text.toInteger()
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         if (size < 100) {
             String suggest = e.attr.suggest ? "suggest ${e.attr.suggest}" : ""
             out << nerderg.inputfield(label: e.text, value: value, field: e.attr.name, size: e.attr.text, maxlength: e.attr.text, error: error, disabled: disabled, class: suggest) {
@@ -70,19 +106,19 @@ class FormTagLib {
     }
 
     def number = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
 
-        Map<String,BigDecimal> minMax = formDataService.getNumberMinMax(e)
+        Map<String, BigDecimal> minMax = formDataService.getNumberMinMax(e)
 
         String size
-        if(e.attr.number instanceof Range){
+        if (e.attr.number instanceof Range) {
             size = e.attr.number.to.toString().size().toString()
         } else {
             size = e.attr.number.toString()
         }
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.inputfield(
                 type: 'number',
                 label: e.text,
@@ -103,52 +139,52 @@ class FormTagLib {
     }
 
     def phone = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
 
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.inputfield(type: 'tel', label: e.text, value: value, field: e.attr.name, size: e.attr.phone, maxlength: e.attr.phone, error: error, disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def money = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
 
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.inputfield(class: 'money', label: e.text, pre: '$&nbsp;', value: value, field: e.attr.name, size: e.attr.money, maxlength: e.attr.money, error: error, disabled: disabled) {
             "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
         }
     }
 
     def date = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
 
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.datefield(label: e.text, value: value, format: e.attr.date, field: e.attr.name, error: error, disabled: disabled) {
             "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def datetime = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def value = findFieldValue(store, e.attr.name, index)
         String error = getFieldErrors(store, e.attr.name, index)
 
         String datetime = (value && value instanceof Map) ? "$value.date $value.time" : ''
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.datetimefield(label: e.text, value: datetime, format: e.attr.date, field: e.attr.name, error: error, disabled: disabled) {
             "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
     def attachment = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         String value = findFieldValue(store, e.attr.name, index) as String
         String error = getFieldErrors(store, e.attr.name, index)
 
@@ -160,17 +196,17 @@ class FormTagLib {
         }
         body += "<span class='hint'>${e.attr.hint ?: ''}</span>"
 
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << nerderg.inputfield(type: 'file', label: e.text, value: value, field: e.attr.name, error: error, disabled: disabled) {
             body
         }
     }
 
     def pick = { FormElement e, Map store, Integer index, boolean disabled ->
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << "<div class='prop'><span class='name'>$e.text<span class='required'>${e.attr.required ? '*' : ''}</span></span>"
         out << "<div class='questionPick'>"
-        
+
         List subs = new ArrayList(e.subElements)
         subs.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
@@ -179,11 +215,11 @@ class FormTagLib {
     }
 
     def group = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << "<div class='questionGroup'>"
-        
+
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
@@ -193,7 +229,7 @@ class FormTagLib {
     def each = { FormElement e, Map store, Integer index, boolean disabled ->
 
         out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << "<div>"
         goodFormService.processEachFormElement(e, store) { Map subMap ->
             subMap.disabled = disabled
@@ -206,9 +242,9 @@ class FormTagLib {
      *
      */
     def listOf = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
-        out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+        preamble(out, e.attr.preamble)
         out << "<div class='listContainer'>"
 
         def currentListSize = listSize(store, e.attr.name)
@@ -248,7 +284,7 @@ class FormTagLib {
     }
 
     def bool = { FormElement e, Map store, Integer index, boolean disabled ->
-        
+
         def disabledAttr = disabled ? "disabled='disabled'" : ""
         def pick = e.parent?.attr?.pick?.toString()
         if (e.subElements.size() > 0) {
@@ -312,7 +348,7 @@ class FormTagLib {
         def name = "${e.attr.name}.yes"
 
         if (value == 'on') {
-            out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+            preamble(out, e.attr.preamble)
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
                 """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
@@ -322,7 +358,7 @@ class FormTagLib {
             out << '</div>'   //inline
             out << "<div>"
         } else {
-            out << "<div class='preamble'>${e.attr.preamble ?: ''}</div>"
+            preamble(out, e.attr.preamble)
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
                 """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' ${disabledAttr}/>
@@ -334,7 +370,7 @@ class FormTagLib {
         }
 
         out << "<div class='dependantQuestions'>"
-        
+
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
@@ -364,7 +400,7 @@ class FormTagLib {
         }
 
         out << "<div class='dependantQuestions'>"
-        
+
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
@@ -590,16 +626,16 @@ class FormTagLib {
         out << '</a>'
     }
 
-    def showMessages = {attrs ->
+    def showMessages = { attrs ->
 
-        if(attrs.fieldErrors) {
+        if (attrs.fieldErrors) {
             out << '<div class="errors">'
             out << g.message(code: 'goodform.field.errors', args: [attrs.fieldErrors.size().toString()])
             out << '</div>'
         }
-        if(flash.message) {
+        if (flash.message) {
             out << '<div class="message">'
-            if(formDataService.isCollectionOrArray(flash.message)) {
+            if (formDataService.isCollectionOrArray(flash.message)) {
                 out << '<ul>'
                 flash.message.each { item ->
                     out << '<li>' + item.toString().encodeAsHTML() + '</li>'

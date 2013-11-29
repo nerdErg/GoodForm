@@ -14,7 +14,7 @@ class GoodFormService {
 
     static transactional = false
 
-    static final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading']
+    static final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading', 'select']
 
     /**
      * compile a form DSL string and return a form instance

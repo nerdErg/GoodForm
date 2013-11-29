@@ -323,8 +323,9 @@ class FormDataService {
             def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
             def f = grailsWebRequest.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
-                String basedir = grailsApplication.config.uploaded.file.location.toString() + 'applications/' + instance.id
-                File location = new File(basedir)
+
+                String basedir = grailsApplication.config.uploaded.file.location ?: ''
+                File location = new java.io.File(basedir, instance.formVersion.formDefinition.name + '/' + instance.id)
                 location.mkdirs()
                 List<String> fieldSplit = formElement.attr.name.split(/\./)
                 String filename = "${fieldSplit[0]}.${fieldSplit.last()}-${f.getOriginalFilename()}"
@@ -591,9 +592,9 @@ class FormDataService {
             if (it.value.equals(null)) {
                 it.value = null
             } else if (it.value instanceof Map) {
-                it.value = cleanUpJSONNullMap(it.value)
+                it.value = cleanUpJSONNullMap(it.value as Map)
             } else if (it.value instanceof Collection) {
-                it.value = cleanUpJSONNullCollection(it.value)
+                it.value = cleanUpJSONNullCollection(it.value as Collection)
             }
         }
     }
