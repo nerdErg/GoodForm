@@ -6,6 +6,11 @@ Checkout the [documentation] (http://nerderg.com/Good+Form)
 
 And the [Tutorial] (tutorial/01-Introduction.md)
 
+Version 1.0.4
+
+* Add a select field so that you can have a "select an option" select: ['one','two','three'] ... which creates a drop down select box
+* Improve the file attachment upload handling. Attachments are now put in uploaded.file.location/formName/formInstanceID/
+
 Version 1.0.3
 
 * Add a generic field errors message to the top of the form page to indicate that there are errors below.
