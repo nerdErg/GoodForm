@@ -58,12 +58,12 @@ class FormTagLib {
         StringWriter sw = new StringWriter()
         MarkupBuilder builder = new MarkupBuilder(new PrintWriter(sw))
         Map attrs = [name: e.attr.name, id: e.attr.name]
-        if(disabled) {
+        if (disabled) {
             attrs << [disabled: 'disabled']
         }
         builder.select(attrs) {
-            for(String opt in options) {
-                if(opt == value) {
+            for (String opt in options) {
+                if (opt == value) {
                     option selected: 'selected', opt
                 } else {
                     option opt
@@ -83,7 +83,45 @@ class FormTagLib {
         out << tag
     }
 
+    private Map getDefaultModelProperties(FormElement e, Map store, Integer index, boolean disabled, Map model) {
+        def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String error = getFieldErrors(store, e.attr.name, index)
+        model.fieldAttributes << [
+                class: (e.attr.suggest ? "suggest ${e.attr.suggest}" : ""),
+                value: value
+        ]
+
+        if (disabled) {
+            model.fieldAttributes << [disabled: 'disabled']
+        }
+
+        model << [
+                error: error,
+                name: e.attr.name,
+                preamble: e.attr.preamble,
+                required: e.attr.required,
+                hint: e.attr.hint,
+                units: e.attr.units
+        ]
+        return model
+    }
+
     def text = { FormElement e, Map store, Integer index, boolean disabled ->
+
+        int size = e.attr.text.toInteger()
+        Map model
+        if (size < 100) {
+            model = getDefaultModelProperties(e, store, index, disabled, [baseType: 'input', label: e.text,
+                    fieldAttributes: [type: 'text', size: e.attr.text, maxlength: e.attr.text]])
+        } else {
+            model = getDefaultModelProperties(e, store, index, disabled, [baseType: 'textarea', label: e.text,
+                    fieldAttributes: [cols: '80', rows: (size / 80 + 1).toString()]])
+        }
+        out << g.render(template: "/templates/form_field_wrapper", model: model)
+    }
+
+    //todo delete or revert
+    def textOld = { FormElement e, Map store, Integer index, boolean disabled ->
 
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String error = getFieldErrors(store, e.attr.name, index)
@@ -91,15 +129,27 @@ class FormTagLib {
         preamble(out, e.attr.preamble)
         if (size < 100) {
             String suggest = e.attr.suggest ? "suggest ${e.attr.suggest}" : ""
-            out << nerderg.inputfield(label: e.text, value: value, field: e.attr.name, size: e.attr.text, maxlength: e.attr.text, error: error, disabled: disabled, class: suggest) {
+            out << nerderg.inputfield(
+                    label: e.text,
+                    value: value,
+                    field: e.attr.name,
+                    size: e.attr.text,
+                    maxlength: e.attr.text,
+                    error: error,
+                    disabled: disabled,
+                    class: suggest) {
                 "<span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
             }
         } else {
             def disabledAttr = disabled ? "disabled='disabled'" : ""
             int rows = size / 80 + 1
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, error: error) {
-                """<textarea name='${e.attr.name}' id='${e.attr.name}' ${disabledAttr} cols='80' rows='${rows}'>${value ?: ''}</textarea>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<textarea name='${e.attr.name}' id='${e.attr.name}' ${disabledAttr} cols='80' rows='${rows}'>${
+                    value ?: ''
+                }</textarea>
+                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                 """
             }
         }
@@ -130,7 +180,7 @@ class FormTagLib {
                 min: toStringIfNotNull(minMax.min),
                 error: error,
                 disabled: disabled) {
-            "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
+            "<span class='units'>${e.attr.units ?: ''}</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
@@ -145,7 +195,7 @@ class FormTagLib {
 
         preamble(out, e.attr.preamble)
         out << nerderg.inputfield(type: 'tel', label: e.text, value: value, field: e.attr.name, size: e.attr.phone, maxlength: e.attr.phone, error: error, disabled: disabled) {
-            "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
+            "<span class='units'>${e.attr.units ?: ''}</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ?: ''}</span>"
         }
     }
 
@@ -156,7 +206,7 @@ class FormTagLib {
 
         preamble(out, e.attr.preamble)
         out << nerderg.inputfield(class: 'money', label: e.text, pre: '$&nbsp;', value: value, field: e.attr.name, size: e.attr.money, maxlength: e.attr.money, error: error, disabled: disabled) {
-            "<span class='units'>${e.attr.units ?: '' }</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
+            "<span class='units'>${e.attr.units ?: ''}</span><span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
         }
     }
 
@@ -311,14 +361,22 @@ class FormTagLib {
 
         if (value == 'on') {
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, 'class': 'inlineCheck') {
-                """<span class='preamble'>${e.attr.preamble ?: ''}</span><span class='cbText'>${e.attr.text ? '*' : ''}</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' checked='checked' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<span class='preamble'>${e.attr.preamble ?: ''}</span><span class='cbText'>${
+                    e.attr.text ? '*' : ''
+                }</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' checked='checked' ${disabledAttr}/>
+                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                     """
             }
         } else {
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, 'class': 'inlineCheck') {
-                """<span class='preamble'>${e.attr.preamble ?: ''}</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<span class='preamble'>${
+                    e.attr.preamble ?: ''
+                }</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' ${disabledAttr}/>
+                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                     """
             }
         }
@@ -329,14 +387,20 @@ class FormTagLib {
         String buttonValue = e.text.encodeAsHTML().replaceAll(/'/, '&rsquo;')
         if (value == e.text.replaceAll(/'/, '\u2019')) {
             out << nerderg.formfield(label: e.text, field: e.attr.name) {
-                """<input type='radio' name='$e.parent.attr.name' id='$e.attr.name' value='$buttonValue' checked='checked' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<input type='radio' name='$e.parent.attr.name' id='$e.attr.name' value='$buttonValue' checked='checked' ${
+                    disabledAttr
+                }/>
+                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                     """
             }
         } else {
             out << nerderg.formfield(label: e.text, field: e.attr.name) {
                 """<input type='radio' name='$e.parent.attr.name' id='$e.attr.name' value='$buttonValue' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                     """
             }
         }
@@ -351,8 +415,12 @@ class FormTagLib {
             preamble(out, e.attr.preamble)
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<input type='checkbox' name='${
+                    name
+                }' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
+                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                 """
             }
             out << '</div>'   //inline
@@ -362,7 +430,9 @@ class FormTagLib {
             out << "<div class='inlineCheck'>"
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
                 """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                 """
             }
             out << '</div>'  //inline
@@ -385,15 +455,23 @@ class FormTagLib {
 
         if (value == e.text.replaceAll(/'/, '\u2019')) {  //todo check if this should be buttonValue
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${buttonValue}' class='hiddenFormRadio' checked='checked' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${
+                    buttonValue
+                }' class='hiddenFormRadio' checked='checked' ${disabledAttr}/>
+                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                 """
             }
             out << "<div>"
         } else {
             out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${buttonValue}' class='hiddenFormRadio' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>
+                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${
+                    buttonValue
+                }' class='hiddenFormRadio' ${disabledAttr}/>
+                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
+                    e.attr.hint ? e.attr.hint : ''
+                }</span>
                 """
             }
             out << "<div class='hiddenForm'>"
@@ -544,7 +622,7 @@ class FormTagLib {
         Boolean compress = attrs.compress || attrs.readOnly
 
         List refs = attrs.refs as List
-        refs.sort { a, b -> a <=> b }
+        refs.sort { a, b -> a<=>b }
         List output = []
 
         goodFormService.withQuestions(refs, questions) { q, qRef ->
