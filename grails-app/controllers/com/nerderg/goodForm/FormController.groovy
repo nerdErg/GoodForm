@@ -160,10 +160,10 @@ class FormController {
             //note the or error here makes sure error isn't reset whilst checking all form elements (so don't move it in front :-)
             error = formDataService.validateAndProcessFields(question.formElement, mergedFormData, formInstance) || error
         }
-        formInstance.storeFormData(mergedFormData)
 
         if (!error) {
             try {
+                formInstance.storeFormData(mergedFormData)
                 mergedFormData.messages = [] //clear messages for processing
                 Map processedFormData = formDataService.processNext(formInstance, mergedFormData)
                 if (processedFormData.messages) {
