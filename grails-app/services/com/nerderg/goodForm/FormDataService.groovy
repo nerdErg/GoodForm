@@ -121,19 +121,23 @@ class FormDataService {
      * @param formElement
      * @return map [max: max, min: min]
      */
-    Map<String, BigDecimal> getNumberMinMax(FormElement formElement) {
-        BigDecimal max
-        BigDecimal min
+    Map getNumberMinMax(FormElement formElement) {
 
+        Map minMax = [:]
+        //todo make non specific to number input (use range?)
         if (formElement.attr.number instanceof Range) {
-            max = formElement.attr.number.to
-            min = formElement.attr.number.from
+            minMax.max = formElement.attr.number.to as BigDecimal
+            minMax.min = formElement.attr.number.from as BigDecimal
         } else {
             //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
-            max = formElement.attr.max == null ? null : formElement.attr.max
-            min = formElement.attr.min == null ? null : formElement.attr.min
+            if(formElement.attr.max != null) {
+                minMax.max = formElement.attr.max
+            }
+            if(formElement.attr.min != null) {
+                minMax.min = formElement.attr.min
+            }
         }
-        return [max: max, min: min]
+        return minMax
     }
 
     /**

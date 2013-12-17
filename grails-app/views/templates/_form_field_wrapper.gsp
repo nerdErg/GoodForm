@@ -7,9 +7,8 @@
     ${label.encodeAsHTML()}
   </label>
 
-  <g:render template="/templates/form_${baseType.toLowerCase()}"
-            model="${[name: name, fieldAttributes: fieldAttributes]}"/>
-
+  <g:if test="${prefix}"><span class='prefix'>${prefix}</span></g:if>
+  <g:render template="/templates/type_${type.toLowerCase()}"/>
   <g:if test="${units}"><span class='units'>${units}</span></g:if>
   <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
   <g:if test="${hint}"><span class='hint'>${hint}</span></g:if>

@@ -1,0 +1,1 @@
+$&nbsp;<g:render template="/templates/form_input" model="${[type: 'number', name: name, fieldAttributes: fieldAttributes]}"/>
