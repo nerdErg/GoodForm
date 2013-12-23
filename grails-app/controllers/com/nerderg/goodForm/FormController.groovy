@@ -67,8 +67,7 @@ class FormController {
             Map formData = rulesEngineService.ask(formName, getRuleFacts()) as Map
             formData.fieldErrors = [:]
             FormInstance formInstance = formDataService.createFormInstance(form, formData)
-            List ask = formDataService.getSubset(formData.next, form)
-            render(view: '/form/formDetails', model: [form: form, asked: [], questions: ask, formData: formData, formInstance: formInstance])
+            redirect(action: 'continueForm', id: formInstance.id)
         } catch (RulesEngineException e) {
             flash.message = message(code: "goodform.rules.error", args: [e.message])
             redirect(action: 'index')
