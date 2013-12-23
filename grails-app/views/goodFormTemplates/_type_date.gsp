@@ -1,0 +1,1 @@
+<g:render template="/goodFormTemplates/form_input" model="${[type: 'text', name: name, fieldAttributes: (fieldAttributes << [class:'date'])]}"/>

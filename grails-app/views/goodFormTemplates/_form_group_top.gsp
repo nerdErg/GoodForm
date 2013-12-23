@@ -11,5 +11,5 @@
 <legend class="${labelClass}">
   ${label.encodeAsHTML()}
 
-<g:if test="${hint}"><span class='hint'>${hint}</span></g:if>
+  <g:if test="${hint}"><span class='hint'>${hint}</span></g:if>
 </legend>

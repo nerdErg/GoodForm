@@ -2,9 +2,6 @@ package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
-import groovy.xml.MarkupBuilder
-
-import java.text.SimpleDateFormat
 
 /**
  * Provides GoodForm-specific tag elements. The main tag elements used by views are:
@@ -50,48 +47,13 @@ class FormTagLib {
         }
     }
 
-    def select = { FormElement e, Map store, Integer index, boolean disabled ->
-
-        def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
-        String error = getFieldErrors(store, e.attr.name, index)
-        List<String> options = e.attr.select as List
-        preamble(out, e.attr.preamble)
-
-        StringWriter sw = new StringWriter()
-        MarkupBuilder builder = new MarkupBuilder(new PrintWriter(sw))
-        Map attrs = [name: e.attr.name, id: e.attr.name]
-        if (disabled) {
-            attrs << [disabled: 'disabled']
-        }
-        builder.select(attrs) {
-            for (String opt in options) {
-                if (opt == value) {
-                    option selected: 'selected', opt
-                } else {
-                    option opt
-                }
-            }
-        }
-        String select = sw.toString()
-        out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, error: error) {
-            "$select <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span>"
-        }
-    }
-
-    def heading = { FormElement e, Map store, Integer index, boolean disabled ->
-        def value = e.attr.heading
-
-        String tag = "<h$value>${e.text.encodeAsHTML()}</h$value>"
-        out << tag
-    }
-
     //todo move to goodFormService?
     private Map getDefaultModelProperties(FormElement e, Map store, Integer index, boolean disabled, Map fieldAttributes) {
         def value = findFieldValue(store, e.attr.name, index) ?: (e.attr.default ?: '')
         String type = goodFormService.getElementType(e)
         String error = getFieldErrors(store, e.attr.name, index)
 
-        if(e.attr.suggest) {
+        if (e.attr.suggest) {
             if (fieldAttributes.class) {
                 fieldAttributes.class += " suggest ${e.attr.suggest}"
             }
@@ -142,18 +104,18 @@ class FormTagLib {
     //todo move to goodFormService?
     private static Map makeFieldSizeAttributes(FormElement e, String type) {
 
-        if(!e.attr[type]){
+        if (!e.attr[type]) {
             return [:]
         }
 
         Integer size
         if (e.attr[type] instanceof Range) {
             size = e.attr[type].to.toString().size()
-        } else if((e.attr[type] as String).isInteger()) {
+        } else if ((e.attr[type] as String).isInteger()) {
             size = e.attr[type].toInteger()
         }
 
-        if(size) {
+        if (size) {
             return [size: size, maxlength: size]
         } else {
             return [:]
@@ -165,36 +127,48 @@ class FormTagLib {
         value != null ? value.toString() : null
     }
 
+    def heading = { FormElement e, Map store, Integer index, boolean disabled ->
+        Map model = [fieldAttributes: [size: e.attr.heading, value: e.text]]
+        out << g.render(template: "/goodFormTemplates/type_heading", model: model)
+
+    }
+
     def text = { FormElement e, Map store, Integer index, boolean disabled ->
         Map model = getDefaultModelProperties(e, store, index, disabled, [:])
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
 
     def number = { FormElement e, Map store, Integer index, boolean disabled ->
         Map model = getDefaultModelProperties(e, store, index, disabled, [:])
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
 
     def phone = { FormElement e, Map store, Integer index, boolean disabled ->
         Map model = getDefaultModelProperties(e, store, index, disabled, [:])
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
 
     def money = { FormElement e, Map store, Integer index, boolean disabled ->
-        Map model = getDefaultModelProperties(e, store, index, disabled, [step : '0.01'] )
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        Map model = getDefaultModelProperties(e, store, index, disabled, [step: '0.01'])
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
+
+    def select = { FormElement e, Map store, Integer index, boolean disabled ->
+        Map model = getDefaultModelProperties(e, store, index, disabled, [options : e.attr.select as List])
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
+    }
+
 
     def date = { FormElement e, Map store, Integer index, boolean disabled ->
         String format = e.attr.date
         Map model = getDefaultModelProperties(e, store, index, disabled, [format: format, size: format.size()])
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
 
     def datetime = { FormElement e, Map store, Integer index, boolean disabled ->
         String format = e.attr.datetime
         Map model = getDefaultModelProperties(e, store, index, disabled, [format: format, size: format.size()])
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
     }
 
     def attachment = { FormElement e, Map store, Integer index, boolean disabled ->
@@ -205,10 +179,10 @@ class FormTagLib {
         String value = model.fieldAttributes.value
         String fileName = (value && value.size() > prefix) ? value.substring(prefix) : ''
         model.fieldAttributes.fileName = fileName
-        if(fileName && model.fieldAttributes.required) {
+        if (fileName && model.fieldAttributes.required) {
             model.fieldAttributes.remove('required')
         }
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
+        out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
 
     }
 
@@ -218,55 +192,38 @@ class FormTagLib {
 
     def group = { FormElement e, Map store, Integer index, boolean disabled ->
         Map model = getDefaultModelProperties(e, store, index, disabled, [:])
-        out << g.render(template: "/templates/form_group_top", model: model)
+        out << g.render(template: "/goodFormTemplates/form_group_top", model: model)
         e.subElements.each { sub ->
             out << element([element: sub, store: store, index: index, disabled: disabled])
         }
-        out << g.render(template: "/templates/form_group_tail", model: model)
+        out << g.render(template: "/goodFormTemplates/form_group_tail", model: model)
     }
 
     def each = { FormElement e, Map store, Integer index, boolean disabled ->
 
         Map model = getDefaultModelProperties(e, store, index, disabled, [:])
-        out << g.render(template: "/templates/form_group_top", model: model)
+        out << g.render(template: "/goodFormTemplates/form_group_top", model: model)
         goodFormService.processEachFormElement(e, store) { Map subMap ->
             subMap.disabled = disabled
             out << element(subMap)
         }
-        out << g.render(template: "/templates/form_group_tail", model: model)
+        out << g.render(template: "/goodFormTemplates/form_group_tail", model: model)
     }
 
-    /**
-     *
-     */
     def listOf = { FormElement e, Map store, Integer index, boolean disabled ->
 
-        out << "<h2>$e.text <span class='hint'>${e.attr.hint ? e.attr.hint : ''}</span></h2>"
-        preamble(out, e.attr.preamble)
-        out << "<div class='listContainer'>"
+        Map model = getDefaultModelProperties(e, store, index, disabled, [:])
+        int currentListSize = listSize(store, e.attr.name)
 
-        def currentListSize = listSize(store, e.attr.name)
-
+        out << g.render(template: "/goodFormTemplates/form_list_top", model: model)
         for (int i = 0; i < Math.max(currentListSize, 1); i++) {
-            out << "<div class='questionListOfItem'>"
+            out << g.render(template: "/goodFormTemplates/form_list_item_top", model: model)
             e.subElements.each { sub ->
                 out << element([element: sub, store: store, index: i, disabled: disabled])
             }
-            out << "<div class='removeForm'><img src='"
-            out << g.resource(dir: 'images/icons', file: 'delete.png')
-            out << """' title='Remove this' alt='+'/><span class='hint'>"""
-            out << g.message(code: "goodform.item.remove")
-            out << "</span></div>"
-            out << "</div>"
+            out << g.render(template: "/goodFormTemplates/form_list_item_tail", model: model)
         }
-        out << "</div>"
-
-        out << "<div class='addAnotherForm'><img src='"
-        out << g.resource(dir: 'images/icons', file: 'add.png')
-        out << "' title='add another' alt='+'/><span class='hint'>"
-        out << g.message(code: "goodform.item.addAnother")
-        out << "</span></div>"
-
+        out << g.render(template: "/goodFormTemplates/form_list_tail", model: model)
     }
 
     private int listSize(Map store, String listName) {
@@ -283,162 +240,25 @@ class FormTagLib {
 
     def bool = { FormElement e, Map store, Integer index, boolean disabled ->
 
-        String pick = e.parent?.attr?.pick?.toString()
-        Map model = getDefaultModelProperties(e, store, index, disabled, [pick1: ('1' == pick), parentName: e.parent.attr.name])
-        if(model.fieldAttributes.value && (model.fieldAttributes.value == 'on' || model.fieldAttributes.value == model.label)) {
+        Boolean pick1 = '1' == e.parent?.attr?.pick?.toString()
+        Map model = getDefaultModelProperties(e, store, index, disabled, [pick1: pick1, parentName: e.parent.attr.name])
+        if (model.fieldAttributes.value) {
             model.fieldAttributes.checked = 'checked'
         }
-        out << g.render(template: "/templates/form_field_wrapper", model: model)
 
-
-//        String disabledAttr = disabled ? "disabled='disabled'" : ""
-//        if (e.subElements.size() > 0) {
-//            if (pick && pick == "1") {
-//                def value = findFieldValue(store, e.parent.attr.name, index)
-//                radioHiddenSubElements(store, index, value, e, disabled)
-//            } else {
-//                def value = findFieldValue(store, "${e.attr.name}.yes", index)
-//                checkboxHiddenSubElements(store, index, value, e, disabled)
-//            }
-//        } else {
-//            if (pick && pick == "1") {
-//                def value = findFieldValue(store, e.parent.attr.name, index)
-//                radioButtonElement(value, e, disabledAttr)
-//            } else {
-//                def value = findFieldValue(store, e.attr.name, index)
-//                checkboxElement(value, e, store, disabledAttr)
-//            }
-//        }
-    }
-
-    private radioButtonElement(value, FormElement e, disabledAttr) {
-        String buttonValue = e.text.encodeAsHTML().replaceAll(/'/, '&rsquo;')
-        if (value == e.text.replaceAll(/'/, '\u2019')) {
-            out << nerderg.formfield(label: e.text, field: e.attr.name) {
-                """<input type='radio' name='$e.parent.attr.name' id='$e.attr.name' value='$buttonValue' checked='checked' ${
-                    disabledAttr
-                }/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                    """
+        if (e.subElements.size() > 0) {
+            if(!pick1 && findFieldValue(store, "${e.attr.name}.yes", index)) {
+                //need to get the renamed value as the name space isn't nested. which affects if it is checked
+                model.fieldAttributes.checked = 'checked'
             }
+            out << g.render(template: "/goodFormTemplates/form_reveal_top", model: model)
+            e.subElements.each { sub ->
+                out << element([element: sub, store: store, index: index, disabled: disabled])
+            }
+            out << g.render(template: "/goodFormTemplates/form_reveal_tail", model: model)
         } else {
-            out << nerderg.formfield(label: e.text, field: e.attr.name) {
-                """<input type='radio' name='$e.parent.attr.name' id='$e.attr.name' value='$buttonValue' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                    """
-            }
+            out << g.render(template: "/goodFormTemplates/form_field_wrapper", model: model)
         }
-    }
-    private checkboxElement(value, FormElement e, Map store, disabledAttr) {
-        out << "<div class='inlineCheck'>"
-
-        if (value == 'on') {
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, 'class': 'inlineCheck') {
-                """<span class='preamble'>${e.attr.preamble ?: ''}</span><span class='cbText'>${
-                    e.attr.text ? '*' : ''
-                }</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' checked='checked' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                    """
-            }
-        } else {
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store, 'class': 'inlineCheck') {
-                """<span class='preamble'>${
-                    e.attr.preamble ?: ''
-                }</span><input type='checkbox' name='$e.attr.name' id='$e.attr.name' ${disabledAttr}/>
-                    <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                    """
-            }
-        }
-        out << "</div > "
-    }
-
-
-    //output a sub elements as a hidden option that becomes visible on clicking the checkbox
-    private checkboxHiddenSubElements(store, index, value, FormElement e, boolean disabled) {
-        def disabledAttr = disabled ? "disabled='disabled'" : ""
-        def name = "${e.attr.name}.yes"
-
-        if (value == 'on') {
-            preamble(out, e.attr.preamble)
-            out << "<div class='inlineCheck'>"
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${
-                    name
-                }' id='$e.attr.name' class='hiddenFormCheckbox' checked='checked' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                """
-            }
-            out << '</div>'   //inline
-            out << "<div>"
-        } else {
-            preamble(out, e.attr.preamble)
-            out << "<div class='inlineCheck'>"
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='checkbox' name='${name}' id='$e.attr.name' class='hiddenFormCheckbox' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                """
-            }
-            out << '</div>'  //inline
-            out << "<div class='hiddenForm'>"
-        }
-
-        out << "<div class='dependantQuestions'>"
-
-        e.subElements.each { sub ->
-            out << element([element: sub, store: store, index: index, disabled: disabled])
-        }
-        out << "</div></div>"
-
-    }
-
-    //output a sub elements as a hidden option that becomes visible on clicking the checkbox
-    private radioHiddenSubElements(store, index, value, FormElement e, boolean disabled) {
-        String disabledAttr = disabled ? "disabled='disabled'" : ""
-        String buttonValue = e.text.encodeAsHTML().replaceAll(/'/, '&rsquo;')
-
-        if (value == e.text.replaceAll(/'/, '\u2019')) {  //todo check if this should be buttonValue
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${
-                    buttonValue
-                }' class='hiddenFormRadio' checked='checked' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                """
-            }
-            out << "<div>"
-        } else {
-            out << nerderg.formfield(label: e.text, field: e.attr.name, bean: store) {
-                """<input type='radio' name='${e.parent.attr.name}' id='$e.attr.name' value='${
-                    buttonValue
-                }' class='hiddenFormRadio' ${disabledAttr}/>
-                <span class='required'>${e.attr.required ? '*' : ''}</span><span class='hint'>${
-                    e.attr.hint ? e.attr.hint : ''
-                }</span>
-                """
-            }
-            out << "<div class='hiddenForm'>"
-        }
-
-        out << "<div class='dependantQuestions'>"
-
-        e.subElements.each { sub ->
-            out << element([element: sub, store: store, index: index, disabled: disabled])
-        }
-        out << "</div></div>"
-
     }
 
     /**
@@ -509,7 +329,7 @@ class FormTagLib {
                 Boolean contentPresent = false
 
                 goodFormService.withQuestions(qSet, questions) { q, qRef ->
-                    String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent, type ->
+                    String qa = goodFormService.decodeFormElementAnswer(q.formElement, formData) { label, value, units, indent, type ->
                         if (type == 'heading') {
                             String res
                             switch (value) {
@@ -581,7 +401,7 @@ class FormTagLib {
         List output = []
 
         goodFormService.withQuestions(refs, questions) { q, qRef ->
-            String qa = goodFormService.printFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
+            String qa = goodFormService.decodeFormElementAnswer(q.formElement, formData) { label, value, units, indent ->
                 if (value && value != 'No') {
                     String res = "<div class='goodformView'>"
                     res += "${indent.replaceAll(' ', '&nbsp;')}"

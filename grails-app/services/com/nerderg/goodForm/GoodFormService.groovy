@@ -362,62 +362,63 @@ class GoodFormService {
      * print using the closure the form element using the form definition
      * @param e
      * @param answers
-     * @param out closure to call to format the values   { label, value, units, indent -> ... }* @return formatted string of the values
+     * @param out closure to call to format the values   { label, value, units, indent -> ... }*
+     * @return whatever the closure returns, e.g. a formatted string of the values
      */
-    String printFormElementAnswer(FormElement e, Map answers, Closure out) {
-        printFormElementAnswer(e, answers, null, '', out)
+    def decodeFormElementAnswer(FormElement e, Map answers, Closure out) {
+        decodeFormElementAnswer(e, answers, null, '', out)
     }
 
-    String printFormElementAnswer(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    def decodeFormElementAnswer(FormElement e, Map answers, Integer index, String indent, Closure out) {
         String type = getElementType(e)
         "$type"(e, answers, index, indent, out)
     }
 
-    private String heading(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def heading(FormElement e, Map answers, Integer index, String indent, Closure out) {
         def value = e.attr.heading
         out(e.text, value, e.attr.units, indent, 'heading')
     }
 
-    private String commonText(FormElement e, Map answers, Integer index, String indent, Closure out, String type) {
+    private def commonText(FormElement e, Map answers, Integer index, String indent, Closure out, String type) {
         def value = findField(answers, e.attr.name, index) ?: ''
         out(e.text, value, e.attr.units, indent, type)
     }
 
-    private String text(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def text(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'text')
     }
 
-    private String date(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def date(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'date')
     }
 
-    private String number(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def number(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'number')
     }
 
-    private String phone(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def phone(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'phone')
     }
 
-    private String attachment(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def attachment(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'attachment')
     }
 
-    private String select(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def select(FormElement e, Map answers, Integer index, String indent, Closure out) {
         commonText(e, answers, index, indent, out, 'select')
     }
 
-    private String datetime(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def datetime(FormElement e, Map answers, Integer index, String indent, Closure out) {
         def value = findField(answers, e.attr.name, index) ?: [date: '', time: '']
         out(e.text, "$value.date $value.time", null, indent, 'dateTime')
     }
 
-    private String money(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def money(FormElement e, Map answers, Integer index, String indent, Closure out) {
         def value = findField(answers, e.attr.name, index)
         out(e.text, value ? "\$$value" : '', e.attr.units, indent, 'money')
     }
 
-    private String bool(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def bool(FormElement e, Map answers, Integer index, String indent, Closure out) {
         def pick = e.parent?.attr?.pick?.toString()
         if (e.subElements.size() > 0) {
             if (pick && pick == "1") {
@@ -438,12 +439,12 @@ class GoodFormService {
         }
     }
 
-    private String radioHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
+    private def radioHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
         if (value == e.text.replaceAll(/'/, '\u2019')) {
             String result = out('', e.text, null, indent, 'radio')
             indent += '  '
             e.subElements.each { sub ->
-                result += printFormElementAnswer(sub, answers, index, indent, out)
+                result += decodeFormElementAnswer(sub, answers, index, indent, out)
             }
             return result
         } else {
@@ -451,13 +452,13 @@ class GoodFormService {
         }
     }
 
-    private String checkboxHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
+    private def checkboxHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
         String result = ''
-        if (value == 'on') {
+        if (value) {
             result = out(e.text, 'Yes', null, indent, 'checkbox')
             indent += '  '
             e.subElements.each { sub ->
-                result += printFormElementAnswer(sub, answers, index, indent, out)
+                result += decodeFormElementAnswer(sub, answers, index, indent, out)
             }
         } else {
             result = out(e.text, 'No', null, indent, 'checkbox')
@@ -465,15 +466,15 @@ class GoodFormService {
         return result
     }
 
-    private String radioButtonElement(value, e, String indent, Closure out) {
+    private def radioButtonElement(value, e, String indent, Closure out) {
         if (value == e.text.replaceAll(/'/, '\u2019')) {
             return out('', e.text, null, indent, 'radio')
         }
         return ''
     }
 
-    private String checkboxElement(value, e, answers, String indent, Closure out) {
-        if (value == 'on') {
+    private def checkboxElement(value, e, answers, String indent, Closure out) {
+        if (value) {
             return out(e.text, 'Yes', null, indent, 'checkbox')
         } else {
             if (e.parent?.attr?.pick) {
@@ -483,11 +484,11 @@ class GoodFormService {
         }
     }
 
-    private String pick(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def pick(FormElement e, Map answers, Integer index, String indent, Closure out) {
         String result = out(e.text, ' ', null, indent, 'pick')
         indent += '  '
         e.subElements.each { sub ->
-            String res = printFormElementAnswer(sub, answers, index, indent, out)
+            String res = decodeFormElementAnswer(sub, answers, index, indent, out)
             if (res) {
                 result += res
             }
@@ -495,32 +496,32 @@ class GoodFormService {
         return result
     }
 
-    private String group(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def group(FormElement e, Map answers, Integer index, String indent, Closure out) {
         String result = out(e.text, ' ', null, indent, 'group')
         indent += '  '
         e.subElements.each { sub ->
-            result += printFormElementAnswer(sub, answers, index, indent, out)
+            result += decodeFormElementAnswer(sub, answers, index, indent, out)
         }
         return result
     }
 
-    private String each(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def each(FormElement e, Map answers, Integer index, String indent, Closure out) {
         String result = ''
         processEachFormElement(e, answers) { Map subMap -> //[element: sub, store: store, index: i]
-            result += printFormElementAnswer(subMap.element, subMap.store, subMap.index, indent, out)
+            result += decodeFormElementAnswer(subMap.element, subMap.store, subMap.index, indent, out)
             result += '\n'
         }
         return result
     }
 
-    private String listOf(FormElement e, Map answers, Integer index, String indent, Closure out) {
+    private def listOf(FormElement e, Map answers, Integer index, String indent, Closure out) {
         int currentListSize = listSize(answers, e.attr.name)
         String result = out(e.text, currentListSize, null, indent, 'listOf')
         indent += '  '
         for (int i = 0; i < Math.max(currentListSize, 1); i++) {
             result += '\n'
             e.subElements.each { sub ->
-                result += printFormElementAnswer(sub, answers, i, indent, out)
+                result += decodeFormElementAnswer(sub, answers, i, indent, out)
             }
         }
         return result

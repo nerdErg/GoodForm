@@ -39,7 +39,7 @@
         });
 
         parent.find('.hiddenFormCheckbox').change(function (event) {
-            var parentDiv = $(this).parents('div.inlineCheck')
+            var parentDiv = $(this).parent('div.formField')
             if ($(this).attr('checked')) {
                 $(parentDiv).next('div').show();
             } else {
@@ -48,7 +48,7 @@
         });
 
         parent.find('.hiddenFormRadio').change(function (event) {
-            var parentDiv = $(this).parents('div.prop')
+            var parentDiv = $(this).parent('div.formField')
             if ($(this).attr('checked')) {
                 $(parentDiv).next('div').show();
             } else {
