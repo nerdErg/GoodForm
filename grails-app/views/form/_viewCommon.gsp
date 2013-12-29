@@ -12,7 +12,7 @@
     </div>
   </g:if>
   <g:else>
-    <h2>This form is <u>not</u> complete and has <u>not</u> been submitted.</h2>
+    <h2>This form is <em>not</em> complete and has <em>not</em> been submitted.</h2>
     <g:if test="${formData.require?.size() > 0}">
       <h2>Before it can be submitted you must supply:</h2>
       <ul class="required">

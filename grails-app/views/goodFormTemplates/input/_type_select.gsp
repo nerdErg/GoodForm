@@ -1,9 +1,11 @@
 <select name="${name}" id="${name}"
 <g:each in="${fieldAttributes}" var="attribute">
-  ${attribute.key}="${attribute.value}"
+  <g:if test="${attribute.key != 'options'}">
+    ${attribute.key}="${attribute.value}"
+  </g:if>
 </g:each>
 >
-<g:each in="${fieldAttributes.remove('options')}" var="opt">
+<g:each in="${fieldAttributes.options}" var="opt">
   <g:if test="${fieldAttributes.value == opt}">
     <option selected="selected">${opt.encodeAsHTML()}</option>
   </g:if>

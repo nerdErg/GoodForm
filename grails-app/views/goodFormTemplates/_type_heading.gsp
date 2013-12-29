@@ -1,1 +1,0 @@
-<h${fieldAttributes.size}>${fieldAttributes.value.encodeAsHTML()}</h${fieldAttributes.size}>

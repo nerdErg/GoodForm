@@ -1,1 +1,0 @@
-$&nbsp;<g:render template="/goodFormTemplates/form_input" model="${[type: 'number', name: name, fieldAttributes: fieldAttributes]}"/>

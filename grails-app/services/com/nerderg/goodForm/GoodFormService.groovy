@@ -14,7 +14,27 @@ class GoodFormService {
 
     static transactional = false
 
-    static final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading', 'select']
+    static
+    final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading', 'select']
+
+    /**
+     * A map of known element types.
+     * Types are mapped to a closure that extracts relevant information about the type for display as a field in summary
+     * or as an input.
+     *
+     * the closure must take (FormElement e, Map answers, Integer index) and return a model.
+     * The model by convention has a submap called fieldAttributes which contains the field value and field specific
+     * attributes. Your closure should call getDefaultModelProperties with a map of extra fieldAttributes
+     * Map model = getDefaultModelProperties(e, answers, index, disabled, [myattribute : e.attr.myspecialthing])
+     *
+     * if you only need the default attributes just add the defaultAttributes closure.
+     * @see GoodFormService
+     */
+    static final Map<String, Closure> elementTypeModel = [:]
+
+    GoodFormService() {
+        initDefaultElements()
+    }
 
     /**
      * compile a form DSL string and return a form instance
@@ -275,6 +295,7 @@ class GoodFormService {
     }
 
     /**
+     * todo move to using the elementTypeModel keys to allow simpler adding of new elements
      * Given a form element return it's type as a String from the known types. If the element doesn't have a type specified
      * then it is a boolean type 'bool'
      * @param e
@@ -328,6 +349,30 @@ class GoodFormService {
     }
 
     /**
+     * Get the minimum and maximum value attributes from a number formElement
+     * @param formElement
+     * @return map [max: max, min: min]
+     */
+    Map getNumberMinMax(FormElement formElement) {
+
+        Map minMax = [:]
+        //todo make non specific to number input (use range?)
+        if (formElement.attr.number instanceof Range) {
+            minMax.max = formElement.attr.number.to as BigDecimal
+            minMax.min = formElement.attr.number.from as BigDecimal
+        } else {
+            //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
+            if (formElement.attr.max != null) {
+                minMax.max = formElement.attr.max
+            }
+            if (formElement.attr.min != null) {
+                minMax.min = formElement.attr.min
+            }
+        }
+        return minMax
+    }
+
+    /**
      * This makes a shallow copy of the FormElement. It shallow copies the attributes map and just copies the reference
      * to the subElements.
      *
@@ -344,6 +389,194 @@ class GoodFormService {
         return clone
     }
 
+    private static getFieldErrors(Map formData, String field, Integer index) {
+        return formData.fieldErrors[field + (index == null ? '0' : index)]
+    }
+
+    Map getDefaultModelProperties(FormElement e, Map store, Integer index, boolean disabled, Map fieldAttributes) {
+        def value = findField(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        String type = getElementType(e)
+        String error = getFieldErrors(store, e.attr.name, index)
+
+        if (e.attr.suggest) {
+            if (fieldAttributes.class) {
+                fieldAttributes.class += " suggest ${e.attr.suggest}"
+            }
+        }
+
+        fieldAttributes << [
+                value: value
+        ]
+
+        fieldAttributes << makeHtmlAttributes(disabled, e, type)
+
+        Map model = [
+                type: type,
+                error: error,
+                name: e.attr.name,
+                label: e.text,
+                preamble: e.attr.preamble,
+                required: e.attr.required,
+                hint: e.attr.hint,
+                prefix: e.attr.prefix,
+                units: e.attr.units,
+                fieldAttributes: fieldAttributes
+        ]
+        return model
+    }
+
+    private Map makeHtmlAttributes(boolean disabled, FormElement e, String type) {
+
+        Map fieldAttributes = getNumberMinMax(e) //get min/max if exist
+        fieldAttributes << makeFieldSizeAttributes(e, type)
+
+        if (disabled) {
+            fieldAttributes << [disabled: 'disabled']
+        }
+
+        if (e.attr.required) {
+            fieldAttributes << [required: 'required']
+        }
+
+        if (e.attr.pattern) {
+            fieldAttributes << [pattern: e.attr.pattern[0]]
+            fieldAttributes << [title: e.attr.pattern[1]]
+        }
+        return fieldAttributes
+    }
+
+    private static Map makeFieldSizeAttributes(FormElement e, String type) {
+
+        if (!e.attr[type]) {
+            return [:]
+        }
+
+        Integer size
+        if (e.attr[type] instanceof Range) {
+            size = e.attr[type].to.toString().size()
+        } else if ((e.attr[type] as String).isInteger()) {
+            size = e.attr[type].toInteger()
+        }
+
+        if (size) {
+            return [size: size, maxlength: size]
+        } else {
+            return [:]
+        }
+    }
+
+    void addFormElementType(String name, Closure c) {
+        elementTypeModel.put(name, c)
+    }
+
+    void initDefaultElements() {
+        addFormElementType('text', defaultAttributesModel)
+        addFormElementType('number', defaultAttributesModel)
+        addFormElementType('phone', defaultAttributesModel)
+        addFormElementType('money', defaultAttributesModel)
+        addFormElementType('group', defaultAttributesModel)
+        addFormElementType('pick', defaultAttributesModel)
+        addFormElementType('each', defaultAttributesModel)
+
+        addFormElementType('select', selectModel)
+        addFormElementType('heading', headingModel)
+        addFormElementType('attachment', attachmentModel)
+        addFormElementType('date', dateModel)
+        addFormElementType('datetime', datetimeModel)
+        addFormElementType('bool', boolModel)
+        addFormElementType('listOf', listOfModel)
+    }
+
+    Map getElementModel(Map attrs) {
+        FormElement e = attrs.element
+        Map store = attrs.store
+        Integer index = attrs.index ?: 0
+        Boolean disabled = attrs.disabled ?: false
+        getElementModel(e, store, index, disabled)
+    }
+
+    Map getElementModel(FormElement e, Map answers, Integer index, Boolean disabled) {
+        String type = getElementType(e)
+        log.debug "*** geting model for $type"
+        return elementTypeModel[type](e, answers, index, disabled)
+    }
+
+    private Closure headingModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        getDefaultModelProperties(e, answers, index, disabled, [size: e.attr.heading])
+    }
+
+    private Closure defaultAttributesModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        getDefaultModelProperties(e, answers, index, disabled, [:])
+    }
+
+    private Closure selectModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        getDefaultModelProperties(e, answers, index, disabled, [options : e.attr.select as List])
+    }
+
+    private Closure attachmentModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        Map model = getDefaultModelProperties(e, answers, index, disabled, [:])
+        List<String> fieldSplit = e.attr.name.split(/\./)
+        Integer prefix = "${fieldSplit[0]}.${fieldSplit.last()}-".size()
+        String value = model.fieldAttributes.value
+        String fileName = (value && value.size() > prefix) ? value.substring(prefix) : ''
+        model.fieldAttributes.fileName = fileName
+        if (fileName && model.fieldAttributes.required) {
+            model.fieldAttributes.remove('required')
+        }
+        return model
+    }
+
+    private Closure dateModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        String format = e.attr.date
+        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: format.size()])
+    }
+
+    private Closure datetimeModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        String format = e.attr.datetime
+        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: format.size()])
+    }
+
+    private Closure listOfModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        Map model = getDefaultModelProperties(e, answers, index, disabled, [:])
+        model.listSize = listSize(model.fieldAttributes.value)
+        return model
+    }
+
+    private Closure boolModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+
+        Boolean pick1 = '1' == e.parent?.attr?.pick?.toString()
+        Map model = getDefaultModelProperties(e, answers, index, disabled, [pick1: pick1, parentName: e.parent.attr.name])
+        if (model.label == model.fieldAttributes.value) {
+            model.fieldAttributes.checked = 'checked'
+        }
+
+        if (e.subElements.size() > 0) {
+            if (!pick1) {
+                String answer = findField(answers, "${e.attr.name}.yes", index)
+                if (answer) {
+                    //need to get the renamed value as the name space isn't nested. which affects if it is checked
+                    model.fieldAttributes.checked = 'checked'
+                } else {
+                    if (model.fieldAttributes.checked) {
+                        model.fieldAttributes.remove('checked')
+                    }
+                }
+            }
+        }
+        return model
+    }
+
+    private static int listSize(value) {
+        if (value && value instanceof Map) {
+            Map.Entry l = value.find { entry ->
+                entry.value instanceof List
+            }
+            return l ? l.value.size() : 0
+        } else {
+            return 0
+        }
+    }
+
     /**
      * Takes the params and formats the output as a string
      * @param label - the data label
@@ -357,189 +590,6 @@ class GoodFormService {
         }
         return "$indent$label : - \n"
     }
-
-    /**
-     * print using the closure the form element using the form definition
-     * @param e
-     * @param answers
-     * @param out closure to call to format the values   { label, value, units, indent -> ... }*
-     * @return whatever the closure returns, e.g. a formatted string of the values
-     */
-    def decodeFormElementAnswer(FormElement e, Map answers, Closure out) {
-        decodeFormElementAnswer(e, answers, null, '', out)
-    }
-
-    def decodeFormElementAnswer(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        String type = getElementType(e)
-        "$type"(e, answers, index, indent, out)
-    }
-
-    private def heading(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        def value = e.attr.heading
-        out(e.text, value, e.attr.units, indent, 'heading')
-    }
-
-    private def commonText(FormElement e, Map answers, Integer index, String indent, Closure out, String type) {
-        def value = findField(answers, e.attr.name, index) ?: ''
-        out(e.text, value, e.attr.units, indent, type)
-    }
-
-    private def text(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'text')
-    }
-
-    private def date(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'date')
-    }
-
-    private def number(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'number')
-    }
-
-    private def phone(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'phone')
-    }
-
-    private def attachment(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'attachment')
-    }
-
-    private def select(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        commonText(e, answers, index, indent, out, 'select')
-    }
-
-    private def datetime(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        def value = findField(answers, e.attr.name, index) ?: [date: '', time: '']
-        out(e.text, "$value.date $value.time", null, indent, 'dateTime')
-    }
-
-    private def money(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        def value = findField(answers, e.attr.name, index)
-        out(e.text, value ? "\$$value" : '', e.attr.units, indent, 'money')
-    }
-
-    private def bool(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        def pick = e.parent?.attr?.pick?.toString()
-        if (e.subElements.size() > 0) {
-            if (pick && pick == "1") {
-                def value = findField(answers, e.parent.attr.name, index)
-                return radioHiddenSubElements(answers, index, value, e, indent, out)
-            } else {
-                def value = findField(answers, "${e.attr.name}.yes", index)
-                return checkboxHiddenSubElements(answers, index, value, e, indent, out)
-            }
-        } else {
-            if (pick && pick == "1") {
-                def value = findField(answers, e.parent.attr.name, index)
-                return radioButtonElement(value, e, indent, out)
-            } else {
-                def value = findField(answers, e.attr.name, index)
-                return checkboxElement(value, e, answers, indent, out)
-            }
-        }
-    }
-
-    private def radioHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
-        if (value == e.text.replaceAll(/'/, '\u2019')) {
-            String result = out('', e.text, null, indent, 'radio')
-            indent += '  '
-            e.subElements.each { sub ->
-                result += decodeFormElementAnswer(sub, answers, index, indent, out)
-            }
-            return result
-        } else {
-            return ''
-        }
-    }
-
-    private def checkboxHiddenSubElements(Map answers, Integer index, value, FormElement e, String indent, Closure out) {
-        String result = ''
-        if (value) {
-            result = out(e.text, 'Yes', null, indent, 'checkbox')
-            indent += '  '
-            e.subElements.each { sub ->
-                result += decodeFormElementAnswer(sub, answers, index, indent, out)
-            }
-        } else {
-            result = out(e.text, 'No', null, indent, 'checkbox')
-        }
-        return result
-    }
-
-    private def radioButtonElement(value, e, String indent, Closure out) {
-        if (value == e.text.replaceAll(/'/, '\u2019')) {
-            return out('', e.text, null, indent, 'radio')
-        }
-        return ''
-    }
-
-    private def checkboxElement(value, e, answers, String indent, Closure out) {
-        if (value) {
-            return out(e.text, 'Yes', null, indent, 'checkbox')
-        } else {
-            if (e.parent?.attr?.pick) {
-                return ''
-            }
-            return out(e.text, 'No', null, indent, 'checkbox')
-        }
-    }
-
-    private def pick(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        String result = out(e.text, ' ', null, indent, 'pick')
-        indent += '  '
-        e.subElements.each { sub ->
-            String res = decodeFormElementAnswer(sub, answers, index, indent, out)
-            if (res) {
-                result += res
-            }
-        }
-        return result
-    }
-
-    private def group(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        String result = out(e.text, ' ', null, indent, 'group')
-        indent += '  '
-        e.subElements.each { sub ->
-            result += decodeFormElementAnswer(sub, answers, index, indent, out)
-        }
-        return result
-    }
-
-    private def each(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        String result = ''
-        processEachFormElement(e, answers) { Map subMap -> //[element: sub, store: store, index: i]
-            result += decodeFormElementAnswer(subMap.element, subMap.store, subMap.index, indent, out)
-            result += '\n'
-        }
-        return result
-    }
-
-    private def listOf(FormElement e, Map answers, Integer index, String indent, Closure out) {
-        int currentListSize = listSize(answers, e.attr.name)
-        String result = out(e.text, currentListSize, null, indent, 'listOf')
-        indent += '  '
-        for (int i = 0; i < Math.max(currentListSize, 1); i++) {
-            result += '\n'
-            e.subElements.each { sub ->
-                result += decodeFormElementAnswer(sub, answers, i, indent, out)
-            }
-        }
-        return result
-    }
-
-    private int listSize(Map store, String listName) {
-        def value = findField(store, listName)
-        if (value && value instanceof Map) {
-            Map.Entry l = value.find { entry ->
-                entry.value instanceof List
-            }
-            return l ? l.value.size() : 0
-        } else {
-            return 0
-        }
-    }
-
-    //---- end print formElement support
 
     /**
      * Print, using the closure, the form Data by question NOT using the form definition

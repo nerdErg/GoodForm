@@ -101,7 +101,7 @@ class FormDataService {
     Closure validateNumber = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && fieldValue instanceof BigDecimal && formElement.attr.containsKey('number')) {
-            Map<String, BigDecimal> minMax = getNumberMinMax(formElement)
+            Map<String, BigDecimal> minMax = goodFormService.getNumberMinMax(formElement)
 
             if (minMax.max != null && fieldValue > minMax.max) {
                 error = true
@@ -116,29 +116,7 @@ class FormDataService {
         return error
     }
 
-    /**
-     * Get the minimum and maximum value attributes from a number formElement
-     * @param formElement
-     * @return map [max: max, min: min]
-     */
-    Map getNumberMinMax(FormElement formElement) {
 
-        Map minMax = [:]
-        //todo make non specific to number input (use range?)
-        if (formElement.attr.number instanceof Range) {
-            minMax.max = formElement.attr.number.to as BigDecimal
-            minMax.min = formElement.attr.number.from as BigDecimal
-        } else {
-            //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
-            if(formElement.attr.max != null) {
-                minMax.max = formElement.attr.max
-            }
-            if(formElement.attr.min != null) {
-                minMax.min = formElement.attr.min
-            }
-        }
-        return minMax
-    }
 
     /**
      * Validates that a field value matches a defined regex pattern.
