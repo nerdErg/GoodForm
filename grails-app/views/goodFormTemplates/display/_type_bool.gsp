@@ -4,7 +4,7 @@
       name="${fieldAttributes.remove('parentName')}"
       value="${label.encodeAsHTML()}"
   <g:each in="${fieldAttributes}" var="attribute">
-    ${attribute.key}="${attribute.value}"
+    ${attribute.key}="${attribute.value.encodeAsHTML()}"
   </g:each>
   />
 </g:if>
@@ -15,7 +15,7 @@
       id="${name}"
       value="${label.encodeAsHTML()}"
   <g:each in="${fieldAttributes}" var="attribute">
-    ${attribute.key}="${attribute.value}"
+    ${attribute.key}="${attribute.value.encodeAsHTML()}"
   </g:each>
   />
 </g:else>

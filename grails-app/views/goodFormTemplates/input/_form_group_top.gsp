@@ -5,7 +5,9 @@
 <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
 <fieldset name="${name}" title="${label.encodeAsHTML()}"
 <g:each in="${fieldAttributes}" var="attribute">
-  ${attribute.key}="${attribute.value}"
+  <g:if test="${attribute.key != 'value'}">
+    ${attribute.key}="${attribute.value.encodeAsHTML()}"
+  </g:if>
 </g:each>
 >
 <legend class="${labelClass}">

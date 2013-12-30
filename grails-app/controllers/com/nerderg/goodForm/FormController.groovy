@@ -239,7 +239,7 @@ class FormController {
             log.error e.message
         }
         log.debug "end FormData: ${(formData as JSON).toString(true)}"
-        render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
+        render(view: '/form/view', model: [formInstance: formInstance, formData: formData])
     }
 
     /**
@@ -267,7 +267,7 @@ class FormController {
             //todo this gets called but it gets a NPE line 38 of PdfRenderingService
             renderPdf(template: '/form/formView', model: [formInstance: formInstance, formData: formData])
         } else {
-            render(view: '/form/endForm', model: [formInstance: formInstance, formData: formData])
+            render(view: '/form/view', model: [formInstance: formInstance, formData: formData])
         }
     }
 }

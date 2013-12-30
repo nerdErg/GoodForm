@@ -24,6 +24,15 @@ textNote
 value
 */
 
+legend {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+label {
+    font-size: 1.0em;
+    font-weight: bold;
+}
+
 div.goodFormContainer {
     padding: 2em;
 }

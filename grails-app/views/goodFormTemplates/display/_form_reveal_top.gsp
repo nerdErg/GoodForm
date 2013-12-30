@@ -1,6 +1,6 @@
 <div class="formField ${error ? 'error' : ''}" title="${error}">
 
-  <g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>
+  %{--<g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>--}%
 
   <label for="${name}"
          class="${labelClass}">
@@ -17,7 +17,7 @@
           class="${fieldAttributes.remove('class')} hiddenFormRadio"
 
       <g:each in="${fieldAttributes}" var="attribute">
-        ${attribute.key}="${attribute.value}"
+        ${attribute.key}="${attribute.value.encodeAsHTML()}"
       </g:each>
       />
     </g:if>
@@ -30,13 +30,11 @@
           class="${fieldAttributes.remove('class')} hiddenFormCheckbox"
 
       <g:each in="${fieldAttributes}" var="attribute">
-        ${attribute.key}="${attribute.value}"
+        ${attribute.key}="${attribute.value.encodeAsHTML()}"
       </g:each>
       />
     </g:else>
   <g:if test="${units}"><span class='units'>${units}</span></g:if>
-  <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
-  <g:if test="${hint}"><span class='hint'>${hint}</span></g:if>
 </div>
   <g:if test="${fieldAttributes.checked}">
     <div>

@@ -3,10 +3,11 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="layout" content="main"/>
+  <title>Form - ${formInstance.formVersion.formDefinition.name}</title>
 </head>
 
 <body>
-<div class="goodFormContainer">
+<div class="goodFormContainer display">
 
   <form:showMessages/>
 

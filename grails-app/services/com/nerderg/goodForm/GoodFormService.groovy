@@ -401,6 +401,8 @@ class GoodFormService {
         if (e.attr.suggest) {
             if (fieldAttributes.class) {
                 fieldAttributes.class += " suggest ${e.attr.suggest}"
+            } else {
+                fieldAttributes.class = "suggest ${e.attr.suggest}"
             }
         }
 
@@ -442,6 +444,7 @@ class GoodFormService {
             fieldAttributes << [pattern: e.attr.pattern[0]]
             fieldAttributes << [title: e.attr.pattern[1]]
         }
+
         return fieldAttributes
     }
 
