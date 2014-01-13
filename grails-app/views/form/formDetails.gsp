@@ -17,18 +17,16 @@
     <g:message code="goodform.form.version" args="${[form.version.formVersionNumber]}"/>
   </div>
 
-  <div class="roundbox">
-    <div class="formContainer">
-      <g:form action="next" enctype="multipart/form-data">
-        <input type="hidden" name="instanceId" value="${formInstance.id}"/>
-        <g:each in="${questions}" var="question">
-          <form:element element="${question.formElement}" store="${formData}"/>
-        </g:each>
-        <div class="menuButton formSubmit">
-          <g:submitButton name="next" value="${message(code: "goodform.button.submit")}"/>
-        </div>
-      </g:form>
-    </div>
+  <div class="formContainer">
+    <g:form action="next" enctype="multipart/form-data">
+      <input type="hidden" name="instanceId" value="${formInstance.id}"/>
+      <g:each in="${questions}" var="question">
+        <form:element element="${question.formElement}" store="${formData}"/>
+      </g:each>
+      <div class="menuButton formSubmit">
+        <g:submitButton name="next" value="${message(code: "goodform.button.submit")}"/>
+      </div>
+    </g:form>
   </div>
 
   <form:answered formInstance="${formInstance}" store="${formData}"/>

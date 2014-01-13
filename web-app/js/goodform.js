@@ -82,8 +82,8 @@
             cloneForm.find("input[type='text'],input[type='number']").val('');
             cloneForm.appendTo(container);
             goodform.addBehaviour(cloneForm);
-            goodform.addNerdergFormTagsBehaviour(cloneForm);
-            goodform.addNerdergFormTagsBehaviour(formDiv);
+            goodform.addDatePickerBehaviour(cloneForm);
+            goodform.addDatePickerBehaviour(formDiv);
             cloneForm.children('.removeForm').click(function (event) {
                 var container = $(this).parent('div.questionListOfItem').parent('div.listContainer');
                 if (container.children('div.questionListOfItem').length > 1) {
@@ -108,27 +108,25 @@
             window.location = url;
         });
 
+        parent.find('input.time').timeEntry({
+            spinnerImage: '',
+            ampmPrefix: ' '
+        });
+
+
+
         parent.find('div.inlineCheck').filter(':even').css('background', '#E5E4E8');
+        this.addDatePickerBehaviour(parent);
 
     },
-    addNerdergFormTagsBehaviour: function(parent) {
+    addDatePickerBehaviour: function(parent) {
         var dateInp = parent.find('input.date');
-        dateInp.removeAttr('id'); //datepicker adds it's own id
+        var format = dateInp.attr('format').toLowerCase().replace('yyyy','yy'); //java date format uses MM for month
         dateInp.datepicker({
-            dateFormat: nerdergFormTags.dateFormat,
+            dateFormat: format,
             showOn: 'button',
-            buttonImage: nerdergFormTags.dateImg,
-            buttonImageOnly: true,
-            changeMonth: true,
-            changeYear: true
-        });
-    },
-    fixNerdergFormTagsDatepickers: function() {
-        $('input.date').datepicker("destroy").removeAttr('id').datepicker({
-            dateFormat: nerdergFormTags.dateFormat,
-            showOn: 'button',
-            buttonImage: nerdergFormTags.dateImg,
-            buttonImageOnly: true,
+            buttonImage: goodform.dateImg,
+            buttonImageOnly: false,
             changeMonth: true,
             changeYear: true
         });
@@ -162,8 +160,6 @@ $(function () {
     });
 
     var container = $('div.goodFormContainer');
-    //datepicker doesn't like id's that are the same...which is generally bad
-    goodform.fixNerdergFormTagsDatepickers();
     goodform.addBehaviour(container);
 
 });

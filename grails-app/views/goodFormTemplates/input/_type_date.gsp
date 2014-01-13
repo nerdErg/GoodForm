@@ -1,1 +1,8 @@
-<g:render template="/goodFormTemplates/input/form_input" model="${[type: 'text', name: name, fieldAttributes: (fieldAttributes << [class:'date'])]}"/>
+<input
+    type="text"
+    name="${name}"
+    class="date"
+<g:each in="${fieldAttributes}" var="attribute">
+  ${attribute.key}="${attribute.value.encodeAsHTML()}"
+</g:each>
+/>
