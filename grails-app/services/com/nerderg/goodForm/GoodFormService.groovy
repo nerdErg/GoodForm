@@ -14,9 +14,6 @@ class GoodFormService {
 
     static transactional = false
 
-    static
-    final List knownTypes = ['text', 'date', 'datetime', 'bool', 'pick', 'group', 'listOf', 'money', 'number', 'phone', 'attachment', 'each', 'heading', 'select']
-
     /**
      * A map of known element types.
      * Types are mapped to a closure that extracts relevant information about the type for display as a field in summary
@@ -75,7 +72,7 @@ class GoodFormService {
             ExpandoMetaClass emc ->
                 emc.form = { Closure formDef ->
                     formDef.delegate = formInstance
-                    formDef.resolveStrategy = Closure.DELEGATE_FIRST
+                    formDef.resolveStrategy = DELEGATE_FIRST
                     formDef()
                 }
         }
@@ -86,7 +83,7 @@ class GoodFormService {
         return formInstance
     }
 
-    private ExpandoMetaClass createEMC(Class clazz, Closure cl) {
+    private static ExpandoMetaClass createEMC(Class clazz, Closure cl) {
 
         ExpandoMetaClass emc = new ExpandoMetaClass(clazz, false)
         cl(emc)
@@ -191,13 +188,13 @@ class GoodFormService {
         throw new FieldNotMappedException(e)
     }
 
-    private isGrantParentPick1(FormElement e) {
+    private static isGrantParentPick1(FormElement e) {
         FormElement grandParent = getGrandParent(e)
         return grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1"
     }
 
     //get the grand parent only if it's a form element
-    private FormElement getGrandParent(FormElement e) {
+    private static FormElement getGrandParent(FormElement e) {
         if (e.parent && e.parent instanceof FormElement && e.parent.parent instanceof FormElement) {
             return e.parent.parent
         }
@@ -225,20 +222,20 @@ class GoodFormService {
      * @return
      */
     def findField(Map map, String field, Integer index = null) {
-        return traverseMapToField(field, map) { lastMap, lastField ->
+        return traverseMapToField(field, map) { Map lastMap, String lastField ->
             def value = lastMap != null ? lastMap[lastField] : null
             return indexedValue(value, index)
         }
     }
 
-    private traverseMapToField(String field, Map map, Closure closure) {
+    private static traverseMapToField(String field, Map map, Closure closure) {
         String[] fieldSplit = field.split(/\./)
         Map lastMap = map
         //traverse to the last, inner most map
         for (int i = 0; i < fieldSplit.size() - 1; i++) {
             String fieldName = fieldSplit[i]
             if (lastMap && lastMap[fieldName] instanceof Map) {
-                lastMap = lastMap[fieldName]
+                lastMap = lastMap[fieldName] as Map
             } else {
                 lastMap = null
             }
@@ -246,10 +243,10 @@ class GoodFormService {
         return closure(lastMap, fieldSplit.last())
     }
 
-    private indexedValue(value, Integer index) {
+    private static indexedValue(value, Integer index) {
         if (value != null && index != null) {
             if (value instanceof List || value instanceof Object[] || value instanceof JSONArray) {
-                return value[index]
+                return (value as List)[index]
             }
         }
         return value
@@ -295,7 +292,6 @@ class GoodFormService {
     }
 
     /**
-     * todo move to using the elementTypeModel keys to allow simpler adding of new elements
      * Given a form element return it's type as a String from the known types. If the element doesn't have a type specified
      * then it is a boolean type 'bool'
      * @param e
@@ -304,7 +300,7 @@ class GoodFormService {
     String getElementType(FormElement e) {
         String type = 'bool'
         if (e.attr) {
-            List types = e.attr.keySet().intersect(knownTypes) as List
+            List types = e.attr.keySet().intersect(elementTypeModel.keySet()) as List
             if (types && types.size() == 1) {
                 type = types[0]
             }
@@ -379,7 +375,7 @@ class GoodFormService {
      * @param orig
      * @return
      */
-    private FormElement copyElement(FormElement orig) {
+    private static FormElement copyElement(FormElement orig) {
         FormElement clone = new FormElement(orig.qref)
         clone.text = orig.text
         clone.parent = orig.parent
@@ -394,9 +390,9 @@ class GoodFormService {
     }
 
     Map getDefaultModelProperties(FormElement e, Map store, Integer index, boolean disabled, Map fieldAttributes) {
-        def value = findField(store, e.attr.name, index) ?: (e.attr.default ?: '')
+        def value = findField(store, e.attr.name as String, index) ?: (e.attr.default ?: '')
         String type = getElementType(e)
-        String error = getFieldErrors(store, e.attr.name, index)
+        String error = getFieldErrors(store, e.attr.name as String, index)
 
         if (e.attr.suggest) {
             if (fieldAttributes.class) {
@@ -440,9 +436,16 @@ class GoodFormService {
             fieldAttributes << [required: 'required']
         }
 
-        if (e.attr.pattern) {
-            fieldAttributes << [pattern: e.attr.pattern[0]]
-            fieldAttributes << [title: e.attr.pattern[1]]
+        if (e.attr.pattern && e.attr.pattern instanceof List) {
+            List pat = e.attr.pattern as List
+            if(pat.size() == 2) {
+                fieldAttributes << [pattern: pat[0], title: pat[1]]
+            }
+        }
+
+        if (e.attr.pattern && e.attr.pattern instanceof Map) {
+            Map pat = e.attr.pattern as Map
+            fieldAttributes << pat
         }
 
         return fieldAttributes
@@ -518,7 +521,7 @@ class GoodFormService {
 
     private Closure attachmentModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         Map model = getDefaultModelProperties(e, answers, index, disabled, [:])
-        List<String> fieldSplit = e.attr.name.split(/\./)
+        List<String> fieldSplit = (e.attr.name as String).split(/\./)
         Integer prefix = "${fieldSplit[0]}.${fieldSplit.last()}-".size()
         String value = model.fieldAttributes.value
         String fileName = (value && value.size() > prefix) ? value.substring(prefix) : ''
@@ -572,7 +575,7 @@ class GoodFormService {
     private static int listSize(value) {
         if (value && value instanceof Map) {
             Map.Entry l = value.find { entry ->
-                entry.value instanceof List
+                (entry.value instanceof List)
             }
             return l ? l.value.size() : 0
         } else {
@@ -627,7 +630,7 @@ class GoodFormService {
     def anyValueSet(Map map) {
         map.find {
             if (it.value instanceof Map) {
-                return anyValueSet(it.value)
+                return anyValueSet(it.value as Map)
             } else {
                 return (it.value && it.value != 'none')
             }
@@ -639,7 +642,7 @@ class GoodFormService {
         key.replaceAll('_', ' ')
     }
 
-    def withQuestions(List<String> qSet, questions, Closure c) {
+    def withQuestions(List<String> qSet, Form questions, Closure c) {
         qSet.each { qRef ->
             if (qRef != 'End') {
                 Question q = questions[qRef]
@@ -689,7 +692,7 @@ class GoodFormService {
         return listOfMaps
     }
 
-    private Map getOrMakeMap(List<Map> source, int index) {
+    private static Map getOrMakeMap(List<Map> source, int index) {
         if (source.size() > index) {
             return source[index]
         } else {
