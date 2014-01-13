@@ -6,6 +6,7 @@ import com.nerderg.goodForm.form.Question
 import grails.validation.ValidationException
 import org.codehaus.groovy.grails.web.json.JSONObject
 import org.codehaus.groovy.grails.web.util.WebUtils
+import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 
 import java.text.ParseException
@@ -26,7 +27,6 @@ class FormDataService {
     def formReferenceService
     def rulesEngineService
     def grailsApplication
-    def messageSource
 
     def springSecurityService
 
@@ -47,9 +47,10 @@ class FormDataService {
     Closure validateDate = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('date')) {
+            String dateFormat = formElement.attr.date as String
             try {
-                if (fieldValue instanceof String && isLegalDate(formElement.attr.date, fieldValue)) {
-                    Date d = Date.parse(formElement.attr.date, fieldValue)
+                if (fieldValue instanceof String && isLegalDate(dateFormat, fieldValue)) {
+                    Date d = Date.parse(dateFormat, fieldValue)
                     if (formElement.attr.max) {
                         if (formElement.attr.max == 'today') {
                             if (d.time > System.currentTimeMillis()) {
@@ -57,7 +58,7 @@ class FormDataService {
                                 error = true
                             }
                         } else {
-                            Date max = Date.parse(formElement.attr.date, formElement.attr.max)
+                            Date max = Date.parse(dateFormat, formElement.attr.max as String)
                             if (d.time > max.time) {
                                 formValidationService.appendError(formElement, formData, "goodform.validate.date.greaterThan", index, [formElement.attr.max])
                                 error = true
@@ -65,7 +66,7 @@ class FormDataService {
                         }
                     }
                     if (formElement.attr.min) {
-                        Date min = Date.parse(formElement.attr.date, formElement.attr.min)
+                        Date min = Date.parse(dateFormat, formElement.attr.min as String)
                         if (d.time < min.time) {
                             formValidationService.appendError(formElement, formData, "goodform.validate.date.lessThan", index, [formElement.attr.min])
                             error = true
@@ -76,6 +77,7 @@ class FormDataService {
                     formValidationService.appendError(formElement, formData, "goodform.validate.date.invalid", index)
                 }
             } catch (ParseException e) {
+                log.info "Date validation failed with message: $e.message for value $fieldValue and format $dateFormat"
                 formValidationService.appendError(formElement, formData, "goodform.validate.date.invalid", index)
                 error = true
             }
@@ -128,18 +130,11 @@ class FormDataService {
     Closure validatePattern = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
-            String pattern
-            String message = "goodform.validate.invalid.pattern"
-            if (isCollectionOrArray(formElement.attr.pattern)) {
-                pattern = formElement.attr.pattern[0]
-                if (formElement.attr.pattern.size() > 1) {
-                    message = formElement.attr.pattern[1]
-                }
-            } else {
-                pattern = formElement.attr.pattern
-            }
-            if (fieldValue && !(fieldValue ==~ pattern)) {
-                formValidationService.appendError(formElement, formData, message, index)
+            Map pattern = [title :"goodform.validate.invalid.pattern"]
+            pattern << goodFormService.getPattern(formElement)
+
+            if (!(fieldValue ==~ pattern.pattern)) {
+                formValidationService.appendError(formElement, formData, pattern.title as String, index)
                 error = true
             }
         }
@@ -236,7 +231,7 @@ class FormDataService {
         // now do the same for all the map values (recursively)
         intermediate.each {
             if (it.value instanceof Map) {
-                it.value = cleanUpStateParams(it.value)
+                it.value = cleanUpStateParams(it.value as Map)
             }
         }
         return intermediate
@@ -255,6 +250,7 @@ class FormDataService {
      * @return true on error
      */
     boolean validateAndProcessFields(FormElement formElement, Map formData, FormInstance instance) {
+
         //note makeElement name uses the attr.name of it's parent so it must be set. (side effect)
         boolean error = false
 
@@ -266,11 +262,11 @@ class FormDataService {
         //we do this before validation because we need to check if required attachments are there
         handleAttachment(formElement, instance, formData)
 
-        def fieldValue = goodFormService.findField(formData, formElement.attr.name)
+        def fieldValue = goodFormService.findField(formData, formElement.attr.name as String)
         (fieldValue, error) = convertNumberFieldToBigDecimal(fieldValue, formElement, formData)
 
         //because strings are a collection in groovy we need to check it's not a string before assuming an array, list etc.
-        if (isCollectionOrArray(fieldValue)) {
+        if (goodFormService.isCollectionOrArray(fieldValue)) {
             fieldValue.eachWithIndex { fv, index ->
                 error = validateField(formElement, formData, fv, index, error)
             }
@@ -292,9 +288,10 @@ class FormDataService {
     private void handleReferences(FormElement formElement, fieldValue, Map formData) {
         if (formElement.attr.containsKey('ref')) {
             //references are stored at the question level under the reference name so there is a limitation there
-            def ref = formReferenceService.lookupReference(formElement.attr.ref, fieldValue)
+            //The fieldValue for a reference is passed as a String
+            def ref = formReferenceService.lookupReference(formElement.attr.ref as String, fieldValue as String)
             if (ref) {
-                formData[formElement.attr.name.split(/\./)[0]]."${formElement.attr.ref}" = ref
+                formData[(formElement.attr.name as String).split(/\./)[0]]."${formElement.attr.ref}" = ref
             }
         }
     }
@@ -311,18 +308,18 @@ class FormDataService {
                 if(!location.exists()) {
                     throw new FileNotFoundException("Base directory couldn't be found or created ${location.absolutePath}")
                 }
-                List<String> fieldSplit = formElement.attr.name.split(/\./)
+                List<String> fieldSplit = (formElement.attr.name as String).split(/\./)
                 String filename = "${fieldSplit[0]}.${fieldSplit.last()}-${f.getOriginalFilename()}"
                 File upload = new File(location, filename)
                 f.transferTo(upload)
-                goodFormService.setField(formData, formElement.attr.name, upload.name)
+                goodFormService.setField(formData, formElement.attr.name as String, upload.name)
             } else {
                 //todo refactor so we don't continually get the stored FormData also dangerous for overwrite
-                def existingFile = goodFormService.findField(instance.storedFormData(), formElement.attr.name)
+                def existingFile = goodFormService.findField(instance.storedFormData(), formElement.attr.name as String)
                 if (existingFile) {
-                    goodFormService.setField(formData, formElement.attr.name, existingFile)
+                    goodFormService.setField(formData, formElement.attr.name as String, existingFile)
                 } else {
-                    goodFormService.setField(formData, formElement.attr.name, 'none')
+                    goodFormService.setField(formData, formElement.attr.name as String, 'none')
                 }
             }
         }
@@ -332,7 +329,7 @@ class FormDataService {
         if (formElement.attr.containsKey('each')) {
             //handle 'each' which dynamically adds elements
             goodFormService.processEachFormElement(formElement, formData) { Map subMap ->
-                error = validateAndProcessFields(subMap.element, formData, instance) || error
+                error = validateAndProcessFields(subMap.element as FormElement, formData, instance) || error
             }
         } else {
             formElement.subElements.each { FormElement sub ->
@@ -386,6 +383,7 @@ class FormDataService {
         try {
             value as BigDecimal
         } catch (NumberFormatException e) {
+            log.info "Converting number to big decimal failed with: $e.message using value $value"
             formValidationService.appendError(formElement, formData, "goodform.validate.number.isnt", index, [value])
             return null
         }
@@ -418,15 +416,16 @@ class FormDataService {
     def getAnsweredQuestions(FormInstance instance, Form form) {
 
         List answered = []
-        List state = instance.storedState()
-        List currentQuestions = instance.storedCurrentQuestion()
+        List<List<String>> state = instance.storedState()
+        List<String> currentQuestions = instance.storedCurrentQuestion()
 
-        def i = 0
-        List qSet
-        while (i < state.size() && (qSet = state[i++] as List) != currentQuestions) {
+        int i = 0
+        List<String> qSet = state[i]
+        while (i < state.size() && (qSet != currentQuestions)) {
             goodFormService.withQuestions(qSet, form) { q, qRef ->
                 answered.add(q)
             }
+            qSet = state[++i]
         }
         return answered
     }
@@ -452,8 +451,9 @@ class FormDataService {
                 readOnly: false
         )
         instance.storeFormData(formData)
-        instance.storeState([formData.next])
-        instance.storeCurrentQuestion(formData.next)
+        List<String> next = formData.next as List<String>
+        instance.storeState([next])
+        instance.storeCurrentQuestion(next)
         save(instance)
         return instance
     }
@@ -464,10 +464,10 @@ class FormDataService {
      * @param form
      * @return
      */
-    List<Question> getSubset(Collection refs, Form form) {
+    List<Question> getSubset(List<String> refs, Form form) {
         List<Question> questions = []
-        refs.each {
-            Question q = form[it]
+        refs.each { String ref ->
+            Question q = form[ref]
             if (q) {
                 questions.add(q)
             } else {
@@ -497,15 +497,17 @@ class FormDataService {
         mergedFormData.remove('next')  //prevent possible pass through by rules engine
         try {
             JSONObject processedJSONFormData = rulesEngineService.ask(ruleName, mergedFormData) as JSONObject
-            def processedFormData = cleanUpJSONNullMap(processedJSONFormData)
+            Map processedFormData = cleanUpJSONNullMap(processedJSONFormData)
 
             if (processedFormData[lastQuestion].message) {
-                appendMessage(processedFormData, processedFormData[lastQuestion].message)
+                appendMessage(processedFormData, processedFormData[lastQuestion].message as String)
             }
 
             updateStoredFormInstance(instance, processedFormData)
 
-            if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
+            List<String> next = processedFormData.next
+
+            if (atEnd(next)) {
                 return processedFormData
             }
             //prevent loops if rules engine sends you back to the same questions
@@ -514,7 +516,7 @@ class FormDataService {
             }
 
             //search for answers to the next questions - if we don't have an answer we ask this question set
-            for (String q in processedFormData.next) {
+            for (String q in next) {
                 if (!processedFormData[q] || processedFormData[q].recheck) {
                     return processedFormData
                 }
@@ -527,7 +529,11 @@ class FormDataService {
         }
     }
 
-    private appendMessage(Map formData, String message) {
+    Boolean atEnd(List<String> next) {
+        (next.size() == 1 && next[0] == 'End')
+    }
+
+    private static appendMessage(Map formData, String message) {
         if (!formData.messages) {
             formData.messages = []
         }
@@ -537,17 +543,18 @@ class FormDataService {
     void updateStoredFormInstance(FormInstance instance, Map processedFormData) {
 
         List state = instance.storedState()
+        List<String> next = processedFormData.next
         def nextInState = state.find { s ->
-            s == processedFormData.next
+            s == next
         }
         if (!nextInState) {
-            state.add(processedFormData.next)
+            state.add(next)
             instance.storeState(state)
         }
         if (processedFormData.description) {
             instance.instanceDescription = processedFormData.description
         }
-        instance.storeCurrentQuestion(processedFormData.next)
+        instance.storeCurrentQuestion(next)
         instance.storeFormData(processedFormData)
     }
 
@@ -609,7 +616,8 @@ class FormDataService {
      * @return list of matching {@link FormInstance}s
      */
     List<FormInstance> getForms(Long formDefinitionId) {
-        FormInstance.findAllByFormVersion(formDefinitionId)
+        List<FormVersion> versions = getFormDefinition(formDefinitionId).formVersions
+        FormInstance.findAllByFormVersionInList(versions)
     }
 
     /**
@@ -689,21 +697,12 @@ class FormDataService {
      * @param thing the object to save
      * @param failMessage
      */
-    private void save(thing, String failMessage = "Failed to save") {
+    private static void save(thing, String failMessage = "Failed to save") {
         if (!(thing.validate() && thing.save())) {
-            throw new ValidationException(failMessage, thing.errors)
+            throw new ValidationException(failMessage, thing.errors as Errors)
         }
     }
 
-    /**
-     * Checks that the object is a List or Array or Set.
-     * This will return false for a Map
-     * @param obj
-     * @return true if this is not a string but a collection
-     */
-    boolean isCollectionOrArray(obj) {
-        (obj instanceof Collection || obj instanceof Object[])
-    }
 
 }
 

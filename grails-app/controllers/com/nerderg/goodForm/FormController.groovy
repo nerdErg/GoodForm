@@ -34,6 +34,7 @@ class FormController {
      * @return
      */
     def submit(Long id) {
+        log.warn "Stub submit action called with id $id. You need to override the submit action to handle completed forms."
         render(view: '/form/submit', plugin: 'GoodForm')
     }
 
@@ -170,11 +171,11 @@ class FormController {
                 }
                 log.debug "next processedFormData: ${processedFormData.toString()}"
                 //rules engine returns "End" as the next question at the end
-                if (processedFormData.next.size() == 1 && processedFormData.next[0] == 'End') {
+                if (formDataService.atEnd(processedFormData.next as List<String>)) {
                     redirect(action: 'endForm', id: formInstance.id)
                     return
                 }
-                List<Question> current = formDataService.getSubset(processedFormData.next, form)
+                List<Question> current = formDataService.getSubset(processedFormData.next as List<String>, form)
                 List answered = formDataService.getAnsweredQuestions(formInstance, form)
                 render(view: '/form/formDetails', model: [form: form, asked: answered, questions: current, formData: processedFormData, formInstance: formInstance])
             } catch (RulesEngineException e) {

@@ -436,19 +436,28 @@ class GoodFormService {
             fieldAttributes << [required: 'required']
         }
 
-        if (e.attr.pattern && e.attr.pattern instanceof List) {
-            List pat = e.attr.pattern as List
-            if(pat.size() == 2) {
-                fieldAttributes << [pattern: pat[0], title: pat[1]]
-            }
-        }
-
-        if (e.attr.pattern && e.attr.pattern instanceof Map) {
-            Map pat = e.attr.pattern as Map
-            fieldAttributes << pat
-        }
+        fieldAttributes << getPattern(e)
 
         return fieldAttributes
+    }
+
+    Map getPattern(FormElement e) {
+        if (e.attr.pattern) {
+            if (isCollectionOrArray(e.attr.pattern)) {
+                List pat = e.attr.pattern as List
+                if (pat.size() == 2) {
+                    return [pattern: pat[0], title: pat[1]]
+                } else {
+                    return [pattern: e.attr.pattern]
+                }
+            }
+            if (e.attr.pattern instanceof Map) {
+                Map pat = e.attr.pattern as Map
+                return pat
+            }
+            return [pattern: pat[0]]
+        }
+        return [:]
     }
 
     private static Map makeFieldSizeAttributes(FormElement e, String type) {
@@ -516,7 +525,7 @@ class GoodFormService {
     }
 
     private Closure selectModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
-        getDefaultModelProperties(e, answers, index, disabled, [options : e.attr.select as List])
+        getDefaultModelProperties(e, answers, index, disabled, [options: e.attr.select as List])
     }
 
     private Closure attachmentModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
@@ -701,4 +710,15 @@ class GoodFormService {
             return n
         }
     }
+
+    /**
+     * Checks that the object is a List or Array or Set.
+     * This will return false for a Map
+     * @param obj
+     * @return true if this is not a string but a collection
+     */
+    boolean isCollectionOrArray(obj) {
+        (obj instanceof Collection || obj instanceof Object[])
+    }
+
 }
