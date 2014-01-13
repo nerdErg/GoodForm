@@ -455,7 +455,7 @@ class GoodFormService {
                 Map pat = e.attr.pattern as Map
                 return pat
             }
-            return [pattern: pat[0]]
+            return [pattern: e.attr.pattern]
         }
         return [:]
     }

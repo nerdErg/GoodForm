@@ -2,10 +2,7 @@
 
   <g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>
 
-  <label for="${name}"
-         class="${labelClass}">
-    ${label.encodeAsHTML()}
-  </label>
+  <label for="${name}" class="${labelClass}">${label.encodeAsHTML()}</label>
 
   <g:if test="${prefix}"><span class='prefix'>${prefix}</span></g:if>
   <g:render template="/goodFormTemplates/input/type_${type.toLowerCase()}"/>

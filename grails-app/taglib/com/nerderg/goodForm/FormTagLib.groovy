@@ -1,6 +1,8 @@
 package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
+import net.htmlparser.jericho.Source
+import net.htmlparser.jericho.SourceFormatter
 
 /**
  * Provides GoodForm-specific tag elements. The main tag elements used by views are:
@@ -18,7 +20,7 @@ class FormTagLib {
     def formDataService
     def goodFormService
 
-    static namespace = "form"
+    static namespace = "gf"
 
     private static final Map<String, Closure> elementClosures = [:]
 
@@ -49,47 +51,47 @@ class FormTagLib {
     }
 
     private Closure heading = { Map model, Map attrs ->
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/type_heading", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_heading", model: model)
     }
 
     private Closure wrapper = { Map model, Map attrs ->
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
     }
 
     private Closure each = { Map model, Map attrs ->
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
         goodFormService.processEachFormElement(attrs.element, attrs.store) { Map subMap ->
             subMap.disabled = attrs.disabled
             subMap.templateDir = attrs.templateDir
             out << element(subMap)
         }
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
     }
 
     private Closure group = { Map model, Map attrs ->
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
         renderSubElements(attrs)
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
     }
 
     private Closure listOf = { Map model, Map attrs ->
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_list_top", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_top", model: model)
         for (int i = 0; i < Math.max(model.listSize as Integer, 1); i++) {
-            out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_top", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_top", model: model)
             attrs.index = i
             renderSubElements(attrs)
-            out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_tail", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_tail", model: model)
         }
-        out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_list_tail", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_tail", model: model)
     }
 
     private Closure bool = { Map model, Map attrs ->
         if (attrs.element.subElements.size() > 0) {
-            out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_top", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_top", model: model)
             renderSubElements(attrs)
-            out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_tail", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_tail", model: model)
         } else {
-            out << g.render(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
         }
     }
 
@@ -97,6 +99,18 @@ class FormTagLib {
         attrs.element.subElements.each { sub ->
             out << element([element: sub, store: attrs.store, index: attrs.index, disabled: attrs.disabled, templateDir: attrs.templateDir])
         }
+    }
+
+    private gfRender(Map params) {
+        out << g.render(params)
+    }
+
+    def tidy = { attr ->
+        Source source = new Source(attr.text as String)
+//        SourceCompactor compactor = new SourceCompactor(source)
+//        Source prettySource = new Source(compactor.toString())
+        SourceFormatter sf = source.getSourceFormatter()
+        out << sf.toString()
     }
 
     /**

@@ -12,6 +12,10 @@ grails.project.dependency.resolution = {
     }
 
     dependencies {
+        compile 'net.htmlparser.jericho:jericho-html:3.2', {
+            excludes 'log4j', 'commons-logging-api','slf4j-api'
+        }
+
         compile 'net.sf.ezmorph:ezmorph:1.0.6', {
             excludes 'commons-beanutils', 'commons-lang', 'commons-logging', 'junit', 'log4j'
         }

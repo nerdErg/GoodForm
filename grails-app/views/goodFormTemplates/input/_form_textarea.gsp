@@ -2,7 +2,9 @@
     name="${name}"
     id="${name}"
 <g:each in="${fieldAttributes}" var="attribute">
-  ${attribute.key}="${attribute.value.encodeAsHTML()}"
+  <g:if test="${attribute.key != 'value'}">
+    ${attribute.key}="${attribute.value.encodeAsHTML()}"
+  </g:if>
 </g:each>
 >${fieldAttributes.value ?: ''}</textarea>
 %{--Do not put a new line before or after the value

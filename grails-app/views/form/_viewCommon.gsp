@@ -18,7 +18,7 @@
       <ul class="required">
         <g:each in="${formData.require}" var="req">
           <li title="${req.Q}">
-            <form:linkToQset formInstance="${formInstance}" questionRef="${req.Q}">${req.message}</form:linkToQset>
+            <gf:linkToQset formInstance="${formInstance}" questionRef="${req.Q}">${req.message}</gf:linkToQset>
           </li>
         </g:each>
       </ul>

@@ -354,7 +354,7 @@ class FormDataService {
         boolean error = false
         if (fieldValue && (formElement.attr.containsKey('number') || formElement.attr.containsKey('money'))) {
             log.debug "converting ${formElement.attr.name} value ${fieldValue} to bigdecimal"
-            if (isCollectionOrArray(fieldValue)) {
+            if (goodFormService.isCollectionOrArray(fieldValue)) {
                 Integer idx = 0
                 fieldValue = fieldValue.collect {
                     if (it != null) {

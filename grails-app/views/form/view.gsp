@@ -9,11 +9,11 @@
 <body>
 <div class="goodFormContainer display">
 
-  <form:showMessages/>
+  <gf:showMessages/>
 
   <h1><g:message code="goodform.view.form"/></h1>
   <g:render template="/form/viewCommon" model="[formInstance: formInstance, formData: formData]"/>
-  <form:displayText formInstance="${formInstance}" store="${formData}" readOnly="${formInstance.readOnly}"/>
+  <gf:tidy text="${gf.displayText(formInstance: formInstance, store: formData, readOnly: formInstance.readOnly)}"/>
 </div>
 </body>
 </html>

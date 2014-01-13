@@ -1,1 +1,1 @@
-${fieldAttributes.value.encodeAsHTML()}
+<span style="white-space: pre">${fieldAttributes.value.encodeAsHTML()}</span>

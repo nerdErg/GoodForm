@@ -1,7 +1,6 @@
 package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.FormElement
-import com.nerderg.taglib.NerdergFormtagsTagLib
 import grails.test.mixin.TestFor
 import grails.test.mixin.TestMixin
 import grails.test.mixin.services.ServiceUnitTestMixin
@@ -15,14 +14,13 @@ class FormTagLibTests {
 
     @Before
     void setUp() {
-        formElement = new FormElement()
+        formElement = new FormElement('q1')
         tagLib.goodFormService = new GoodFormService()
         tagLib.formDataService = new FormDataService()
-        mockTagLib(NerdergFormtagsTagLib.class)
     }
 
     void testGroup() {
-        FormElement subElement = new FormElement()
+        FormElement subElement = new FormElement('s1')
         subElement.form("Dummy element", [text: 10, map: 'test'], null) {
             "testing"
         }
@@ -33,7 +31,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
         subElement.attr.name = 'test.test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='questionGroup'><div class='prop'>
 <span class='name'><label for='test.test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test.test' value='' id='test.test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
@@ -42,7 +40,7 @@ class FormTagLibTests {
     }
 
     void testListOf() {
-        FormElement subElement = new FormElement()
+        FormElement subElement = new FormElement('s1')
         subElement.form("Dummy element", [text: 10, map: 'test'], null) {
             "testing"
         }
@@ -53,7 +51,7 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
         subElement.attr.name = 'test.test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<h2>Dummy element <span class='hint'></span></h2><div class='listContainer'><div class='questionListOfItem'><div class='prop'>
 <span class='name'><label for='test.test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test.test' value='' id='test.test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
@@ -66,8 +64,9 @@ class FormTagLibTests {
             "testing"
         }
         formElement.attr.name = 'test'
+        formElement.subElements[0].attr.name = 'test.sub'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><input type='text' name='test' value='' id='test' size='10' maxlength='10'/><span class='required'></span><span class='hint'></span></span>
@@ -79,8 +78,9 @@ class FormTagLibTests {
             "testing"
         }
         formElement.attr.name = 'test'
+        formElement.subElements[0].attr.name = 'test.sub'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>Dummy element:</label></span>
 <span class='value' title='Dummy element'><textarea name='test' id='test'  cols='80' rows='3'></textarea>
@@ -94,17 +94,29 @@ class FormTagLibTests {
             "are you male?" default: true
         }
         formElement.attr.name = 'test'
+        formElement.subElements[0].attr.name = 'test.sub'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
-
-        assert result.contains('input type=\'radio\'')
-        assert result == """<div class='prop'><span class='name'>Dummy element<span class='required'></span></span><div class='questionPick'><div class='prop'>
-<span class='name'><label>are you male?:</label></span>
-<span class='value' title='are you male?'><input type='radio' name='test' id='null' value='are you male?' />
-                    <span class='required'></span><span class='hint'></span>
-                    </span>
-</div>
-</div></div>"""
+        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String expect ="""<div class="formField " title="">
+\t<fieldset name="test" title="Dummy element"
+\t\tsize="1"
+\t\tmaxlength="1"
+\t\t>
+\t\t<legend class="">
+\t\t\tDummy element
+\t\t</legend>
+\t\t<div class="formField " title="">
+\t\t\t<label for="test.sub" class="">are you male?</label>
+\t\t\t<input
+\t\t\t\ttype="radio"
+\t\t\t\tname="test"
+\t\t\t\tvalue="are you male?"
+\t\t\t\t/>
+\t\t</div>
+\t</fieldset>
+</div>""".toString()
+        assert result.contains('type="radio"')
+        assert result.compareTo(expect)
     }
 
     void testHeader() {
@@ -113,7 +125,7 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == '<h1>This is a test</h1>'
     }
 
@@ -121,7 +133,7 @@ class FormTagLibTests {
         formElement.form("This is a test", [number: 5, map: 'test'], null) {}
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='number' name='test' value='' id='test' size='5' maxlength='5'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
@@ -132,7 +144,7 @@ class FormTagLibTests {
         formElement.form("This is a test", [number: 0..21, map: 'test'], null) {}
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='number' name='test' value='' id='test' size='2' maxlength='2' max='21' min='0'/><span class='units'></span><span class='required'></span><span class='hint'></span></span>
@@ -145,7 +157,7 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('input type=\'tel\'')
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
@@ -159,7 +171,7 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'money\'')
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
@@ -173,7 +185,7 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'date\'')
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
@@ -187,7 +199,7 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result.contains('class=\'date\'')
         assert result == """<div class='prop'>
 <span class='name'><label for='test'>This is a test:</label></span>
@@ -199,7 +211,7 @@ class FormTagLibTests {
         formElement.form("This is a test", [attachment: 'document', map: 'test'], null) {}
         formElement.attr.name = 'test.document'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class='prop'>
 <span class='name'><label for='test.document'>This is a test:</label></span>
 <span class='value' title='This is a test'><input type='file' name='test.document' value='null' id='test.document'/>&nbsp; <span class='required'></span><span class='hint'></span></span>
@@ -210,7 +222,7 @@ class FormTagLibTests {
         formElement.form("This is a test", [select: ['one','two','three','four','five'], map: 'test', default: 'one'], null) {}
         formElement.attr.name = 'test.select'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         println result
         assert result == """<div class='prop'>
 <span class='name'><label for='test.select'>This is a test:</label></span>
@@ -228,7 +240,7 @@ class FormTagLibTests {
         formElement.form("This is a test", [select: ['one','two','three','four','five'], map: 'test', default: 'one', hint: 'pick one of those', preamble: 'do this now', required: true], null) {}
         formElement.attr.name = 'test.select'
 
-        String result = applyTemplate('<form:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         println result
         assert result == """<div class='preamble'>do this now</div><div class='prop'>
 <span class='name'><label for='test.select'>This is a test:</label></span>

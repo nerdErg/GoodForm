@@ -8,7 +8,7 @@
 <body>
 <div class="goodFormContainer">
 
-  <form:showMessages/>
+  <gf:showMessages/>
 
   <h1><g:message code="goodform.submit.form"/></h1>
 
