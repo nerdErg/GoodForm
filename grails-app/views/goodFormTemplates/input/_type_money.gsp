@@ -1,1 +1,1 @@
-$&nbsp;<g:render template="/goodFormTemplates/input/form_input" model="${[type: 'number', name: name, fieldAttributes: fieldAttributes]}"/>
+$&nbsp;<g:render template="/goodFormTemplates/input/form_input" model="${[type: 'number', name: name, fieldAttributes: fieldAttributes << [class: 'money']]}"/>

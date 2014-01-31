@@ -107,8 +107,6 @@ class FormTagLib {
 
     def tidy = { attr ->
         Source source = new Source(attr.text as String)
-//        SourceCompactor compactor = new SourceCompactor(source)
-//        Source prettySource = new Source(compactor.toString())
         SourceFormatter sf = source.getSourceFormatter()
         out << sf.toString()
     }

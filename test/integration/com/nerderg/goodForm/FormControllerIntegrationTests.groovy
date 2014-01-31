@@ -38,7 +38,8 @@ class FormControllerIntegrationTests extends AbstractIntegrationTest {
     @Test
     void testMandatoryField() {
         controller.createForm("SampleForm")
-        def id = controller.modelAndView.model.formInstance.id
+        assert controller.response.redirectedUrl.contains('continueForm')
+        long id = controller.response.redirectedUrl.split('/').last().toLong()
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
                  'Q1.names.lastName': '',
@@ -59,7 +60,7 @@ class FormControllerIntegrationTests extends AbstractIntegrationTest {
     @Test
     void testFormSubmission() {
         controller.createForm("SampleForm")
-        def id = controller.modelAndView.model.formInstance.id
+        long id = controller.response.redirectedUrl.split('/').last().toLong()
         controller.params.putAll(
                 ['Q1.names.aliases.alias': '',
                  'Q1.names.lastName': 'Test',

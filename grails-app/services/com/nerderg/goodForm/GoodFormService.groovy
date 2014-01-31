@@ -543,12 +543,16 @@ class GoodFormService {
 
     private Closure dateModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         String format = e.attr.date
-        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: format.size()])
+        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(),10)])
     }
 
     private Closure datetimeModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         String format = e.attr.datetime
-        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: format.size()])
+        Map model = getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(),10)])
+        if(!model.fieldAttributes.value) {
+            model.fieldAttributes.value = [date: '', time: '']
+        }
+        return model
     }
 
     private Closure listOfModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
