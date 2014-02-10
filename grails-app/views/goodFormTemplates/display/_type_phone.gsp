@@ -1,1 +1,1 @@
-${fieldAttributes.value.encodeAsHTML()}
+${fieldAttributes.value != '' ? fieldAttributes.value.encodeAsHTML() :  "<span class='text-muted'>(blank)</span>"}

@@ -13,9 +13,6 @@
             }
         });
     },
-    postForm: function (form, func) {
-        return this.postData(form.action, $(form).serialize(), func)
-    },
     addBehaviour: function (parent) {
         parent.find('span.hiddenDetails').each(function () {
             var offset = $(this).parent().position();
@@ -39,21 +36,16 @@
         });
 
         parent.find('.hiddenFormCheckbox').change(function (event) {
-            var parentDiv = $(this).parent('div.formField')
+            var hiddenForm = $('#'+$(this).attr('data-hidden-form'));
             if ($(this).attr('checked')) {
-                $(parentDiv).next('div').show();
+                hiddenForm.show();
             } else {
-                $(parentDiv).next('div').hide();
+                hiddenForm.hide();
             }
         });
 
-        parent.find('.hiddenFormRadio').change(function (event) {
-            var parentDiv = $(this).parent('div.formField')
-            if ($(this).attr('checked')) {
-                $(parentDiv).next('div').show();
-            } else {
-                $(parentDiv).next('div').hide();
-            }
+        parent.find('input:radio').change(function (event) {
+            goodform.radioChange(event);
         });
 
         parent.find(".suggest").each(function () {
@@ -114,21 +106,36 @@
         });
 
 
-
         parent.find('div.inlineCheck').filter(':even').css('background', '#E5E4E8');
         this.addDatePickerBehaviour(parent);
 
     },
-    addDatePickerBehaviour: function(parent) {
-        var dateInp = parent.find('input.date');
-        var format = dateInp.attr('format').toLowerCase().replace('yyyy','yy'); //java date format uses MM for month
-        dateInp.datepicker({
-            dateFormat: format,
-            showOn: 'button',
-            buttonImage: goodform.dateImg,
-            buttonImageOnly: false,
-            changeMonth: true,
-            changeYear: true
+    addDatePickerBehaviour: function (parent) {
+        parent.find('input.date').each(function(index,el){
+            var element = $(el);
+            var format = element.attr('format').toLowerCase().replace('yyyy', 'yy'); //java date format uses MM for month
+            element.datepicker({
+                dateFormat: format,
+                showOn: 'button',
+                buttonImage: goodform.dateImg,
+                buttonImageOnly: false,
+                changeMonth: true,
+                changeYear: true
+            });
+            element.prev('label').attr('for', element.attr('id'));
+        });
+    },
+    radioChange: function (event) {
+        $('input:radio').each(function (index, el) {
+            var element = $(el);
+            if ($(element).hasClass('hiddenFormRadio')) {
+                var hiddenForm = $('#'+$(this).attr('data-hidden-form'));
+                if ($(this).attr('checked')) {
+                    hiddenForm.show();
+                } else {
+                    hiddenForm.hide();
+                }
+            }
         });
     }
 

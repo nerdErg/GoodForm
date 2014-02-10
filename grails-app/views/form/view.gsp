@@ -7,13 +7,6 @@
 </head>
 
 <body>
-<div class="goodFormContainer display">
-
-  <gf:showMessages/>
-
-  <h1><g:message code="goodform.view.form"/></h1>
-  <g:render template="/form/viewCommon" model="[formInstance: formInstance, formData: formData]"/>
-  <gf:tidy text="${gf.displayText(formInstance: formInstance, store: formData, readOnly: formInstance.readOnly)}"/>
-</div>
+<g:render template="/goodFormTemplates/common/viewForm" model="[formInstance: formInstance, formData: formData]"/>
 </body>
 </html>

@@ -1,4 +1,5 @@
-<div class='removeForm'><img src='${g.resource(dir: 'images/icons', file: 'delete.png')}' title='Remove this' alt='+'/>
-  <span class='hint'><g:message code="goodform.item.remove"/></span>
-</div>
+<span class='removeForm btn-xs btn-warning'>
+  <img src='${g.resource(dir: 'images/icons', file: 'delete.png')}' title='Remove this' alt='-'/>
+  <g:message code="goodform.item.remove"/>
+</span>
 </div>

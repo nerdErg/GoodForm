@@ -32,7 +32,7 @@ class FormTagLib {
         elementClosures.put('money', wrapper)
         elementClosures.put('select', wrapper)
         elementClosures.put('date', wrapper)
-        elementClosures.put('datetime', wrapper)
+        elementClosures.put('datetime', datetime)
         elementClosures.put('attachment', wrapper)
         elementClosures.put('group', group)
         elementClosures.put('pick', group)
@@ -42,7 +42,7 @@ class FormTagLib {
     }
 
     def element = { attrs ->
-        if(!attrs.templateDir) {
+        if (!attrs.templateDir) {
             attrs.templateDir = 'input'
         }
         Map model = goodFormService.getElementModel(attrs)
@@ -56,6 +56,10 @@ class FormTagLib {
 
     private Closure wrapper = { Map model, Map attrs ->
         gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
+    }
+
+    private Closure datetime = { Map model, Map attrs ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_datetime", model: model)
     }
 
     private Closure each = { Map model, Map attrs ->
@@ -91,7 +95,7 @@ class FormTagLib {
             renderSubElements(attrs)
             gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_tail", model: model)
         } else {
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_bool_wrapper", model: model)
         }
     }
 
@@ -105,10 +109,51 @@ class FormTagLib {
         out << g.render(params)
     }
 
+    def addAttributes = { attr ->
+        Map fieldAttrs = new HashMap(attr.fieldAttr)
+        String classString = attr['class']
+
+        if (classString) {
+            List classes = fieldAttrs.class ? fieldAttrs.class.split(' ') : []
+            classes.add(classString)
+            fieldAttrs.class = classes.join(' ')
+        }
+
+        if (fieldAttrs['size']) {
+            BigDecimal size = new BigDecimal(fieldAttrs.remove('size') as String)
+            BigDecimal width = ((size * 0.7) + 2.5).max(4)
+            fieldAttrs.style = "max-width: ${width}em"
+        }
+
+        List<String> skip = attr.skip ?: []
+        List attributeStrings = fieldAttrs.collect { String key, value ->
+            if (!(skip && skip.contains(key))) {
+                "$key=\"${value.encodeAsHTML()}\""
+            }
+        }
+        out << attributeStrings.join(' ')
+    }
+
+    def makeId = { attr ->
+        out << (attr.identity.join('-') as String).hashCode()
+    }
+
     def tidy = { attr ->
         Source source = new Source(attr.text as String)
         SourceFormatter sf = source.getSourceFormatter()
         out << sf.toString()
+    }
+
+    def renderQuestionSet = { attr ->
+        List qSet = attr.qset
+        Form questions = attr.questions
+        Map formData = attr.data
+        Boolean disabled = attr.disabled ?: true
+        String templateDir = attr.display ? 'display' : 'input'
+        log.debug "in RenderQuestionSet qSet $qSet"
+        goodFormService.withQuestions(qSet, questions) { q, qRef ->
+            out << element([element: q.formElement, store: formData, disabled: disabled, templateDir: 'display'])
+        }
     }
 
     /**
@@ -122,20 +167,11 @@ class FormTagLib {
         List state = formInstance.storedState().reverse()
         List currentQuestions = formInstance.storedCurrentQuestion()
         boolean found = false
-        def i = 0
-        state.each() { List qSet ->
+        state.eachWithIndex { List<String> qSet, int i ->
             if (found) {
-                out << "<div class='qset' title='"
-                out << g.message(code: "goodform.click.edit")
-                out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
-                out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
-                out << "<div class='qsetDisplay'>${qSet.toString()}</div>"
-                goodFormService.withQuestions(qSet, questions) { q, qRef ->
-                    out << element([element: q.formElement, store: formData, disabled: true])
-                }
-                out << "</div>"
+                out << g.render(template: '/goodFormTemplates/common/answeredQuestionSet',
+                        model: [id: "$formInstance.id/$i", qSet: qSet, data: formData, questions: questions])
             }
-            i++
             found = found || qSet == currentQuestions
         }
     }
@@ -148,25 +184,13 @@ class FormTagLib {
         FormInstance formInstance = attrs.formInstance
         Map formData = attrs.store
         Form questions = formDataService.getFormQuestions(formInstance.formVersion)
-
+        Boolean readOnly = attrs.readOnly
         List state = formInstance.storedState()
         def i = state.size() - 1
         state.each() { List qSet ->
             if (!qSet.isEmpty() && qSet[0] != 'End') {
-                List output = []
-
-                if (attrs.readOnly) {
-                    out << "<div class='qsetReadOnly' style='page-break-inside: avoid;'>"
-                } else {
-                    out << "<div class='qset' title='"
-                    out << g.message(code: "goodform.click.edit")
-                    out << "' id='${formInstance.id}/${i}' data-backurl='${g.createLink(action: 'back')}/${formInstance.id}/${i}'>"
-                    out << "<div class='clickToEdit'>${g.message(code: "goodform.click.edit")}</div>"
-                }
-                goodFormService.withQuestions(qSet, questions) { q, qRef ->
-                    out << element([element: q.formElement, store: formData, disabled: true, templateDir: 'display'])
-                }
-                out << "</div>"
+                out << g.render(template: '/goodFormTemplates/common/displayQuestionSet',
+                        model: [id: "$formInstance.id/$i", qSet: qSet, data: formData, questions: questions, readOnly: readOnly])
                 i--
             }
             log.debug "end display tag"
@@ -199,7 +223,7 @@ class FormTagLib {
         }
         if (flash.message) {
             out << '<div class="message">'
-            if (formDataService.isCollectionOrArray(flash.message)) {
+            if (GoodFormService.isCollectionOrArray(flash.message)) {
                 out << '<ul>'
                 flash.message.each { item ->
                     out << '<li>' + item.toString().encodeAsHTML() + '</li>'

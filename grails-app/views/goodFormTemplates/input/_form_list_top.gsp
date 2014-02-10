@@ -1,4 +1,5 @@
-<label for="${name}" class="${labelClass}">${label.encodeAsHTML()}<g:if test="${hint}"> <span class='hint'>${hint}</span></g:if></label>
-<g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>
+<fieldset class="listFieldSet">
+<legend >${label.encodeAsHTML()}<g:if test="${hint}"> <span class='hint help-block'>${hint}</span></g:if></legend>
+<g:if test="${preamble}"><div class='preamble text-info'>${preamble.encodeAsHTML()}</div></g:if>
 
 <div class='listContainer'>

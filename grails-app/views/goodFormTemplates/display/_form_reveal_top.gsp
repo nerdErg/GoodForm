@@ -1,45 +1,13 @@
 <div class="formField ${error ? 'error' : ''}" title="${error}">
 
-  %{--<g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>--}%
-
-  <label for="${name}" class="${labelClass}">${label.encodeAsHTML()}</label>
-
   <g:if test="${prefix}"><span class='prefix'>${prefix}</span></g:if>
-
-  <g:if test="${fieldAttributes.remove('pick1')}">
-      <input
-          type="radio"
-          name="${fieldAttributes.remove('parentName')}"
-          value="${label.encodeAsHTML()}"
-          class="${fieldAttributes.remove('class')} hiddenFormRadio"
-
-      <g:each in="${fieldAttributes}" var="attribute">
-        <g:if test="${attribute.key != 'value'}">
-          ${attribute.key}="${attribute.value.encodeAsHTML()}"
-        </g:if>
-      </g:each>
-      />
-    </g:if>
-    <g:else>
-      <input
-          type="checkbox"
-          name="${name}.yes"
-          id="${name}"
-          value="${label.encodeAsHTML()}"
-          class="${fieldAttributes.remove('class')} hiddenFormCheckbox"
-
-      <g:each in="${fieldAttributes}" var="attribute">
-        <g:if test="${attribute.key != 'value'}">
-          ${attribute.key}="${attribute.value.encodeAsHTML()}"
-        </g:if>
-      </g:each>
-      />
-    </g:else>
-  <g:if test="${units}"><span class='units'>${units}</span></g:if>
-</div>
   <g:if test="${fieldAttributes.checked}">
+    <fieldset class="reset reveal">
+        <legend>${label.encodeAsHTML()} <span class="text-success"><span class="glyphicon glyphicon-ok"></span></span></legend>
     <div>
   </g:if>
   <g:else>
+    <dt>${label.encodeAsHTML()}</dt>
+    <dd class="text-muted"><span class="glyphicon glyphicon-remove"></span></dd>
     <div class='hiddenForm'>
   </g:else>

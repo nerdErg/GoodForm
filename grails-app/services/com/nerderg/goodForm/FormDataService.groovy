@@ -103,7 +103,7 @@ class FormDataService {
     Closure validateNumber = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && fieldValue instanceof BigDecimal && formElement.attr.containsKey('number')) {
-            Map<String, BigDecimal> minMax = goodFormService.getNumberMinMax(formElement)
+            Map<String, BigDecimal> minMax = goodFormService.getNumberMinMaxStep(formElement)
 
             if (minMax.max != null && fieldValue > minMax.max) {
                 error = true

@@ -349,22 +349,25 @@ class GoodFormService {
      * @param formElement
      * @return map [max: max, min: min]
      */
-    Map getNumberMinMax(FormElement formElement) {
+    Map getNumberMinMaxStep(FormElement formElement) {
 
         Map minMax = [:]
         //todo make non specific to number input (use range?)
         if (formElement.attr.number instanceof Range) {
             minMax.max = formElement.attr.number.to as BigDecimal
             minMax.min = formElement.attr.number.from as BigDecimal
-        } else {
-            //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
-            if (formElement.attr.max != null) {
-                minMax.max = formElement.attr.max
-            }
-            if (formElement.attr.min != null) {
-                minMax.min = formElement.attr.min
-            }
         }
+        //note avoid groovy truth for number 0 check for null. Note null attributes aren't added to tags in nerdergFormTags
+        if (formElement.attr.max != null) {
+            minMax.max = formElement.attr.max
+        }
+        if (formElement.attr.min != null) {
+            minMax.min = formElement.attr.min
+        }
+        if (formElement.attr.step != null) {
+            minMax.step = formElement.attr.step
+        }
+
         return minMax
     }
 
@@ -425,7 +428,7 @@ class GoodFormService {
 
     private Map makeHtmlAttributes(boolean disabled, FormElement e, String type) {
 
-        Map fieldAttributes = getNumberMinMax(e) //get min/max if exist
+        Map fieldAttributes = getNumberMinMaxStep(e) //get min/max if exist
         fieldAttributes << makeFieldSizeAttributes(e, type)
 
         if (disabled) {
@@ -468,7 +471,12 @@ class GoodFormService {
 
         Integer size
         if (e.attr[type] instanceof Range) {
-            size = e.attr[type].to.toString().size()
+            BigDecimal max = e.attr[type].to
+            if(e.attr.step) {
+                max += (e.attr.step as BigDecimal).abs()
+            }
+            println "max is $max"
+            size = max.toString().size()
         } else if ((e.attr[type] as String).isInteger()) {
             size = e.attr[type].toInteger()
         }
@@ -488,7 +496,7 @@ class GoodFormService {
         addFormElementType('text', defaultAttributesModel)
         addFormElementType('number', defaultAttributesModel)
         addFormElementType('phone', defaultAttributesModel)
-        addFormElementType('money', defaultAttributesModel)
+        addFormElementType('money', moneyModel)
         addFormElementType('group', defaultAttributesModel)
         addFormElementType('pick', defaultAttributesModel)
         addFormElementType('each', defaultAttributesModel)
@@ -524,6 +532,13 @@ class GoodFormService {
         getDefaultModelProperties(e, answers, index, disabled, [:])
     }
 
+    private Closure moneyModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
+        if(!e.attr.step){
+            e.attr.step = 0.01
+        }
+        getDefaultModelProperties(e, answers, index, disabled, [:])
+    }
+
     private Closure selectModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         getDefaultModelProperties(e, answers, index, disabled, [options: e.attr.select as List])
     }
@@ -543,13 +558,13 @@ class GoodFormService {
 
     private Closure dateModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         String format = e.attr.date
-        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(),10)])
+        getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(), 10)])
     }
 
     private Closure datetimeModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
         String format = e.attr.datetime
-        Map model = getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(),10)])
-        if(!model.fieldAttributes.value) {
+        Map model = getDefaultModelProperties(e, answers, index, disabled, [format: format, size: Math.max(format.size(), 10)])
+        if (!model.fieldAttributes.value) {
             model.fieldAttributes.value = [date: '', time: '']
         }
         return model
@@ -721,7 +736,7 @@ class GoodFormService {
      * @param obj
      * @return true if this is not a string but a collection
      */
-    boolean isCollectionOrArray(obj) {
+    public static boolean isCollectionOrArray(obj) {
         (obj instanceof Collection || obj instanceof Object[])
     }
 

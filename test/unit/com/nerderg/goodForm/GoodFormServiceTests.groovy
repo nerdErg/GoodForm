@@ -1,5 +1,6 @@
 package com.nerderg.goodForm
 
+import com.nerderg.goodForm.form.FormElement
 import grails.converters.JSON
 import grails.test.mixin.TestFor
 import org.codehaus.groovy.grails.web.json.JSONArray
@@ -83,6 +84,33 @@ class GoodFormServiceTests {
         assert m == [Q1: [question_one: [yes: 'off']]]
     }
 
+    void testMakeFieldSizeAttributes() {
+        FormElement fe1 = new FormElement('q1')
+        fe1.form("Number by a Range?", [number: 0..100,
+                map: 'numberRange',
+                step: 0.1], null, null)
+        Map result = service.makeFieldSizeAttributes(fe1, 'number')
+        assert result.size == 5
+        fe1.attr.step = 24.23
+        result = service.makeFieldSizeAttributes(fe1, 'number')
+        assert result.size == 6
+        fe1.attr.step = 0
+        result = service.makeFieldSizeAttributes(fe1, 'number')
+        assert result.size == 3
+        fe1.attr.step = -0.234
+        result = service.makeFieldSizeAttributes(fe1, 'number')
+        assert result.size == 7
+
+        FormElement fe2 = new FormElement('q1')
+        fe2.form("Number size?", [number: 9,
+                map: 'numberSize',
+                step: 0.1], null, null)
+        result = service.makeFieldSizeAttributes(fe2, 'number')
+        assert result.size == 9
+
+    }
+
+
     void testPrintFormDataAnswer() {
         Map formData = JSON.parse(familyFormDataJson) as Map
         formData.each { key, data ->
@@ -93,7 +121,7 @@ class GoodFormServiceTests {
         }
     }
 
-    void testIsCollectionOrArray(){
+    void testIsCollectionOrArray() {
 
         String subst = 'boo'
         assert !("this is a ${subst} gstring" instanceof Object[])
@@ -104,15 +132,15 @@ class GoodFormServiceTests {
         assert !('this is a string' instanceof List)
 
         assert !service.isCollectionOrArray('this is a string')
-        assert !service.isCollectionOrArray("this is a ${['list in a string','blah']} gstring")
+        assert !service.isCollectionOrArray("this is a ${['list in a string', 'blah']} gstring")
         ArrayList<String> listOfString = ['this is a string in a list']
         assert listOfString instanceof ArrayList
         assert service.isCollectionOrArray(listOfString)
-        String[] stringArray = ['this is a string in an Array','another string']
+        String[] stringArray = ['this is a string in an Array', 'another string']
         assert stringArray instanceof String[]
         assert service.isCollectionOrArray(stringArray)
 
-        Set set = ['string in a set','another string']
+        Set set = ['string in a set', 'another string']
         assert set instanceof HashSet
         assert service.isCollectionOrArray(set)
 
@@ -154,7 +182,6 @@ class GoodFormServiceTests {
         assert !service.isCollectionOrArray(formData.Job1.names.lastName)
 
     }
-
 
     //todo replace this old map format with new one.
     String familyFormDataJson = """{

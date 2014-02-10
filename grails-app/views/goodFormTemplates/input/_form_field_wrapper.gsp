@@ -1,4 +1,4 @@
-<div class="formField ${error ? 'error' : ''}" title="${error}">
+<div class="formField ${error ? 'has-error' : ''}" title="${error}">
 
   <g:if test="${preamble}"><div class='preamble'>${preamble.encodeAsHTML()}</div></g:if>
 
@@ -8,5 +8,5 @@
   <g:render template="/goodFormTemplates/input/type_${type.toLowerCase()}"/>
   <g:if test="${units}"><span class='units'>${units}</span></g:if>
   <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
-  <g:if test="${hint}"><span class='hint'>${hint}</span></g:if>
+  <g:if test="${hint}"><p class='hint help-block'>${hint}</p></g:if>
 </div>

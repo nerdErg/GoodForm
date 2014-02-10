@@ -1,273 +1,106 @@
-/* need
-addAnotherForm
-*cbText
-dependantQuestions
-goodformView
-hiddenForm
-*hiddenFormCheckbox
-*hiddenFormRadio
-hint
-inlineCheck
-*label
-*listContainer
-*nospin
-*paddedBox
-preamble
-qset
-qsetReadOnly
-questionGroup
-questionListOfItem
-questionPick
-removeForm
-required
-textNote
-value
-*/
-
-legend {
-    font-size: 1.2em;
-    font-weight: bold;
-}
-label {
-    font-size: 1.0em;
-    font-weight: bold;
-}
-
-div.goodFormContainer {
-    padding: 2em;
-}
-
-div.goodFormContainer p {
-    margin-bottom: 1em;
-    line-height: 1.5;
-}
-
-div.goodFormContainer .addAnotherForm,
-div.goodFormContainer .removeForm {
-    margin-left: 3em;
-    margin-top: 1em;
-    margin-bottom: 1em;
-    cursor: pointer;
-}
-
-div.goodFormContainer .addAnotherForm img,
-div.goodFormContainer .removeForm img {
-    vertical-align: bottom;
-}
-
-div.goodFormContainer .questionListOfItem .prop .value,
-div.goodFormContainer .questionGroup .prop .value,
-div.goodFormContainer .questionPick .prop .value,
-div.goodFormContainer .dependantQuestions .prop .value,
-div.goodFormContainer .questionListOfItem .prop .name,
-div.goodFormContainer .questionGroup .prop .name,
-div.goodFormContainer .questionPick .prop .name,
-div.goodFormContainer .dependantQuestions .prop .name {
-    margin: 0;
-}
-
-div.goodFormContainer .questionListOfItem,
-div.goodFormContainer .questionGroup,
-div.goodFormContainer .questionPick,
-div.goodFormContainer .dependantQuestions {
-    margin: 1em;
-    padding: 1em;
-    border: 1px #dddddd solid;
-    border-radius: 5px;
-    display: inline-block;
-}
-
-div.goodFormContainer .questionListOfItem {
-    display: block;
-}
-
-div.goodFormContainer .questionPick .prop {
-    display: table-row;
-}
-
-div.goodFormContainer .questionPick > .prop > .name,
-div.goodFormContainer .questionPick > .prop > .value {
-    display: table-cell;
-    border-bottom: 1px solid #dddddd;
-    padding-top: 0.25em;
-    padding-bottom: 0.25em;
-}
-
-div.goodFormContainer .value {
-    font-weight: bold;
-}
-
-div.goodFormContainer .hiddenForm {
-    display: none;
-    white-space: nowrap;
-}
-
-div.goodFormContainer .hint {
-    color: #888888;
-    display: inline-block;
-    font-weight: bold;
-    margin-left: 1em;
-    max-width: 20em;
-    /*vertical-align: middle;*/
-    white-space: normal;
-}
-
-div.goodFormContainer .inlineCheck {
-    margin-left: 0;
-    display: block;
-}
-
-div.goodFormContainer .inlineCheck .prop {
-    display: table-row;
-}
-
-div.goodFormContainer .inlineCheck .name,
-div.goodFormContainer .inlineCheck .value {
-    display: table-cell;
-}
-
-div.goodFormContainer .inlineFields {
-    height: auto;
-}
-
-div.goodFormContainer .inlineFields .prop {
-    background: none;
-}
-
-div.goodFormContainer .inlineFields .value,
-div.goodFormContainer .inlineFields .name {
-    background: none;
-    border: none;
-}
-
-div.goodFormContainer .roundbox,
-div.goodFormContainer .qset,
-div.goodFormContainer .qsetReadOnly {
-    margin-top: 0.5em;
-    border: 1px solid #333333;
-    border-radius: 0.5em;
-    box-shadow: 3px 3px 3px #AAAAAA;
+div.goodFormContainer .panel-body {
     padding: 0.5em;
 }
 
-div.goodFormContainer .roundbox.activity {
-    height: 25em;
-    overflow-y: auto;
-}
-
-div.goodFormContainer .qset {
-    background: #EDFFC6;
-}
-
-div.goodFormContainer .qset:hover {
-    background: #D0FF70;
-    box-shadow: 5px 5px 5px 4px #999999;
-}
-
-div.goodFormContainer .qsetReadOnly {
-    background: #FEFCF2;
-}
-
-div.goodFormContainer div.clickToEdit {
-    color: #999999;
-    float: right;
-}
-
-div.goodFormContainer .qset:hover div.clickToEdit {
-    color: #333333;
-    float: right;
-}
-
-div.goodFormContainer .prop {
-    padding-top: 5px;
+div.goodFormContainer label {
     display: block;
 }
 
-div.goodFormContainer .prop .name {
+div.goodFormContainer fieldset {
+    border: 1px solid #E7E7E7;
+    border-radius: 5px;
+    margin-bottom: 0.5em;
+    padding-left: 0.5em;
+    padding-right: 0.5em;
+    padding-bottom: 0.5em;
     display: block;
-    text-align: left; /*width: 15%;*/
-    white-space: nowrap;
-    margin-left: 2em;
-    margin-top: 0.5em;
+
+}
+
+div.goodFormContainer fieldset legend {
+    border: medium none;
+    font-size: 1em;
+    font-weight: bold;
+    padding-bottom: 0.5em;
+    padding-left: 1em;
+    padding-right: 1em;
+    margin-left: 0;
+    margin-bottom: 0;
+    width: auto;
+    display: inline-block;
+}
+
+div.goodFormContainer fieldset legend .help-block,
+div.goodFormContainer fieldset legend .hint {
+    display: inline;
     font-weight: normal;
 }
 
-div.goodFormContainer .prop .value {
-    display: block;
-    text-align: left; /*width: 85%;*/
-    margin-left: 2em;
+div.goodFormContainer fieldset.reveal legend {
+    margin-left: -1.6em;
+}
+
+div.goodFormContainer .form-control {
+    width: auto;
+    display: inline;
+    height: auto;
+}
+
+div.goodFormContainer input[type='text'].form-control {
+    width: 90%;
+}
+
+div.goodFormContainer textarea.form-control {
+    width: 90%;
+    display: inline-block;
+    height: auto;
+}
+
+div.goodFormContainer div.datetime {
+    display: inline-block;
 }
 
 div.goodFormContainer .required {
     color: red;
-    margin-left: 0.5em;
 }
 
-div.goodFormContainer ul.required {
-    font-size: 1.1em;
-    font-weight: bold;
-    color: black;
+div.goodFormContainer .reset {
+    border: none;
 }
 
-div.goodFormContainer div.preamble {
-    margin: 1em;
-    font-style: italic;
+div.goodFormContainer .listFieldSet {
+    border: medium none;
 }
 
-div.goodFormContainer div.textNote {
-    white-space: pre-line;
-}
-
-div.goodFormContainer div.message ul {
-    list-style: none;
-}
-
-div.goodFormContainer div.formContainer {
-    display: inline-block;
-}
-
-div.goodFormContainer .formSubmit {
-    text-align: right;
-}
-
-/* Completed form view related CSS */
-div.goodFormContainer div.goodformView {
-    font-size: 1.1em;
+div.goodFormContainer .questionListOfItem
+{
+    display: block;
+    border-bottom: 3px solid #888888;
+    border-top: 3px solid #888888;
+    background-color: #F5F5F5;
+    border-radius: 5px;
     margin-bottom: 0.5em;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-left: 0.5em;
 }
 
-div.goodFormContainer div.goodformView .label {
-    color: #006dba;
-    font-weight: bold;
+div.goodFormContainer .reveal
+{
+    border-bottom: 1px solid #888888;
+    border-radius: 5px;
+    border-top: 1px solid #888888;
 }
 
-div.goodFormContainer div.goodformView .value {
-    font-weight: normal;
-}
-
-div.goodFormContainer textarea {
-    width: auto;
-    max-width: 60%;
-    height: auto;
-    overflow: auto;
-    white-space: nowrap;
-    font-size: 1em;
-}
-
-div.goodFormContainer h2 {
-    margin-top: 0.5em;
-    margin-bottom: 0.5em;
-    font-size: 1.2em;
-}
-
-div.goodFormContainer h2 > .hint {
-    font-size: 0.8em;
+div.goodFormContainer .hiddenForm {
+    display: none;
 }
 
 div.goodFormContainer .qsetDisplay {
     display: none;
 }
 
+/**/
 div.goodFormContainer .formVersion {
     color: #666666;
 }
