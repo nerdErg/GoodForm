@@ -1,9 +1,34 @@
 div.goodFormContainer .panel-body {
     padding: 0.5em;
+    background-color: rgba(238, 219, 0, 0.09);
+    border-radius: 9px;
 }
 
+div.goodFormContainer .panel {
+    border: none;
+    border-radius: 0 0 9px 9px;
+    box-shadow: 5px 5px 5px #888;
+}
+
+div.goodFormContainer .errorsAlert {
+    position: fixed;
+    top: 0;
+}
+
+div.goodFormContainer .qset {
+    cursor: pointer;
+}
 div.goodFormContainer label {
     display: block;
+}
+
+div.goodFormContainer dd {
+    overflow-x: auto;
+}
+
+div.goodFormContainer .formField {
+    margin-bottom: 0.7em;
+    overflow-x: auto;
 }
 
 div.goodFormContainer fieldset {
@@ -14,7 +39,7 @@ div.goodFormContainer fieldset {
     padding-right: 0.5em;
     padding-bottom: 0.5em;
     display: block;
-
+    overflow-x: auto;
 }
 
 div.goodFormContainer fieldset legend {
@@ -42,7 +67,7 @@ div.goodFormContainer fieldset.reveal legend {
 
 div.goodFormContainer .form-control {
     width: auto;
-    display: inline;
+    display: inline-block;
     height: auto;
 }
 

@@ -3,16 +3,6 @@
     active: 0,
     x: 0,
     y: 0,
-    postData: function (uri, data, func, opts) {
-        $.ajax({
-            type: "POST",
-            url: uri,
-            data: data,
-            success: function (resp) {
-                func(resp, opts);
-            }
-        });
-    },
     addBehaviour: function (parent) {
         parent.find('span.hiddenDetails').each(function () {
             var offset = $(this).parent().position();
@@ -36,7 +26,7 @@
         });
 
         parent.find('.hiddenFormCheckbox').change(function (event) {
-            var hiddenForm = $('#'+$(this).attr('data-hidden-form'));
+            var hiddenForm = $('#' + $(this).attr('data-hidden-form'));
             if ($(this).attr('checked')) {
                 hiddenForm.show();
             } else {
@@ -96,8 +86,10 @@
         });
 
         parent.find('div.qset').click(function (event) {
-            var url = $(this).data('backurl');
-            window.location = url;
+            var qset = $(this);
+            window.location = qset.data('backurl');
+            qset.css('cursor', 'wait');
+            qset.find('i.fa-rotate-right').addClass('fa-spin');
         });
 
         parent.find('input.time').timeEntry({
@@ -111,7 +103,7 @@
 
     },
     addDatePickerBehaviour: function (parent) {
-        parent.find('input.date').each(function(index,el){
+        parent.find('input.date').each(function (index, el) {
             var element = $(el);
             var format = element.attr('format').toLowerCase().replace('yyyy', 'yy'); //java date format uses MM for month
             element.datepicker({
@@ -129,7 +121,7 @@
         $('input:radio').each(function (index, el) {
             var element = $(el);
             if ($(element).hasClass('hiddenFormRadio')) {
-                var hiddenForm = $('#'+$(this).attr('data-hidden-form'));
+                var hiddenForm = $('#' + $(this).attr('data-hidden-form'));
                 if ($(this).attr('checked')) {
                     hiddenForm.show();
                 } else {
@@ -147,26 +139,25 @@ $(function () {
         goodform.y = e.pageY;
     });
 
-    $('#spinner').ajaxStart(
-        function (e) {
-            $(this).css('left', goodform.x);
-            $(this).css('top', goodform.y).show();
-            $('body').css('cursor', 'wait');
-        }).ajaxComplete(function () {
-            $(this).hide();
-            $('body').css('cursor', 'auto');
-        });
-
-    $('.lengthyAction, a[target!="attachment"], button, input[type="submit"]').click(function (e) {
-        if (!$(this).hasClass('nospin')) {
-            $('#spinner').css('left', goodform.x);
-            $('#spinner').css('top', goodform.y).show();
-            $(this).css('cursor', 'wait');
-            $('body').css('cursor', 'wait');
-        }
+    $('form').on('submit', function (e) {
+        $('i.fa-refresh').addClass('fa-spin');
+        $(this).css('cursor', 'wait');
     });
 
     var container = $('div.goodFormContainer');
     goodform.addBehaviour(container);
+
+    var form = $("#form");
+    var errors = $('.has-error');
+    if (form.length == 1 && !errors.length > 0) {
+        $('html, body').animate({
+            scrollTop: form.offset().top
+        }, 1000);
+    }
+    if(errors.length > 0) {
+        $('html, body').animate({
+            scrollTop: ($(errors[0]).offset().top - 50)
+        }, 2000);
+    }
 
 });

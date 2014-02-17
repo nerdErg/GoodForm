@@ -8,5 +8,6 @@
   <g:render template="/goodFormTemplates/input/type_${type.toLowerCase()}"/>
   <g:if test="${units}"><span class='units'>${units}</span></g:if>
   <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
+  <g:if test="${error}"><span class="text text-danger"><span class="glyphicon glyphicon-warning-sign"></span>&nbsp;${error}</span></g:if>
   <g:if test="${hint}"><p class='hint help-block'>${hint}</p></g:if>
 </div>

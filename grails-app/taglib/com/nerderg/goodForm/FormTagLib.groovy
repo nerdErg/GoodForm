@@ -1,8 +1,10 @@
 package com.nerderg.goodForm
 
 import com.nerderg.goodForm.form.Form
+import net.htmlparser.jericho.GoodFormCompactor
 import net.htmlparser.jericho.Source
 import net.htmlparser.jericho.SourceFormatter
+import org.codehaus.groovy.runtime.StringBufferWriter
 
 /**
  * Provides GoodForm-specific tag elements. The main tag elements used by views are:
@@ -47,66 +49,73 @@ class FormTagLib {
         }
         Map model = goodFormService.getElementModel(attrs)
         Closure c = elementClosures[model.type]
-        c.call(model, attrs)
+        StringBufferWriter bufOut = new StringBufferWriter(new StringBuffer())
+        c.call(model, attrs, bufOut)
+        Source source = new Source(bufOut.toString())
+        GoodFormCompactor compactor = new GoodFormCompactor(source)
+        Source prettySource = new Source(compactor.toString())
+        SourceFormatter psf = prettySource.getSourceFormatter()
+        out << psf.toString()
     }
 
-    private Closure heading = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_heading", model: model)
+    private Closure heading = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_heading", model: model, out: bufOut)
     }
 
-    private Closure wrapper = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model)
+    private Closure wrapper = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_field_wrapper", model: model, out: bufOut)
     }
 
-    private Closure datetime = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_datetime", model: model)
+    private Closure datetime = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/type_datetime", model: model, out: bufOut)
     }
 
-    private Closure each = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
+    private Closure each = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model, out: bufOut)
         goodFormService.processEachFormElement(attrs.element, attrs.store) { Map subMap ->
             subMap.disabled = attrs.disabled
             subMap.templateDir = attrs.templateDir
-            out << element(subMap)
+            bufOut << element(subMap)
         }
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model, out: bufOut)
     }
 
-    private Closure group = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model)
-        renderSubElements(attrs)
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model)
+    private Closure group = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_top", model: model, out: bufOut)
+        renderSubElements(attrs, bufOut)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_group_tail", model: model, out: bufOut)
     }
 
-    private Closure listOf = { Map model, Map attrs ->
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_top", model: model)
+    private Closure listOf = { Map model, Map attrs, Writer bufOut ->
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_top", model: model, out: bufOut)
         for (int i = 0; i < Math.max(model.listSize as Integer, 1); i++) {
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_top", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_top", model: model, out: bufOut)
             attrs.index = i
-            renderSubElements(attrs)
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_tail", model: model)
+            renderSubElements(attrs, bufOut)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_item_tail", model: model, out: bufOut)
         }
-        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_tail", model: model)
+        gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_list_tail", model: model, out: bufOut)
     }
 
-    private Closure bool = { Map model, Map attrs ->
+    private Closure bool = { Map model, Map attrs, Writer bufOut ->
         if (attrs.element.subElements.size() > 0) {
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_top", model: model)
-            renderSubElements(attrs)
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_tail", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_top", model: model, out: bufOut)
+            renderSubElements(attrs, bufOut)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_reveal_tail", model: model, out: bufOut)
         } else {
-            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_bool_wrapper", model: model)
+            gfRender(template: "/goodFormTemplates/$attrs.templateDir/form_bool_wrapper", model: model, out: bufOut)
         }
     }
 
-    private renderSubElements(Map attrs) {
+    private renderSubElements(Map attrs, Writer bufOut) {
         attrs.element.subElements.each { sub ->
-            out << element([element: sub, store: attrs.store, index: attrs.index, disabled: attrs.disabled, templateDir: attrs.templateDir])
+            bufOut << element([element: sub, store: attrs.store, index: attrs.index, disabled: attrs.disabled, templateDir: attrs.templateDir])
         }
     }
 
     private gfRender(Map params) {
-        out << g.render(params)
+        Writer bufOut = params.remove('out')
+        bufOut << g.render(params)
     }
 
     def addAttributes = { attr ->
@@ -144,6 +153,11 @@ class FormTagLib {
         out << sf.toString()
     }
 
+    def preFormatToHTML = { attr ->
+        String text = attr.text
+        out << text.encodeAsHTML().replaceAll(/\n/, '<br>').replaceAll(' ', '&nbsp;')
+    }
+
     def renderQuestionSet = { attr ->
         List qSet = attr.qset
         Form questions = attr.questions
@@ -152,7 +166,7 @@ class FormTagLib {
         String templateDir = attr.display ? 'display' : 'input'
         log.debug "in RenderQuestionSet qSet $qSet"
         goodFormService.withQuestions(qSet, questions) { q, qRef ->
-            out << element([element: q.formElement, store: formData, disabled: disabled, templateDir: 'display'])
+            out << element([element: q.formElement, store: formData, disabled: disabled, templateDir: templateDir])
         }
     }
 
@@ -167,12 +181,15 @@ class FormTagLib {
         List state = formInstance.storedState().reverse()
         List currentQuestions = formInstance.storedCurrentQuestion()
         boolean found = false
-        state.eachWithIndex { List<String> qSet, int i ->
+        int i = state.size() - 1
+        int stateMaxIndex = i
+        state.each { List<String> qSet ->
             if (found) {
                 out << g.render(template: '/goodFormTemplates/common/answeredQuestionSet',
-                        model: [id: "$formInstance.id/$i", qSet: qSet, data: formData, questions: questions])
+                        model: [id: "$formInstance.id/${stateMaxIndex - i}", qSet: qSet, data: formData, questions: questions])
             }
             found = found || qSet == currentQuestions
+            i--
         }
     }
 

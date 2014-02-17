@@ -1,6 +1,7 @@
 <%@ page import="com.nerderg.goodForm.GoodFormService" %>
 <g:if test="${formData?.fieldErrors}">
-  <div class="alert alert-danger errors">
+  <div class="alert alert-danger alert-dismissable errorsAlert">
+    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<g:message code="goodform.field.errors"
                                                                            args="[formData.fieldErrors.size().toString()]"/>
   </div>
