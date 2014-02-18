@@ -8,7 +8,14 @@
 
   <gf:answered formInstance="${formInstance}" store="${formData}"/>
   <a id="form"><hr></a>
-  <div class="panel panel-default">
+
+  <div class="panel panel-info">
+    <div class="panel-heading">
+      <span><i class='fa fa-edit'></i> Please answer these questions.</span>
+      <span class="text text-muted">Questions marked with a <span
+          class='required'>*</span> are required before continuing.</span>
+    </div>
+
     <div class="panel-body">
       <div class="formContainer">
         <g:form action="next" enctype="multipart/form-data" role="form">

@@ -1,7 +1,7 @@
 div.goodFormContainer .panel-body {
     padding: 0.5em;
-    background-color: rgba(238, 219, 0, 0.09);
-    border-radius: 9px;
+    background-color: rgba(130, 178, 44, 0.05);
+    border-radius: 0 0 9px 9px;
 }
 
 div.goodFormContainer .panel {
@@ -62,7 +62,7 @@ div.goodFormContainer fieldset legend .hint {
 }
 
 div.goodFormContainer fieldset.reveal legend {
-    margin-left: -1.6em;
+    margin-left: -1.5em;
 }
 
 div.goodFormContainer .form-control {
