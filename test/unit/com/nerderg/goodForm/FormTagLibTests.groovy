@@ -31,27 +31,18 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
         subElement.attr.name = 'test.test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
-        assert result == """<div class="formField " title="">
-\t<fieldset name="test" title="Dummy element"
-\t\t>
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        assert result == """<div class="col-12-xs col-8-md col-6-lg formField form-group " title="">
+\t<fieldset name="test" title="Dummy element">
 \t\t<legend class="">
 \t\t\tDummy element
 \t\t</legend>
 \t\t<div class="formField " title="">
 \t\t\t<label for="test.test" class="">Dummy element</label>
-\t\t\t<input
-\t\t\t\ttype="text"
-\t\t\t\tname="test.test"
-\t\t\t\tid="test.test"
-\t\t\t\tvalue=""
-\t\t\t\tsize="10"
-\t\t\t\tmaxlength="10"
-\t\t\t\t/>
+\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
 \t\t</div>
 \t</fieldset>
-</div>
-"""
+</div>"""
     }
 
     void testListOf() {
@@ -66,31 +57,26 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
         subElement.attr.name = 'test.test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
-        assert result == """<label for="test" class="">Dummy element</label>
-<div class='listContainer'>
-\t<div class='questionListOfItem'>
-\t\t<div class="formField " title="">
-\t\t\t<label for="test.test" class="">Dummy element</label>
-\t\t\t<input
-\t\t\t\ttype="text"
-\t\t\t\tname="test.test"
-\t\t\t\tid="test.test"
-\t\t\t\tvalue=""
-\t\t\t\tsize="10"
-\t\t\t\tmaxlength="10"
-\t\t\t\t/>
-\t\t</div>
-\t\t<div class='removeForm'><img src='/images/icons/delete.png' title='Remove this' alt='+'/>
-\t\t\t<span class='hint'>goodform.item.remove</span>
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        assert result == """<fieldset class="listFieldSet">
+\t<legend>Dummy element</legend>
+\t<div class="listContainer">
+\t\t<div class="questionListOfItem">
+\t\t\t<div class="formField " title="">
+\t\t\t\t<label for="test.test" class="">Dummy element</label>
+\t\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
+\t\t\t</div>
+\t\t\t<span class="removeForm btn-xs btn-warning">
+\t\t\t<img src="/images/icons/delete.png" title="Remove this" alt="-" />
+\t\t\tgoodform.item.remove
+\t\t\t</span>
 \t\t</div>
 \t</div>
-</div>
-<div class='addAnotherForm'>
-\t<img src="/images/icons/add.png" title='add another' alt='+'/>
-\t<span class='hint'>goodform.item.addAnother</span>
-</div>
-"""
+\t<span class="addAnotherForm btn-xs btn-success">
+\t<img src="/images/icons/add.png" title="add another" alt="+" />
+\tgoodform.item.addAnother
+\t</span>
+</fieldset>"""
     }
 
     void testText() {
@@ -99,38 +85,31 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">Dummy element</label>
-\t<input
-\t\ttype="text"
-\t\tname="test"
-\t\tid="test"
-\t\tvalue=""
-\t\tsize="10"
-\t\tmaxlength="10"
-\t\t/>
-</div>
-"""
+\t<input type="text" name="test" id="test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
+</div>"""
     }
 
     void testLargeText() {
-        formElement.form("Dummy element", [text: 200, map: 'test'], null) {
+        formElement.form("Dummy element", [
+                text: 120,
+                map: 'test'
+        ], null) {
             "testing"
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>',
+                [formElement: formElement, formData: [fieldErrors: [:], test: 'this is a\nbroken string.']]).trim()
+
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">Dummy element</label>
-\t<textarea
-\t\tname="test"
-\t\tid="test"
-\t\tcols="80"
-\t\trows="3"
-\t\t></textarea>
-</div>
-"""
+\t<!-- <div></div> -->
+\t<textarea name="test" id="test" class="form-control">this is a
+broken string.</textarea>
+</div>"""
     }
 
     void testPick() {
@@ -140,27 +119,20 @@ class FormTagLibTests {
         formElement.attr.name = 'test'
         formElement.subElements[0].attr.name = 'test.sub'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
-        String expect ="""<div class="formField " title="">
-\t<fieldset name="test" title="Dummy element"
-\t\tsize="1"
-\t\tmaxlength="1"
-\t\t>
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
+        String expect ="""<div class="col-12-xs col-8-md col-6-lg formField form-group " title="">
+\t<fieldset name="test" title="Dummy element" size="1" maxlength="1">
 \t\t<legend class="">
 \t\t\tDummy element
 \t\t</legend>
-\t\t<div class="formField " title="">
-\t\t\t<label for="test.sub" class="">are you male?</label>
-\t\t\t<input
-\t\t\t\ttype="radio"
-\t\t\t\tname="test"
-\t\t\t\tvalue="are you male?"
-\t\t\t\t/>
+\t\t<div class="col-12-xs col-8-md col-6-lg formField form-group " title="">
+\t\t\t<label class="">
+\t\t\t<input type="radio" name="test" value="are you male?" class="form-control" />&nbsp;are you male?</label>
 \t\t</div>
 \t</fieldset>
-</div>""".toString()
+</div>"""
         assert result.contains('type="radio"')
-        assert result.compareTo(expect)
+        assert result == expect
     }
 
     void testHeader() {
@@ -177,40 +149,22 @@ class FormTagLibTests {
         formElement.form("This is a test", [number: 5, map: 'test'], null) {}
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input
-\t\ttype="number"
-\t\tname="test"
-\t\tid="test"
-\t\tvalue=""
-\t\tsize="5"
-\t\tmaxlength="5"
-\t\t/>
-</div>
-"""
+\t<input type="number" name="test" id="test" value="" maxlength="5" style="max-width: 6.0em" class="form-control" />
+</div>"""
     }
 
     void testNumberRange() {
         formElement.form("This is a test", [number: 0..21, map: 'test'], null) {}
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input
-\t\ttype="number"
-\t\tname="test"
-\t\tid="test"
-\t\tvalue=""
-\t\tmax="21"
-\t\tmin="0"
-\t\tsize="2"
-\t\tmaxlength="2"
-\t\t/>
-</div>
-"""
+\t<input type="number" name="test" id="test" min="0" max="21" value="" maxlength="2" style="max-width: 4em" class="form-control" />
+</div>"""
     }
 
     void testPhone() {
@@ -219,19 +173,11 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input
-\t\ttype="tel"
-\t\tname="test"
-\t\tid="test"
-\t\tvalue=""
-\t\tsize="15"
-\t\tmaxlength="15"
-\t\t/>
-</div>
-"""
+\t<input type="tel" name="test" id="test" style="max-width: 13.0em" value="" maxlength="15" class="form-control" />
+</div>"""
     }
 
     void testMoney() {
@@ -240,20 +186,11 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t\$&nbsp;<input
-\t\ttype="number"
-\t\tname="test"
-\t\tid="test"
-\t\tvalue=""
-\t\tsize="5"
-\t\tmaxlength="5"
-\t\tclass="money"
-\t\t/>
-</div>
-"""
+\t\$&nbsp;<input type="number" name="test" id="test" step="0.01" value="" class="money form-control" maxlength="5" style="max-width: 6.0em" />
+</div>"""
     }
 
     void testDate() {
@@ -262,19 +199,11 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input
-\t\ttype="text"
-\t\tname="test"
-\t\tclass="date"
-\t\tformat="d/M/yyyy"
-\t\tsize="10"
-\t\tvalue=""
-\t\t/>
-</div>
-"""
+\t<input type="text" name="test" id="test" format="d/M/yyyy" value="" style="max-width: 9.5em" class="form-control date" />
+</div>"""
     }
 
     void testDatetime() {
@@ -283,80 +212,71 @@ class FormTagLibTests {
         }
         formElement.attr.name = 'test'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
-\t<label for="test" class="">This is a test</label>
-\t<input type="text" name="test.date" id="test.date" value="" class="date"
-\t\tformat="d/M/yyyy"
-\t\tsize="10"
-\t\t/>
-\t<input type="text" name="test.time" id="test.time" value="" class="time"
-\t\tformat="d/M/yyyy"
-\t\tsize="10"
-\t\t/>
-</div>
-"""
+\t<fieldset>
+\t\t<legend>This is a test</legend>
+\t\t<div class="datetime">
+\t\t\t<label for="test.date">Date
+\t\t\t<input type="text" name="test.date" id="test.date" value="" format="d/M/yyyy" style="max-width: 9.5em" class="form-control date" />
+\t\t\t</label>
+\t\t\t<label for="test.time">Time
+\t\t\t<input type="text" name="test.time" id="test.time" value="" class="form-control time" format="d/M/yyyy" style="max-width: 9.5em" />
+\t\t\t</label>
+\t\t</div>
+\t\t<div class="datetime">
+\t\t</div>
+\t</fieldset>
+</div>"""
     }
 
     void testAttachment() {
         formElement.form("This is a test", [attachment: 'document', map: 'test'], null) {}
         formElement.attr.name = 'test.document'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test.document" class="">This is a test</label>
-\t<input
-\t\ttype="file"
-\t\tname="test.document"
-\t\tid="test.document"
-\t\tfileName=""
-\t\t/>
+\t<input type="file" name="test.document" id="test.document" fileName="" class="form-control" />
 \t&nbsp;
-</div>
-"""
+</div>"""
     }
 
     void testSelect() {
         formElement.form("This is a test", [select: ['one','two','three','four','five'], map: 'test', default: 'one'], null) {}
         formElement.attr.name = 'test.select'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test.select" class="">This is a test</label>
-\t<select name="test.select" id="test.select"
-\t\t>
+\t<select name="test.select" id="test.select" class="form-control">
 \t\t<option selected="selected">one</option>
 \t\t<option>two</option>
 \t\t<option>three</option>
 \t\t<option>four</option>
 \t\t<option>five</option>
 \t</select>
-</div>
-"""
+</div>"""
     }
 
     void testSelectPreambleAndHint() {
         formElement.form("This is a test", [select: ['one','two','three','four','five'], map: 'test', default: 'one', hint: 'pick one of those', preamble: 'do this now', required: true], null) {}
         formElement.attr.name = 'test.select'
 
-        String result = tagLib.tidy(text: applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim())
-        println result
+        String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
-\t<div class='preamble'>do this now</div>
+\t<div class="preamble">do this now</div>
 \t<label for="test.select" class="">This is a test</label>
-\t<select name="test.select" id="test.select"
-\t\trequired="required"
-\t\t>
+\t<select name="test.select" id="test.select" class="form-control" required="required">
 \t\t<option selected="selected">one</option>
 \t\t<option>two</option>
 \t\t<option>three</option>
 \t\t<option>four</option>
 \t\t<option>five</option>
 \t</select>
-\t<span class='required'>*</span>
-\t<span class='hint'>pick one of those</span>
-</div>
-"""
+\t<span class="required">*</span>
+\t<p class="hint help-block">pick one of those</p>
+</div>"""
     }
 
 }

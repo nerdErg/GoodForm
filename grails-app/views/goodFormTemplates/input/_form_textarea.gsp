@@ -1,3 +1,4 @@
+<!-- <div>%{--this is a bug fix for compressing textarea--}%</div> -->
 <textarea
     name="${name}"
     id="${name}"

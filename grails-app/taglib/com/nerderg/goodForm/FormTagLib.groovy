@@ -53,9 +53,7 @@ class FormTagLib {
         c.call(model, attrs, bufOut)
         Source source = new Source(bufOut.toString())
         GoodFormCompactor compactor = new GoodFormCompactor(source)
-        Source prettySource = new Source(compactor.toString())
-        SourceFormatter psf = prettySource.getSourceFormatter()
-        out << psf.toString()
+        out << compactor.toString()
     }
 
     private Closure heading = { Map model, Map attrs, Writer bufOut ->
@@ -135,11 +133,12 @@ class FormTagLib {
         }
 
         List<String> skip = attr.skip ?: []
-        List attributeStrings = fieldAttrs.collect { String key, value ->
+        Set<String> attributeStrings = fieldAttrs.collect { String key, value ->
             if (!(skip && skip.contains(key))) {
                 "$key=\"${value.encodeAsHTML()}\""
             }
         }
+        attributeStrings.remove(null)
         out << attributeStrings.join(' ')
     }
 
