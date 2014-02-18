@@ -341,7 +341,6 @@ class GoodFormService {
                 }
             }
         }
-
     }
 
     /**
@@ -392,6 +391,25 @@ class GoodFormService {
         return formData.fieldErrors[field + (index == null ? '0' : index)]
     }
 
+    /**
+     * Gets the standard basic model properties. You can pass in a default map of fieldAttributes that may be over written
+     * or added too. the class attribute will be added too, the value attribute will be overwritten. If a default value
+     * is specified in the form DSL it will be used.
+     *
+     * fieldAttributes will have these HTML attributes added as appropriate;
+     * <code>
+     *  max, min, step, size, maxLength, required, disabled, pattern
+     * </code>
+     *
+     * Obviously you can over write these values as you see fit when you get the model back.
+     *
+     * @param e - the {@link FormElement}
+     * @param store - form data map
+     * @param index - if this is a list this is the index position into the list of values
+     * @param disabled - is this read only
+     * @param fieldAttributes - default value map of field attributes to be used in the input element.
+     * @return model
+     */
     Map getDefaultModelProperties(FormElement e, Map store, Integer index, boolean disabled, Map fieldAttributes) {
         def value = findField(store, e.attr.name as String, index) ?: (e.attr.default ?: '')
         String type = getElementType(e)
@@ -426,6 +444,13 @@ class GoodFormService {
         return model
     }
 
+    /**
+     * gets a map of HTML(5) attributes from the form element in key/value form for injecting into input elements
+     * @param disabled - should the field be disabled
+     * @param e - the {@link FormElement}
+     * @param type - the element type e.g. text, number, money, phone
+     * @return map
+     */
     private Map makeHtmlAttributes(boolean disabled, FormElement e, String type) {
 
         Map fieldAttributes = getNumberMinMaxStep(e) //get min/max if exist
@@ -444,6 +469,16 @@ class GoodFormService {
         return fieldAttributes
     }
 
+    /**
+     * Get a pattern Map from an element if it exists. The map will contain a 'pattern' item, with <em>optional</em> 'title'
+     * item. The title is the description of the pattern for use in errors.
+     *
+     * It is preferred that the form DSL contains a map, however this handles the legacy definitions of just the pattern
+     * string or a list where the first element is the pattern and the second is the title.
+     *
+     * @param e
+     * @return Map [pattern: 'regex', title: 'blah']
+     */
     Map getPattern(FormElement e) {
         if (e.attr.pattern) {
             if (isCollectionOrArray(e.attr.pattern)) {
@@ -463,6 +498,12 @@ class GoodFormService {
         return [:]
     }
 
+    /**
+     * use information from the element to determine the size of the element in characters.
+     * @param e
+     * @param type
+     * @return
+     */
     private static Map makeFieldSizeAttributes(FormElement e, String type) {
 
         if (!e.attr[type]) {
@@ -472,7 +513,7 @@ class GoodFormService {
         Integer size
         if (e.attr[type] instanceof Range) {
             BigDecimal max = e.attr[type].to
-            if(e.attr.step) {
+            if (e.attr.step) {
                 max += (e.attr.step as BigDecimal).abs()
             }
             println "max is $max"
@@ -488,11 +529,22 @@ class GoodFormService {
         }
     }
 
-    void addFormElementType(String name, Closure c) {
+    /**
+     * Add a new Model Closure for a specific element type. If you are adding a new element type you create a model
+     * closure and add it here to have it rendered.
+     *
+     * @param name
+     * @param c
+     */
+    final void addFormElementType(String name, Closure c) {
         elementTypeModel.put(name, c)
     }
 
-    void initDefaultElements() {
+    /**
+     * add default model producing Closures to the list (Map) of models.
+     * use the public addFormElementType to add custom models.
+     */
+    private final void initDefaultElements() {
         addFormElementType('text', defaultAttributesModel)
         addFormElementType('number', defaultAttributesModel)
         addFormElementType('phone', defaultAttributesModel)
@@ -510,6 +562,13 @@ class GoodFormService {
         addFormElementType('listOf', listOfModel)
     }
 
+    /**
+     * Get the data model for a given element. The data model is used to render a given element using a GSP template.
+     * See getElementModel(FormElement e, Map answers, Integer index, Boolean disabled) documentation.
+     *
+     * @param attrs Map with 'element', 'store', 'index', 'disabled' elements
+     * @return model Map
+     */
     Map getElementModel(Map attrs) {
         FormElement e = attrs.element
         Map store = attrs.store
@@ -518,6 +577,27 @@ class GoodFormService {
         getElementModel(e, store, index, disabled)
     }
 
+    /**
+     * Get the data model for a given element. The data model is used to render a given element using a GSP template.
+     * The data model map contains the following elements by default:
+     * <code>
+     *     String type:      The element type, e.g. text, number, money etc.
+     *     String error:     An error string for this element, if any.
+     *     String name:      The elements name
+     *     String label:     The label text to use on this element
+     *     String preamble:  Preamble text if any, to be displayed with the element
+     *     Boolean required: If the element is required
+     *     String hint:      The hint text if any
+     *     String prefix:    Prefix text that goes just before the field e.g. "$"
+     *     String units:     Units text that goes just after the field e.g. 'km/h"
+     *     Map fieldAttributes: fieldAttributes for the input element itself including the value, max, min, size, required in key/value pairs.
+     * </code>
+     * @param e the {@link FormElement}
+     * @param answers the Form Data Map
+     * @param index if this is a list this is the index position into the list of values
+     * @param disabled should the field be disabled or read only
+     * @return model Map
+     */
     Map getElementModel(FormElement e, Map answers, Integer index, Boolean disabled) {
         String type = getElementType(e)
         log.debug "*** geting model for $type"
@@ -533,7 +613,7 @@ class GoodFormService {
     }
 
     private Closure moneyModel = { FormElement e, Map answers, Integer index, Boolean disabled ->
-        if(!e.attr.step){
+        if (!e.attr.step) {
             e.attr.step = 0.01
         }
         getDefaultModelProperties(e, answers, index, disabled, [:])
@@ -655,7 +735,7 @@ class GoodFormService {
         return result
     }
 
-    def anyValueSet(Map map) {
+    private Boolean anyValueSet(Map map) {
         map.find {
             if (it.value instanceof Map) {
                 return anyValueSet(it.value as Map)
@@ -666,11 +746,18 @@ class GoodFormService {
     }
 
 
-    String keyToLabel(String key) {
+    private static String keyToLabel(String key) {
         key.replaceAll('_', ' ')
     }
 
-    def withQuestions(List<String> qSet, Form questions, Closure c) {
+    /**
+     * Do some work with a set of questions. The closure is passed in a {@link Question} and the question reference name.
+     * @param qSet a List of question reference strings
+     * @param questions the Form object with the question definitions
+     * @param c the Closure that does the work
+     * @see Question
+     */
+    void withQuestions(List<String> qSet, Form questions, Closure c) {
         qSet.each { qRef ->
             if (qRef != 'End') {
                 Question q = questions[qRef]
