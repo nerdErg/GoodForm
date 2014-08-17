@@ -6,6 +6,15 @@ Checkout the [documentation] (http://nerderg.com/Good+Form)
 
 And the [Tutorial] (tutorial/01-Introduction.md)
 
+Version 2.0.0 (not released)
+
+* remove nerderg form tags as the basis for the form elelments
+* write templates for all element and form pages for ease of skinning and adding new elements for forms.
+* add a script to import the templates into your project for modification
+* make the form element definitions in the DSL more modular to allow for simpler addition of new custom elements
+* support bootstrap out of the box, and implement a new default bootstrap theme for the forms
+* add a form index bar to assist going back in the form
+
 Version 1.0.4
 
 * Add a select field so that you can have a "select an option" select: ['one','two','three'] ... which creates a drop down select box
