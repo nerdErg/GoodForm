@@ -3,8 +3,8 @@ package com.nerderg.goodForm.form
 /**
  * The Form Question defines a Question as a Form Element. The question has a reference string to identify it.
  *
- * User: pmcneil
- * Date: 11/11/11
+ * @author pmcneil
+ * @since 11/11/11
  *
  */
 class Question {

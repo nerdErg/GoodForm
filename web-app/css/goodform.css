@@ -15,9 +15,27 @@ div.goodFormContainer .errorsAlert {
     top: 0;
 }
 
+div.goodFormContainer #formIndex {
+    position: fixed;
+    z-index: 100;
+    width: 4em;
+    /*float: left;*/
+}
+
+div.goodFormContainer #formIndex .panel-heading {
+    padding: 9px;
+}
+
+div.goodFormContainer .formData {
+    height: 100%;
+    margin-left: 4.5em;
+}
+
+
 div.goodFormContainer .qset {
     cursor: pointer;
 }
+
 div.goodFormContainer label {
     display: block;
 }

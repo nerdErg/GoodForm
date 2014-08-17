@@ -4,9 +4,8 @@ package com.nerderg.goodForm.form
  * Handles updating question information at runtime. This is not comprehensive and only allows data fields in the
  * form data map to be renamed.
  *
- * User: pmcneil
- * Date: 6/08/12
- *
+ * @author pmcneil
+ * @since 6/08/12
  */
 class Updater {
 

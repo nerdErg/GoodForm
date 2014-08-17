@@ -97,6 +97,15 @@
             ampmPrefix: ' '
         });
 
+        parent.find('a.animated').click(function (e) {
+            e.preventDefault();
+            var selector = $(this).attr('href');
+            var dest = $(selector);
+            var top = dest.offset().top;
+            $('html, body').animate({
+                scrollTop: top
+            }, 1000);
+        });
 
         parent.find('div.inlineCheck').filter(':even').css('background', '#E5E4E8');
         this.addDatePickerBehaviour(parent);
@@ -144,20 +153,62 @@ $(function () {
         $(this).css('cursor', 'wait');
     });
 
+
     var container = $('div.goodFormContainer');
     goodform.addBehaviour(container);
 
     var form = $("#form");
     var errors = $('.has-error');
+    var formIndex = $('#formIndex');
+    var formData = $('.formData');
+
     if (form.length == 1 && !errors.length > 0) {
         $('html, body').animate({
             scrollTop: form.offset().top
         }, 1000);
     }
-    if(errors.length > 0) {
+
+    if (errors.length > 0) {
         $('html, body').animate({
             scrollTop: ($(errors[0]).offset().top - 50)
         }, 2000);
     }
+
+    /**
+     * This makes sure the formIndex is always in view and that you can scroll to see all the index elements even if they
+     * are larger than the screen height. It switches from fixed to JS positioning of the formIndex div to make it perform
+     * reasonably in mobile browsers.
+     *
+     * Absolute positioning in chrome can be a little jumpy if you scroll using the mouse wheel, but it's fine if you
+     * use the scroll bar, which seems like a bug in chrome (or not worth fixing)
+     */
+
+    var scrollMode = 0;
+    $(window).scroll(function () {
+        var h = $(window).height();
+        var wtop = $(window).scrollTop();
+        var fdtop = formData.offset().top;
+
+        if (h < (formIndex.height())) {
+            var top = Math.max(wtop, fdtop);
+            var bottom = top + h;
+            var indexHeight = formIndex.height();
+
+            if (formIndex.offset().top >= top) {
+                formIndex.css({position: 'absolute', float: 'left', top: top});
+            } else if (formIndex.offset().top + indexHeight < top + h) {
+                formIndex.css({position: 'absolute', float: 'left', top: (bottom - indexHeight)});
+            }
+            scrollMode = 0;
+        } else {
+            if((scrollMode != 1) && (wtop > fdtop)) {
+                formIndex.css({position: 'fixed', top: 0});
+                scrollMode = 1;
+            } else if(fdtop - wtop > 0) {
+                formIndex.css({position: 'fixed', top: (fdtop - wtop)});
+                scrollMode = 0;
+            }
+        }
+    });
 
 });

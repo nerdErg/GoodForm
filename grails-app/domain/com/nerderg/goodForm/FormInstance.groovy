@@ -3,7 +3,11 @@ package com.nerderg.goodForm
 import grails.converters.JSON
 
 /**
- * Represents a form submission for a user.
+ * <p>#domian, #persistance</p>
+ *
+ * <p>Represents a form submission for a user.</p>
+ *
+ * <p>This domain class stores the the form data and state including user identifier.</p>
  *
  * @author Peter McNeil
  */

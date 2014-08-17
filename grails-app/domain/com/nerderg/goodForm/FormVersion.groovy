@@ -1,7 +1,18 @@
 package com.nerderg.goodForm
-
+/**
+ * #domian, #persistance
+ *
+ * Represents a version of a form definition.
+ * This domain class contains the form definition and it's version number.
+ *
+ * @see FormDefinition
+ * @author Peter McNeil
+ */
 class FormVersion {
 
+    /**
+     * The formDefinition DSL as a string
+     */
     String formDefinitionDSL
 
     /**

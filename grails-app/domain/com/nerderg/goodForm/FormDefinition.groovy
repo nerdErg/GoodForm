@@ -1,8 +1,12 @@
 package com.nerderg.goodForm
 
 /**
- * Handles persisting the form definition in the database.
+ * #domian, #persistance
  *
+ * This domain class defines a particular form by name. It has many form versions associated with it which contain the
+ * FormDefinitionDSL as a String.
+ *
+ * @see FormVersion
  * @author Peter McNeil
  */
 class FormDefinition {

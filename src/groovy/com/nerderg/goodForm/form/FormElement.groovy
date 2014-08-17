@@ -5,9 +5,8 @@ package com.nerderg.goodForm.form
  * element. Form elements contain sub elements which are FormElements. Each form element has a link to it's parent
  * which may be a form element or a question.
  *
- * User: pmcneil
- * Date: 11/11/11
- *
+ * @author pmcneil
+ * @since 11/11/11
  */
 class FormElement {
 

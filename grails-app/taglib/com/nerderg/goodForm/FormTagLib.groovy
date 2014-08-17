@@ -170,7 +170,7 @@ class FormTagLib {
     }
 
     /**
-     *
+     * Displays the answered question sets in reverse order
      */
     def answered = { attrs ->
         FormInstance formInstance = attrs.formInstance
@@ -185,7 +185,28 @@ class FormTagLib {
         state.each { List<String> qSet ->
             if (found) {
                 out << g.render(template: '/goodFormTemplates/common/answeredQuestionSet',
-                        model: [id: "$formInstance.id/${stateMaxIndex - i}", qSet: qSet, data: formData, questions: questions])
+                        model: [id: "$formInstance.id/${stateMaxIndex - i}", qSet: qSet, data: formData, questions: questions, i: i+1])
+            }
+            found = found || qSet == currentQuestions
+            i--
+        }
+    }
+
+    /**
+     * Displays an index of the answered question sets
+     */
+    def answeredIndex = { attrs ->
+        FormInstance formInstance = attrs.formInstance
+
+        List state = formInstance.storedState().reverse()
+        List currentQuestions = formInstance.storedCurrentQuestion()
+        boolean found = false
+        int i = state.size() - 1
+        int stateMaxIndex = i
+        state.each { List<String> qSet ->
+            if (found) {
+                out << g.render(template: '/goodFormTemplates/common/answeredQuestionIndexItem',
+                        model: [id: "$formInstance.id/${stateMaxIndex - i}", i: i+1])
             }
             found = found || qSet == currentQuestions
             i--
@@ -206,7 +227,7 @@ class FormTagLib {
         state.each() { List qSet ->
             if (!qSet.isEmpty() && qSet[0] != 'End') {
                 out << g.render(template: '/goodFormTemplates/common/displayQuestionSet',
-                        model: [id: "$formInstance.id/$i", qSet: qSet, data: formData, questions: questions, readOnly: readOnly])
+                        model: [id: "$formInstance.id/$i", qSet: qSet, data: formData, questions: questions, readOnly: readOnly, i: state.size() - i])
                 i--
             }
             log.debug "end display tag"
