@@ -20,10 +20,11 @@ class RulesEngineService {
     def rulesEngine
 
     def getRulesEngineRestUri() {
-        if (!grailsApplication.config.rulesEngine.uri.toString()) {
+        String uri = grailsApplication.config.goodform.rulesEngine.uri.toString()
+        if (!uri) {
             throw new RulesEngineException("rulesEngine.uri must be defined in grails-app/conf/Config.groovy")
         }
-        return new URIBuilder(grailsApplication.config.rulesEngine.uri.toString() + "/rest/applyRules")
+        return new URIBuilder(uri + "/rest/applyRules")
     }
 
     /**

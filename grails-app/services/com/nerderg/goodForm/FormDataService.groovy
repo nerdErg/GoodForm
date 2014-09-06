@@ -301,7 +301,7 @@ class FormDataService {
             def grailsWebRequest = WebUtils.retrieveGrailsWebRequest()
             def f = grailsWebRequest.getCurrentRequest().getFile(formElement.attr.name)
             if (f && !f.empty) {
-                String basedir = grailsApplication.config.uploaded.file.location ?: './'
+                String basedir = grailsApplication.config.goodform.uploaded.file.location ?: './'
                 File location = new File(basedir, instance.formVersion.formDefinition.name + '/' + instance.id)
                 location.mkdirs()
                 if(!location.exists()) {

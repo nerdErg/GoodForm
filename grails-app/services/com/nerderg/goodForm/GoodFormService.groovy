@@ -3,6 +3,7 @@ package com.nerderg.goodForm
 import com.nerderg.goodForm.form.Form
 import com.nerderg.goodForm.form.FormElement
 import com.nerderg.goodForm.form.Question
+import grails.gsp.PageRenderer
 import org.codehaus.groovy.grails.web.json.JSONArray
 
 /**
@@ -13,21 +14,30 @@ import org.codehaus.groovy.grails.web.json.JSONArray
 class GoodFormService {
 
     static transactional = false
+    PageRenderer groovyPageRenderer
 
     /**
-     * A map of known element types.
-     * Types are mapped to a closure that extracts relevant information about the type for display as a field in summary
-     * or as an input.
+     * <p>A map of known element types.</p>
      *
-     * the closure must take (FormElement e, Map answers, Integer index) and return a model.
-     * The model by convention has a submap called fieldAttributes which contains the field value and field specific
+     * <p>Types are mapped to a closure that extracts relevant information about the type for display as a field in summary
+     * or as an input.</p>
+     *
+     * <p>The closure must take (FormElement e, Map answers, Integer index) and return a model.</p>
+     *
+     * <p>The model by convention has a submap called fieldAttributes which contains the field value and field specific
      * attributes. Your closure should call getDefaultModelProperties with a map of extra fieldAttributes
-     * Map model = getDefaultModelProperties(e, answers, index, disabled, [myattribute : e.attr.myspecialthing])
+     * Map model = getDefaultModelProperties(e, answers, index, disabled, [myattribute : e.attr.myspecialthing])</p>
      *
-     * if you only need the default attributes just add the defaultAttributes closure.
+     * <p>If you only need the default attributes just add the defaultAttributes closure.</p>
      * @see GoodFormService
      */
-    static final Map<String, Closure> elementTypeModel = [:]
+    private static final Map<String, Closure> elementTypeModel = [:]
+
+    /**
+     * <p>A map of element closures to render an element. This is used in FormTagLib to render different element types.
+     */
+    private static final Map<String, Closure> elementRenderers = [:]
+
 
     GoodFormService() {
         initDefaultElements()
@@ -173,7 +183,7 @@ class GoodFormService {
         }
         if (name) {
             String parentName = e.parent ? e.parent.attr.name : ''
-            if (isGrantParentPick1(e)) {
+            if (isGrandParentPick1(e)) {
                 //if grandparent is a pick 1 we need to move the sub element data to below it in the map
                 parentName = parentName.replaceAll(/\.([^\.]*)$/, '_$1')
             }
@@ -188,7 +198,7 @@ class GoodFormService {
         throw new FieldNotMappedException(e)
     }
 
-    private static isGrantParentPick1(FormElement e) {
+    private static isGrandParentPick1(FormElement e) {
         FormElement grandParent = getGrandParent(e)
         return grandParent && grandParent.attr.pick && grandParent.attr.pick.toString() == "1"
     }
@@ -538,6 +548,25 @@ class GoodFormService {
      */
     final void addFormElementType(String name, Closure c) {
         elementTypeModel.put(name, c)
+    }
+
+    /**
+     * Add a rendering closure for form elements. The rendering closure renders a template or templates to a output
+     * buffer.
+     * @param name
+     * @param c
+     */
+    final void addFormElementRenderer(String name, Closure c) {
+        elementRenderers.put(name, c)
+    }
+
+    final Map getFormElementRenders() {
+        elementRenderers
+    }
+
+    final void render(Map params) {
+        Writer bufOut = params.remove('out') as Writer
+        bufOut << groovyPageRenderer.render(params)
     }
 
     /**

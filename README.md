@@ -14,6 +14,7 @@ Version 2.0.0 (not released)
 * make the form element definitions in the DSL more modular to allow for simpler addition of new custom elements
 * support bootstrap out of the box, and implement a new default bootstrap theme for the forms
 * add a form index bar to assist going back in the form
+* add the ability to extend the form element types
 
 Version 1.0.4
 

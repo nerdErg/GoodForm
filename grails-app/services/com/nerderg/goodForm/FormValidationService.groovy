@@ -35,8 +35,13 @@ class FormValidationService {
         customValidationMap.put(validationName, closure)
     }
 
+    void removeCustomValidator(String validationName) {
+        customValidationMap.remove(validationName)
+    }
+
     /**
-     *
+     * Checks the formData field against a custom validator. The formElement needs a validate attribute which is used as
+     * a key to the customValidation
      * @param formElement
      * @param fieldValue
      * @return

@@ -24,23 +24,31 @@ class FormTagLib {
 
     static namespace = "gf"
 
-    private static final Map<String, Closure> elementClosures = [:]
+    private Map formElementRenderers = [:]
 
-    FormTagLib() {
-        elementClosures.put('heading', heading)
-        elementClosures.put('text', wrapper)
-        elementClosures.put('number', wrapper)
-        elementClosures.put('phone', wrapper)
-        elementClosures.put('money', wrapper)
-        elementClosures.put('select', wrapper)
-        elementClosures.put('date', wrapper)
-        elementClosures.put('datetime', datetime)
-        elementClosures.put('attachment', wrapper)
-        elementClosures.put('group', group)
-        elementClosures.put('pick', group)
-        elementClosures.put('each', each)
-        elementClosures.put('listOf', listOf)
-        elementClosures.put('bool', bool)
+    private void addStandardFormElementRenderers() {
+        goodFormService.addFormElementRenderer('heading', heading)
+        goodFormService.addFormElementRenderer('text', wrapper)
+        goodFormService.addFormElementRenderer('number', wrapper)
+        goodFormService.addFormElementRenderer('phone', wrapper)
+        goodFormService.addFormElementRenderer('money', wrapper)
+        goodFormService.addFormElementRenderer('select', wrapper)
+        goodFormService.addFormElementRenderer('date', wrapper)
+        goodFormService.addFormElementRenderer('datetime', datetime)
+        goodFormService.addFormElementRenderer('attachment', wrapper)
+        goodFormService.addFormElementRenderer('group', group)
+        goodFormService.addFormElementRenderer('pick', group)
+        goodFormService.addFormElementRenderer('each', each)
+        goodFormService.addFormElementRenderer('listOf', listOf)
+        goodFormService.addFormElementRenderer('bool', bool)
+    }
+
+    private withElementRenderer(String name, Closure work) {
+        if(!formElementRenderers) {
+            addStandardFormElementRenderers()
+            formElementRenderers = goodFormService.getFormElementRenders()
+        }
+        work(formElementRenderers[name])
     }
 
     def element = { attrs ->
@@ -48,12 +56,13 @@ class FormTagLib {
             attrs.templateDir = 'input'
         }
         Map model = goodFormService.getElementModel(attrs)
-        Closure c = elementClosures[model.type]
-        StringBufferWriter bufOut = new StringBufferWriter(new StringBuffer())
-        c.call(model, attrs, bufOut)
-        Source source = new Source(bufOut.toString())
-        GoodFormCompactor compactor = new GoodFormCompactor(source)
-        out << compactor.toString()
+        withElementRenderer(model.type) { Closure c ->
+            StringBufferWriter bufOut = new StringBufferWriter(new StringBuffer())
+            c.call(model, attrs, bufOut)
+            Source source = new Source(bufOut.toString())
+            GoodFormCompactor compactor = new GoodFormCompactor(source)
+            out << compactor.toString()
+        }
     }
 
     private Closure heading = { Map model, Map attrs, Writer bufOut ->
