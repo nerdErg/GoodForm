@@ -17,11 +17,11 @@ import org.springframework.context.MessageSource
  * @author Ross Rowe
  * @author Peter McNeil
  */
-@TestFor(FormDataService)
 @TestMixin(DomainClassUnitTestMixin)
 @Mock([FormDefinition, FormVersion])
 class FormDataServiceTests {
 
+    FormDataService service
     FormInstance formInstance
     Form form
     FormValidationService formValidationService
@@ -30,9 +30,9 @@ class FormDataServiceTests {
 
     @Before
     public void setUp() {
-        service.goodFormService = new GoodFormService()
         formValidationService = new FormValidationService()
-        service.formValidationService = formValidationService
+        service = new FormDataService(goodFormService: new GoodFormService(), formValidationService: formValidationService)
+
         service.addValidator(formValidationService.customValidation)
         formInstance = new FormInstance()
         form = new Form()
@@ -296,7 +296,7 @@ class FormDataServiceTests {
     }
 
     void testCreateNewFormVersion() {
-        String sampleForm = """ form {  //start with a 'form' element
+        String sampleForm = """form {  //start with a 'form' element
                    question("Q1") {   //include a 'question' element with an identifier
                            "What is your name?" group: "names", {
                            "Title" text: 10, hint: "e.g. Mr, Mrs, Ms, Miss, Dr", suggest: "title", map: 'title'

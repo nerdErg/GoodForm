@@ -1,3 +1,5 @@
+//= require jquery.timeentry.min.js
+//= require jquery.mousewheel.min.js
 (goodform = {
     baseContextPath: '/',
     active: 0,
@@ -27,7 +29,7 @@
 
         parent.find('.hiddenFormCheckbox').change(function (event) {
             var hiddenForm = $('#' + $(this).attr('data-hidden-form'));
-            if ($(this).attr('checked')) {
+            if ($(this).prop('checked')) {
                 hiddenForm.show();
             } else {
                 hiddenForm.hide();
@@ -131,7 +133,7 @@
             var element = $(el);
             if ($(element).hasClass('hiddenFormRadio')) {
                 var hiddenForm = $('#' + $(this).attr('data-hidden-form'));
-                if ($(this).attr('checked')) {
+                if ($(this).prop('checked')) {
                     hiddenForm.show();
                 } else {
                     hiddenForm.hide();

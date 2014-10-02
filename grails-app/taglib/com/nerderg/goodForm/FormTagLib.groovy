@@ -120,13 +120,14 @@ class FormTagLib {
         }
     }
 
+    @SuppressWarnings("GrMethodMayBeStatic")
     private gfRender(Map params) {
-        Writer bufOut = params.remove('out')
+        Writer bufOut = params.remove('out') as Writer
         bufOut << g.render(params)
     }
 
     def addAttributes = { attr ->
-        Map fieldAttrs = new HashMap(attr.fieldAttr)
+        Map fieldAttrs = new HashMap(attr.fieldAttr as Map)
         String classString = attr['class']
 
         if (classString) {
@@ -142,7 +143,7 @@ class FormTagLib {
         }
 
         List<String> skip = attr.skip ?: []
-        Set<String> attributeStrings = fieldAttrs.collect { String key, value ->
+        Set<String> attributeStrings = fieldAttrs.collect { key, value ->
             if (!(skip && skip.contains(key))) {
                 "$key=\"${value.encodeAsHTML()}\""
             }

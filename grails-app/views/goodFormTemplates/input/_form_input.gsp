@@ -2,4 +2,4 @@
     type="${type}"
     name="${name}"
     id="${name}"
-  ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control")}/>
+  <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control"/>/>

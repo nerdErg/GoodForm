@@ -3,11 +3,10 @@
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
   <meta name="layout" content="main"/>
-  <r:script>
+  <script type="application/javascript">
   goodform.baseContextPath = "${request.getContextPath()}";
-  </r:script>
+  </script>
   <link href="//netdna.bootstrapcdn.com/font-awesome/4.0.3/css/font-awesome.css" rel="stylesheet">
-
 </head>
 
 <body>

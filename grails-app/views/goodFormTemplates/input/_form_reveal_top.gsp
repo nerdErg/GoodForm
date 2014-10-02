@@ -11,7 +11,7 @@
       name="${fieldAttributes.parentName}"
       value="${label.encodeAsHTML()}"
       data-hidden-form="${gf.makeId(identity: [name,label])}-hiddenForm"
-    ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control hiddenFormRadio", skip: ['value', 'parentName'])}/>&nbsp;${label.encodeAsHTML()}</label></legend>
+    <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control hiddenFormRadio" skip="['value', 'parentName']"/> />&nbsp;${label.encodeAsHTML()}</label></legend>
 </g:if>
 
 <g:else>
@@ -23,7 +23,7 @@
       id="${name}"
       value="${label.encodeAsHTML()}"
       data-hidden-form="${gf.makeId(identity: [name,label])}-hiddenForm"
-    ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control hiddenFormCheckbox", skip: ['value'])}/>&nbsp;${label.encodeAsHTML()}</label></legend>
+    <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control hiddenFormCheckbox" skip="['value']"/> />&nbsp;${label.encodeAsHTML()}</label></legend>
 </g:else>
 
 <g:if test="${units}"><span class='units'>${units}</span></g:if>

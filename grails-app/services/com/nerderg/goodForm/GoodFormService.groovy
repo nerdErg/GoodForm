@@ -332,9 +332,9 @@ class GoodFormService {
 
         def source = store[sourceCollectionName]
 
-        List items = (source instanceof List ? source : [source])
+        List<String> items = (source instanceof List ? source : [source])
 
-        items.eachWithIndex { String item, i ->
+        items.eachWithIndex { item, i ->
             //because of JSON.Null item may well be null
             if (item) {
                 e.subElements.each { FormElement sub ->

@@ -15,8 +15,10 @@ class FormTagLibTests {
     @Before
     void setUp() {
         formElement = new FormElement('q1')
-        tagLib.goodFormService = new GoodFormService()
-        tagLib.formDataService = new FormDataService()
+        mockService(GoodFormService)
+        mockService(FormValidationService)
+        mockService(FormReferenceService)
+        mockService(FormDataService)
     }
 
     void testGroup() {
@@ -39,7 +41,7 @@ class FormTagLibTests {
 \t\t</legend>
 \t\t<div class="formField " title="">
 \t\t\t<label for="test.test" class="">Dummy element</label>
-\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
+\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" style="max-width: 9.5em" value="" class="form-control" />
 \t\t</div>
 \t</fieldset>
 </div>"""
@@ -64,7 +66,7 @@ class FormTagLibTests {
 \t\t<div class="questionListOfItem">
 \t\t\t<div class="formField " title="">
 \t\t\t\t<label for="test.test" class="">Dummy element</label>
-\t\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
+\t\t\t\t<input type="text" name="test.test" id="test.test" maxlength="10" style="max-width: 9.5em" value="" class="form-control" />
 \t\t\t</div>
 \t\t\t<span class="removeForm btn-xs btn-warning">
 \t\t\t<img src="/images/icons/delete.png" title="Remove this" alt="-" />
@@ -88,7 +90,7 @@ class FormTagLibTests {
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">Dummy element</label>
-\t<input type="text" name="test" id="test" maxlength="10" value="" style="max-width: 9.5em" class="form-control" />
+\t<input type="text" name="test" id="test" maxlength="10" style="max-width: 9.5em" value="" class="form-control" />
 </div>"""
     }
 
@@ -152,7 +154,7 @@ broken string.</textarea>
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input type="number" name="test" id="test" value="" maxlength="5" style="max-width: 6.0em" class="form-control" />
+\t<input type="number" name="test" id="test" maxlength="5" style="max-width: 6.0em" value="" class="form-control" />
 </div>"""
     }
 
@@ -163,7 +165,7 @@ broken string.</textarea>
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input type="number" name="test" id="test" min="0" max="21" value="" maxlength="2" style="max-width: 4em" class="form-control" />
+\t<input type="number" name="test" id="test" min="0" maxlength="2" max="21" style="max-width: 4em" value="" class="form-control" />
 </div>"""
     }
 
@@ -176,7 +178,7 @@ broken string.</textarea>
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input type="tel" name="test" id="test" style="max-width: 13.0em" value="" maxlength="15" class="form-control" />
+\t<input type="tel" name="test" id="test" maxlength="15" style="max-width: 13.0em" value="" class="form-control" />
 </div>"""
     }
 
@@ -189,7 +191,7 @@ broken string.</textarea>
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t\$&nbsp;<input type="number" name="test" id="test" step="0.01" value="" class="money form-control" maxlength="5" style="max-width: 6.0em" />
+\t\$&nbsp;<input type="number" name="test" id="test" maxlength="5" style="max-width: 6.0em" value="" class="money form-control" step="0.01" />
 </div>"""
     }
 
@@ -202,7 +204,7 @@ broken string.</textarea>
         String result = applyTemplate('<gf:element element="${formElement}" store="${formData}"/>', [formElement: formElement, formData: [fieldErrors: [:]]]).trim()
         assert result == """<div class="formField " title="">
 \t<label for="test" class="">This is a test</label>
-\t<input type="text" name="test" id="test" format="d/M/yyyy" value="" style="max-width: 9.5em" class="form-control date" />
+\t<input type="text" name="test" id="test" style="max-width: 9.5em" value="" class="form-control date" format="d/M/yyyy" />
 </div>"""
     }
 
@@ -218,10 +220,10 @@ broken string.</textarea>
 \t\t<legend>This is a test</legend>
 \t\t<div class="datetime">
 \t\t\t<label for="test.date">Date
-\t\t\t<input type="text" name="test.date" id="test.date" value="" format="d/M/yyyy" style="max-width: 9.5em" class="form-control date" />
+\t\t\t<input type="text" name="test.date" id="test.date" value="" style="max-width: 9.5em" class="form-control date" format="d/M/yyyy" />
 \t\t\t</label>
 \t\t\t<label for="test.time">Time
-\t\t\t<input type="text" name="test.time" id="test.time" value="" class="form-control time" format="d/M/yyyy" style="max-width: 9.5em" />
+\t\t\t<input type="text" name="test.time" id="test.time" value="" style="max-width: 9.5em" class="form-control time" format="d/M/yyyy" />
 \t\t\t</label>
 \t\t</div>
 \t\t<div class="datetime">

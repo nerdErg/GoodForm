@@ -9,10 +9,10 @@ import org.codehaus.groovy.grails.web.util.WebUtils
 import org.springframework.validation.Errors
 import org.springframework.web.multipart.MultipartFile
 
+import javax.annotation.PostConstruct
 import java.text.ParseException
 import java.text.ParsePosition
 import java.text.SimpleDateFormat
-import javax.annotation.PostConstruct
 
 /**
  * Handles processing and validating form data.
@@ -21,19 +21,15 @@ import javax.annotation.PostConstruct
  */
 class FormDataService {
 
-    static transactional = true
+    static transactional = false
 
     def goodFormService
     def formReferenceService
     def rulesEngineService
     def grailsApplication
+    def formValidationService
 
     def springSecurityService
-
-    /**
-     * Handles custom form validation
-     */
-    def formValidationService
 
     Map<Long, Form> forms = [:]
 
@@ -118,8 +114,6 @@ class FormDataService {
         return error
     }
 
-
-
     /**
      * Validates that a field value matches a defined regex pattern.
      *
@@ -130,7 +124,7 @@ class FormDataService {
     Closure validatePattern = { FormElement formElement, Map formData, fieldValue, Integer index ->
         boolean error = false
         if (fieldValue && formElement.attr.containsKey('pattern')) {
-            Map pattern = [title :"goodform.validate.invalid.pattern"]
+            Map pattern = [title: "goodform.validate.invalid.pattern"]
             pattern << goodFormService.getPattern(formElement)
 
             if (!(fieldValue ==~ pattern.pattern)) {
@@ -155,11 +149,11 @@ class FormDataService {
                 formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
                 error = true
             }
-            if(formElement.attr.datetime && !(fieldValue.date && fieldValue.time)) {
+            if (formElement.attr.datetime && !(fieldValue.date && fieldValue.time)) {
                 formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
                 error = true
             }
-            if(formElement.attr.attachment && fieldValue == 'none') {
+            if (formElement.attr.attachment && fieldValue == 'none') {
                 formValidationService.appendError(formElement, formData, "goodform.validate.required.field", index)
                 error = true
             }
@@ -304,7 +298,7 @@ class FormDataService {
                 String basedir = grailsApplication.config.goodform.uploaded.file.location ?: './'
                 File location = new File(basedir, instance.formVersion.formDefinition.name + '/' + instance.id)
                 location.mkdirs()
-                if(!location.exists()) {
+                if (!location.exists()) {
                     throw new FileNotFoundException("Base directory couldn't be found or created ${location.absolutePath}")
                 }
                 List<String> fieldSplit = (formElement.attr.name as String).split(/\./)
@@ -442,19 +436,21 @@ class FormDataService {
     }
 
     FormInstance createFormInstance(Form form, Map formData) {
-        FormInstance instance = new FormInstance(
-                started: new Date(),
-                userId: getCurrentUser(),
-                instanceDescription: form.name,
-                formVersion: form.version,
-                readOnly: false
-        )
-        instance.storeFormData(formData)
-        List<String> next = formData.next as List<String>
-        instance.storeState([next])
-        instance.storeCurrentQuestion(next)
-        save(instance)
-        return instance
+        FormInstance.withTransaction { status ->
+            FormInstance instance = new FormInstance(
+                    started: new Date(),
+                    userId: getCurrentUser(),
+                    instanceDescription: form.name,
+                    formVersion: form.version,
+                    readOnly: false
+            )
+            instance.storeFormData(formData)
+            List<String> next = formData.next as List<String>
+            instance.storeState([next])
+            instance.storeCurrentQuestion(next)
+            save(instance)
+            return instance
+        }
     }
 
     /**
@@ -540,21 +536,22 @@ class FormDataService {
     }
 
     void updateStoredFormInstance(FormInstance instance, Map processedFormData) {
-
-        List state = instance.storedState()
-        List<String> next = processedFormData.next
-        def nextInState = state.find { s ->
-            s == next
+        FormInstance.withTransaction { txState ->
+            List state = instance.storedState()
+            List<String> next = processedFormData.next
+            def nextInState = state.find { s ->
+                s == next
+            }
+            if (!nextInState) {
+                state.add(next)
+                instance.storeState(state)
+            }
+            if (processedFormData.description) {
+                instance.instanceDescription = processedFormData.description
+            }
+            instance.storeCurrentQuestion(next)
+            instance.storeFormData(processedFormData)
         }
-        if (!nextInState) {
-            state.add(next)
-            instance.storeState(state)
-        }
-        if (processedFormData.description) {
-            instance.instanceDescription = processedFormData.description
-        }
-        instance.storeCurrentQuestion(next)
-        instance.storeFormData(processedFormData)
     }
 
     /**
@@ -637,14 +634,16 @@ class FormDataService {
      * @return FormVersion instance
      */
     FormVersion createNewFormVersion(String name, String formDefinitionDSL) {
-        FormDefinition formDefinition = FormDefinition.findByName(name)
-        if (!formDefinition) {
-            formDefinition = new FormDefinition(
-                    name: name
-            )
-            save(formDefinition, "Failed to save new Form Definition")
+        FormDefinition.withTransaction { status ->
+            FormDefinition formDefinition = FormDefinition.findByName(name)
+            if (!formDefinition) {
+                formDefinition = new FormDefinition(
+                        name: name
+                )
+                save(formDefinition, "Failed to save new Form Definition")
+            }
+            createNewFormVersion(formDefinition, formDefinitionDSL)
         }
-        createNewFormVersion(formDefinition, formDefinitionDSL)
     }
 
     /**
@@ -673,20 +672,21 @@ class FormDataService {
      * @return form version instance
      */
     FormVersion createNewFormVersion(FormDefinition formDefinition, String formDefinitionDSL) {
-
         if (!formDefinition) {
             throw new GoodFormException("Form definition must be provided.")
         }
 
-        FormVersion currentVersion = formDefinition.currentVersion()
-        Integer nextVersionNumber = currentVersion ? currentVersion.formVersionNumber + 1 : 1
+        FormDefinition.withTransaction { status ->
+            FormVersion currentVersion = formDefinition.currentVersion()
+            Integer nextVersionNumber = currentVersion ? currentVersion.formVersionNumber + 1 : 1
 
-        FormVersion formVersion = new FormVersion(formVersionNumber: nextVersionNumber, formDefinitionDSL: formDefinitionDSL)
+            FormVersion formVersion = new FormVersion(formVersionNumber: nextVersionNumber, formDefinitionDSL: formDefinitionDSL)
 
-        formDefinition.addToFormVersions(formVersion)
+            formDefinition.addToFormVersions(formVersion)
 
-        save(formDefinition, "Failed to save new Form Definition")
-        return formVersion
+            save(formDefinition, "Failed to save new Form Definition")
+            return formVersion
+        }
     }
 
     /**

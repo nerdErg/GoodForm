@@ -1,4 +1,26 @@
-grails.project.work.dir = 'target'
+grails.servlet.version = "2.5" // Change depending on target container compliance (2.5 or 3.0)
+grails.project.class.dir = "target/classes"
+grails.project.test.class.dir = "target/test-classes"
+grails.project.test.reports.dir = "target/test-reports"
+grails.project.work.dir = "target/work"
+grails.project.target.level = 1.6
+grails.project.source.level = 1.6
+
+grails.project.fork = [
+        // configure settings for compilation JVM, note that if you alter the Groovy version forked compilation is required
+        //  compile: [maxMemory: 256, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+
+        // configure settings for the test-app JVM, uses the daemon by default
+        test: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, daemon:true],
+        // configure settings for the run-app JVM
+        run: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+        // configure settings for the run-war JVM
+        war: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256, forkReserve:false],
+        // configure settings for the Console UI JVM
+        console: [maxMemory: 768, minMemory: 64, debug: false, maxPerm: 256]
+]
+
+grails.project.dependency.resolver = "maven"
 
 grails.project.dependency.resolution = {
 
@@ -15,37 +37,25 @@ grails.project.dependency.resolution = {
         compile 'net.htmlparser.jericho:jericho-html:3.2', {
             excludes 'log4j', 'commons-logging-api','slf4j-api'
         }
-
-        compile 'net.sf.ezmorph:ezmorph:1.0.6', {
-            excludes 'commons-beanutils', 'commons-lang', 'commons-logging', 'junit', 'log4j'
-        }
-
-        compile 'org.codehaus.groovy.modules.http-builder:http-builder:0.5.2', {
-            excludes 'commons-io', 'groovy', 'httpclient', 'junit', 'log4j', 'nekohtml',
-                     'signpost-commonshttp4', 'signpost-core', 'xercesImpl'
-        }
-        compile 'org.apache.httpcomponents:httpclient:4.0.3', {
-            excludes 'commons-codec', 'commons-logging', 'httpcore', 'junit'
-        }
-        compile 'org.apache.httpcomponents:httpcore:4.0.1', {
-            excludes 'junit'
-        }
     }
 
     plugins {
 
         // including rendering plugin as a compile dependency seems to cause loading problems
-        compile ":rendering:0.4.3",
-                  ":jquery:1.8.3",
-                  ":jquery-ui:1.8.24"
+//        compile (":rendering:0.4.3") {
+//            export = false
+//        }
+        compile ":jquery:1.11.1",
+                ":jquery-ui:1.10.4"
 
-        test ":code-coverage:1.2.6"
 
-        build ':release:2.2.1', ':rest-client-builder:1.0.3', {
+        compile ':rest-client-builder:2.0.3'
+
+        build (':release:3.0.1', ':rest-client-builder:2.0.3') {
             export = false
         }
 
-        runtime ":hibernate:$grailsVersion", {
+        runtime (":hibernate:3.6.10.14") {
             export = false
         }
     }

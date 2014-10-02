@@ -8,7 +8,7 @@
           type="radio"
           name="${fieldAttributes.parentName}"
           value="${label.encodeAsHTML()}"
-        ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control", skip: ['value', 'parentName'])}/>&nbsp;${label.encodeAsHTML()}</label>
+        <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control" skip="['value', 'parentName']"/> />&nbsp;${label.encodeAsHTML()}</label>
   </g:if>
 
   <g:else>
@@ -18,7 +18,7 @@
           name="${name}"
           id="${name}"
           value="${label.encodeAsHTML()}"
-        ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control", skip: ['value'])}/>&nbsp;${label.encodeAsHTML()}</label>
+        <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control" skip="['value']"/> />&nbsp;${label.encodeAsHTML()}</label>
   </g:else>
 
   <g:if test="${units}"><span class='units'>${units}</span></g:if>

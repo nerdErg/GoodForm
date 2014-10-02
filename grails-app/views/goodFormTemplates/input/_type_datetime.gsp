@@ -7,11 +7,11 @@
     <div class="datetime">
     <label for="${name}.date">Date
       <input type="text" name="${name}.date" id="${name}.date" value="${fieldAttributes.value?.date}"
-        ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control date", skip: ['value'])}/>
+        <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control date" skip="['value']"/> />
     </label>
     <label for="${name}.time">Time
       <input type="text" name="${name}.time" id="${name}.time" value="${fieldAttributes.value?.time}"
-        ${gf.addAttributes(fieldAttr: fieldAttributes, class: "form-control time", skip: ['value'])}/>
+        <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control time" skip="['value']"/> />
     </label>
     </div>
     <div class="datetime">

@@ -1,10 +1,7 @@
 package com.nerderg.goodForm
 
-import groovyx.net.http.RESTClient
-import groovyx.net.http.URIBuilder
-
-import org.apache.http.client.ClientProtocolException
-import org.codehaus.groovy.grails.web.json.JSONArray
+import grails.plugins.rest.client.RestBuilder
+import org.springframework.web.client.ResourceAccessException
 
 /**
  * Handles making REST requests to a <a href="">One-Ring</a> instance to process rules.
@@ -17,14 +14,19 @@ class RulesEngineService {
 
     def grailsApplication
 
-    def rulesEngine
+    private String rulesEngineUri = null
+    private RestBuilder rest = new RestBuilder()
 
-    def getRulesEngineRestUri() {
-        String uri = grailsApplication.config.goodform.rulesEngine.uri.toString()
-        if (!uri) {
-            throw new RulesEngineException("rulesEngine.uri must be defined in grails-app/conf/Config.groovy")
+    String getRulesEngineRestUri() {
+        if(!rulesEngineUri) {
+            String uri = grailsApplication.config.goodform.rulesEngine.uri
+            if (!uri) {
+                throw new RulesEngineException("rulesEngine.uri must be defined in grails-app/conf/Config.groovy")
+            }
+            uri = (uri.endsWith('/') ? uri : "$uri/")
+            rulesEngineUri = "${uri}rest/applyRules"
         }
-        return new URIBuilder(uri + "/rest/applyRules")
+        return rulesEngineUri
     }
 
     /**
@@ -46,27 +48,24 @@ class RulesEngineService {
         try {
             log.debug facts.toMapString(2)
             def resp = askRuleset(ruleSet, [facts])
+            Map data = (resp.json as List)[0] as Map
             if (resp.status != 200) {
-                throw new RulesEngineException("Error talking to Rules Engine: $resp.status")
+                throw new RulesEngineException("Error talking to Rules Engine: $resp.status, error: ${data?.error}")
             }
-            if (resp.data[0].error) {
-                throw new RulesEngineException("Error Rules Engine: Invoking $ruleSet got error ${resp.data[0].error}")
+            if (data?.error) {
+                throw new RulesEngineException("Error Rules Engine: Invoking $ruleSet got error ${data?.error}")
             }
-            def data = resp.data[0]
             if (data.equals(null)) {
                 data = null //turn it into a real null
             }
             return data
-
-        } catch (ClientProtocolException e) {
-            String errorMessage = e.message
-            if (e.response?.responseData && e.response.responseData instanceof JSONArray && e.response.responseData.size() > 0 && e.response.responseData[0].error) {
-                errorMessage = e.response.responseData[0].error
-            }
-            throw new RulesEngineException(errorMessage)
         }
         catch (RulesEngineException e) {
             throw e
+        }
+        catch (ResourceAccessException e) {
+            log.error e.message
+            throw new RulesEngineException("Unable to connect to the Rules Engine. at ${getRulesEngineRestUri()}", e)
         }
         catch (Exception e) {
             throw new RulesEngineException(e)
@@ -78,10 +77,8 @@ class RulesEngineService {
      * This leaves the processing of errors to the caller.
      * @param ruleSet
      * @param facts
-     * @return HttpResponseDecorator containing a net.sf.json.JSONObject of results in resp.data - a List of maps in a data property
-     * @see groovyx.net.http.HttpResponseDecorator http://json-lib.sourceforge.net/apidocs/net/sf/json/JSONObject.html
-     * @see groovyx.net.http.RESTClient http://groovy.codehaus.org/modules/http-builder/doc/rest.html
-     * @throws java.net.URISyntaxException , org.apache.http.client.ClientProtocolException, java.io.IOException
+     * @return RestResponse
+     * @see grails.plugins.rest.client.RestBuilder http://springsource.github.io/grails-data-mapping/rest-client/api/grails/plugins/rest/client/RestResponse.html
      */
     def askRuleset(String ruleSet, List facts) {
         if (!facts) {
@@ -89,12 +86,13 @@ class RulesEngineService {
             return []
         }
         def uri = getRulesEngineRestUri()
-        if (!rulesEngine) {
-            rulesEngine = new RESTClient(uri)
-        }
+
         log.debug "ask json ${uri} $ruleSet"
-        return rulesEngine.post(body: [ruleSet: ruleSet, facts: facts],
-                requestContentType: groovyx.net.http.ContentType.JSON)
+
+        return rest.post(uri) {
+            contentType "application/json"
+            json ([ruleSet: ruleSet, facts: facts])
+        }
     }
 
 }

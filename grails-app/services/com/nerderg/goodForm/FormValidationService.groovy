@@ -31,11 +31,12 @@ class FormValidationService {
 
     private Map<String,Closure> customValidationMap = [:]
 
-    void addCustomValidator(String validationName, Closure closure) {
+    Closure addCustomValidator(String validationName, Closure closure) {
         customValidationMap.put(validationName, closure)
     }
 
-    void removeCustomValidator(String validationName) {
+    @SuppressWarnings("GroovyUnusedDeclaration")
+    Closure removeCustomValidator(String validationName) {
         customValidationMap.remove(validationName)
     }
 

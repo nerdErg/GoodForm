@@ -1,62 +1,58 @@
 package com.nerderg.goodForm
 
+import grails.plugins.rest.client.RestBuilder
 import grails.test.mixin.TestFor
-
-import org.junit.Before
 
 /**
  * @author Ross Rowe
+ * @author Peter McNeil
  */
 @TestFor(RulesEngineService)
 class RulesEngineServiceTests {
 
-    class MockRESTClient {
-        def responseCode = 200
-        def result = [:]
-
-        def post(Map<String, ?> args) {
-            [status: responseCode, data: [result]]
+    void mockRestClient(int status, Map responseData) {
+        //Just mock the RestResponse with a map because mockFor(RestResponse) doesn't let me override .json
+        def restCLientMock = mockFor(RestBuilder, true)
+        restCLientMock.demand.post { String uri, Closure c ->
+            println "POST $uri"
+            [status: status, json: [responseData]]
         }
-    }
-
-    def restClient = new MockRESTClient()
-
-    @Before void setUp() {
-        service.rulesEngine = restClient
+        service.rest = restCLientMock.createMock()
     }
 
     void testNoRulesEngineURI() {
+        config.goodform.rulesEngine.uri = null
         shouldFail(RulesEngineException) {
             service.ask("Test", [:])
         }
     }
 
     void testErrorMessage() {
-        config.rulesEngine.uri = 'http://localhost'
-        def result = restClient.result
-        result.put('error', 'testing')
+        mockRestClient(200, [error: 'testing'])
+        config.goodform.rulesEngine.uri = 'http://localhost:7070/rulesEngine'
         shouldFail(RulesEngineException) {
             service.ask("Test", [:])
         }
     }
 
     void testErrorResponseCode() {
-        config.rulesEngine.uri = 'http://localhost'
-        restClient.responseCode = 404
+        mockRestClient(404, [error: 'testing'])
+        config.goodform.rulesEngine.uri = 'http://localhost:7070/rulesEngine'
         shouldFail(RulesEngineException) {
             service.ask("Test", [:])
         }
     }
 
     void testNoData() {
-        config.rulesEngine.uri = 'http://localhost'
+        mockRestClient(200, [:])
+        config.goodform.rulesEngine.uri = 'http://localhost:7070/rulesEngine'
         def results = service.ask("Test", [:])
         assertTrue(results.isEmpty())
 
     }
 
     void testNoFacts() {
-        config.rulesEngine.uri = 'http://localhost'
+        config.goodform.rulesEngine.uri = 'http://localhost:7070/rulesEngine'
         Map map = null
         shouldFail(NullPointerException) {
             service.ask("Test", map)
