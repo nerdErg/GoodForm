@@ -283,4 +283,19 @@ class FormTagLib {
         }
     }
 
+    def value = { attrs, body ->
+        String value = attrs.value.toString()
+        def test = value
+        if(attrs.containsKey('test')) {
+            test = attrs.test
+        }
+        if(test) {
+            out << value.encodeAsHTML()
+        } else {
+            if(body) {
+                out << body()
+            }
+            out << "<span class='text-muted'>(blank)</span>"
+        }
+    }
 }

@@ -133,7 +133,7 @@ div.goodFormContainer .questionListOfItem
 div.goodFormContainer .reveal
 {
     border-bottom: 1px solid #888888;
-    border-radius: 5px;
+    border-radius: 0;
     border-top: 1px solid #888888;
 }
 

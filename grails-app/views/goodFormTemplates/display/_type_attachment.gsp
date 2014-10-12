@@ -1,6 +1,1 @@
-<g:if test="${fieldAttributes.fileName != ''}">
-  ${fieldAttributes.value.encodeAsHTML()}
-</g:if>
-<g:else>
-  <span class='text-muted'>(blank)</span>
-</g:else>
+<gf:value test="${fieldAttributes.fileName}" value="${fieldAttributes.value}"/>

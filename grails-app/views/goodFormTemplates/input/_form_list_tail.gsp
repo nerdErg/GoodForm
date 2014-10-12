@@ -1,6 +1,6 @@
 </div>
 <span class='addAnotherForm btn-xs btn-success'>
-  <img src="${g.resource(dir: 'images/icons', file: 'add.png')}" title='add another' alt='+'/>
+  <i class="fa fa-plus-square"></i>
   <g:message code="goodform.item.addAnother"/>
 </span>
 </fieldset>

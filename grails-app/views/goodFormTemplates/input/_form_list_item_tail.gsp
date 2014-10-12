@@ -1,5 +1,5 @@
 <span class='removeForm btn-xs btn-warning'>
-  <img src='${g.resource(dir: 'images/icons', file: 'delete.png')}' title='Remove this' alt='-'/>
+  <i class="fa fa-minus-square"></i>
   <g:message code="goodform.item.remove"/>
 </span>
 </div>

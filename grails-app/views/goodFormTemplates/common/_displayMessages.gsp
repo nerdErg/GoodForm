@@ -2,7 +2,7 @@
 <g:if test="${formData?.fieldErrors}">
   <div class="alert alert-danger alert-dismissable errorsAlert">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-    <span class="glyphicon glyphicon-warning-sign"></span>&nbsp;<g:message code="goodform.field.errors"
+    <span class="fa fa-warning"></span>&nbsp;<g:message code="goodform.field.errors"
                                                                            args="[formData.fieldErrors.size().toString()]"/>
   </div>
 </g:if>

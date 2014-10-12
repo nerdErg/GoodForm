@@ -466,8 +466,8 @@ class FormDataService {
             if (q) {
                 questions.add(q)
             } else {
-                log.error "Question $it not found."
-                throw new FormDataException("Question $it not found.")
+                log.error "Question $ref not found."
+                throw new FormDataException("Question $ref not found.")
             }
         }
         return questions

@@ -117,10 +117,11 @@
         parent.find('input.date').each(function (index, el) {
             var element = $(el);
             var format = element.attr('format').toLowerCase().replace('yyyy', 'yy'); //java date format uses MM for month
+            var img = element.data('image');
             element.datepicker({
                 dateFormat: format,
                 showOn: 'button',
-                buttonImage: goodform.dateImg,
+                buttonImage: img,
                 buttonImageOnly: false,
                 changeMonth: true,
                 changeYear: true

@@ -1,1 +1,1 @@
-$&nbsp;${fieldAttributes.value != '' ? fieldAttributes.value.encodeAsHTML() :  "<span class='text-muted'>(blank)</span>"}
+$&nbsp;<gf:value value="${fieldAttributes.value}"/>
