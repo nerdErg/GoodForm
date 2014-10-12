@@ -187,31 +187,33 @@ $(function () {
      */
 
     var scrollMode = 0;
-    $(window).scroll(function () {
-        var h = $(window).height();
-        var wtop = $(window).scrollTop();
-        var fdtop = formData.offset().top;
+    if(formData != undefined) {
+        $(window).scroll(function () {
+            var h = $(window).height();
+            var wtop = $(window).scrollTop();
+            var fdtop = formData.offset().top;
 
-        if (h < (formIndex.height())) {
-            var top = Math.max(wtop, fdtop);
-            var bottom = top + h;
-            var indexHeight = formIndex.height();
+            if (h < (formIndex.height())) {
+                var top = Math.max(wtop, fdtop);
+                var bottom = top + h;
+                var indexHeight = formIndex.height();
 
-            if (formIndex.offset().top >= top) {
-                formIndex.css({position: 'absolute', float: 'left', top: top});
-            } else if (formIndex.offset().top + indexHeight < top + h) {
-                formIndex.css({position: 'absolute', float: 'left', top: (bottom - indexHeight)});
-            }
-            scrollMode = 0;
-        } else {
-            if((scrollMode != 1) && (wtop > fdtop)) {
-                formIndex.css({position: 'fixed', top: 0});
-                scrollMode = 1;
-            } else if(fdtop - wtop > 0) {
-                formIndex.css({position: 'fixed', top: (fdtop - wtop)});
+                if (formIndex.offset().top >= top) {
+                    formIndex.css({position: 'absolute', float: 'left', top: top});
+                } else if (formIndex.offset().top + indexHeight < top + h) {
+                    formIndex.css({position: 'absolute', float: 'left', top: (bottom - indexHeight)});
+                }
                 scrollMode = 0;
+            } else {
+                if ((scrollMode != 1) && (wtop > fdtop)) {
+                    formIndex.css({position: 'fixed', top: 0});
+                    scrollMode = 1;
+                } else if (fdtop - wtop > 0) {
+                    formIndex.css({position: 'fixed', top: (fdtop - wtop)});
+                    scrollMode = 0;
+                }
             }
-        }
-    });
+        });
+    }
 
 });

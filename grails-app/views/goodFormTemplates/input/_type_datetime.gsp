@@ -8,7 +8,12 @@
     <div class="datetime">
       <label for="${name}.date">Date</label>
       <input type="text" name="${name}.date" id="${name}.date" value="${fieldAttributes.value?.date}"
-             data-image="${assetPath(src: 'icons/date.png')}"
+        <g:if test="${applicationContext.getBean('pluginManager').hasGrailsPlugin('asset-pipeline')}">
+          data-image="${assetPath(src: 'icons/date.png')}"
+        </g:if>
+        <g:elseif test="${applicationContext.getBean('pluginManager').hasGrailsPlugin('resources')}">
+          data-image="${resource(dir: 'images/icons/date.png')}"
+        </g:elseif>
         <gf:addAttributes fieldAttr="${fieldAttributes}" class="form-control date" skip="['value']"/>/>
       <g:if test="${required}"><span class='required'>${required ? '*' : ''}</span></g:if>
 
