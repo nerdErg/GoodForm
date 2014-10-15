@@ -1,5 +1,5 @@
 class GoodformGrailsPlugin {
-    def version = "2.0.0-SNAPSHOT"
+    def version = "2.0.0"
     def grailsVersion = "2.0 > *"
     def groupId = 'com.nerderg.grails.plugins'
 
@@ -15,7 +15,8 @@ Good form features a form definition DSL that allows rapid human readable form c
 
     def license = "APACHE"
     def organization = [ name: "nerdEg Pty Ltd", url: "http://www.nerderg.com/" ]
-    def developers = [ [ name: "Ross Rowe", email: "ross@nerderg.com" ]]
-    def issueManagement = [ system: "JIRA", url: "https://github.com/nerdErg/GoodForm/issues" ]
+    def developers = [ [ name: "Peter McNeil", email: "peter@nerderg.com" ],
+                       [ name: "Ross Rowe", email: "ross@nerderg.com" ]]
+    def issueManagement = [ system: "Github", url: "https://github.com/nerdErg/GoodForm/issues" ]
     def scm = [ url: "https://github.com/nerdErg/GoodForm" ]
 }
