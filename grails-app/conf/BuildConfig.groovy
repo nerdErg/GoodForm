@@ -41,10 +41,6 @@ grails.project.dependency.resolution = {
 
     plugins {
 
-        // including rendering plugin as a compile dependency seems to cause loading problems
-//        compile (":rendering:0.4.3") {
-//            export = false
-//        }
         compile ":jquery:1.11.1",
                 ":jquery-ui:1.10.4"
 
