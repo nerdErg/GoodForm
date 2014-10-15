@@ -1,7 +1,7 @@
 class GoodformGrailsPlugin {
     def version = "2.0.0"
     def grailsVersion = "2.0 > *"
-    def groupId = 'com.nerderg.grails.plugins'
+//    def groupId = 'com.nerderg.grails.plugins'
 
     def title = "Goodform Plugin"
     def author = "Peter McNeil"
