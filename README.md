@@ -6,7 +6,7 @@ Checkout the [documentation] (http://nerderg.com/Good+Form)
 
 And the [Tutorial] (tutorial/01-Introduction.md)
 
-Version 2.0.0 (not released)
+Version 2.0.0
 
 * remove nerderg form tags as the basis for the form elelments
 * write templates for all element and form pages for ease of skinning and adding new elements for forms.
